@@ -362,13 +362,13 @@ public class PlayerControl
 				maxSpeed = maxSpeed * 1.5f;
 			}
 
-			//if(!_isFAKilled)
+			if(!_isFAKilled)
 			{
 				
 				maxSpeed = maxSpeed * _throttle;
 			}
 
-			if(velocity.magnitude < maxSpeed)
+			if(velocity.magnitude < maxSpeed && !_isFAKilled)
 			{
 				PlayerShip.RB.AddForce(PlayerShip.transform.forward * _forwardForce);
 			}
@@ -580,6 +580,15 @@ public class PlayerControl
 					SelectedObjectType = SelectedObjectType.Station;
 					SelectedObject = station;
 					GameManager.Inst.UIManager.HUDPanel.OnSelectPlanetOrStation(station.transform, station.DisplayName);
+					return;
+				}
+
+				StationComponent stationComp = go.GetComponent<StationComponent>();
+				if(stationComp != null)
+				{
+					SelectedObjectType = SelectedObjectType.Station;
+					SelectedObject = stationComp.ParentStation;
+					GameManager.Inst.UIManager.HUDPanel.OnSelectPlanetOrStation(stationComp.ParentStation.transform, stationComp.ParentStation.DisplayName);
 					return;
 				}
 

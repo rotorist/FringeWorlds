@@ -52,7 +52,7 @@ public class SelectedObjMarker : MonoBehaviour
 			Marker.alpha = _maxAlpha;
 			if(_isLabelReadyToShow)
 			{
-				Desc.alpha = 0.75f;
+				Desc.alpha = 1f;
 				MarkerLine.alpha = _maxLineAlpha;
 			}
 		}

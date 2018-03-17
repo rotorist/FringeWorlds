@@ -16,8 +16,14 @@ public class Planet : MonoBehaviour
 
 		//shrink when far from camera
 		float camDist = Vector3.Distance(transform.position, Camera.main.transform.position);
-		transform.localScale = Vector3.Lerp(OriginalScale, OriginalScale * 0.2f, Mathf.Clamp01(camDist / 6000f));
-
+		if(camDist > 1000)
+		{
+			transform.localScale = Vector3.Lerp(OriginalScale, OriginalScale * 0.2f, Mathf.Clamp01((camDist - 1000f) / 6000f));
+		}
+		else
+		{
+			transform.localScale = OriginalScale;
+		}
 	}
 
 
