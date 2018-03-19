@@ -31,7 +31,7 @@ public class RoundDockGate: DockGate
 		_bottomLeftAxis = (BottomLeft.right + BottomLeft.up) * -1f;
 		_bottomRightAxis = (BottomRight.right - BottomRight.up) * -1f;
 
-		IsOpen = true;
+		SetRedLight();
 	}
 
 	// Update is called once per frame

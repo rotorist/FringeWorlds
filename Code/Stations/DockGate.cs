@@ -8,6 +8,11 @@ public class DockGate : MonoBehaviour
 	public bool IsDone = true;
 	public StationBase ParentStation;
 	public BoxCollider DockingTrigger;
+	public MeshRenderer LightRed;
+	public MeshRenderer LightGreen;
+
+
+
 
 	public void Open()
 	{
@@ -29,6 +34,18 @@ public class DockGate : MonoBehaviour
 	public void OnCloseDone()
 	{
 
+	}
+
+	public void SetRedLight()
+	{
+		LightRed.enabled = true;
+		LightGreen.enabled = false;
+	}
+
+	public void SetGreenLight()
+	{
+		LightRed.enabled = false;
+		LightGreen.enabled = true;
 	}
 }
 

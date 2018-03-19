@@ -11,6 +11,13 @@ public class Station : StationBase
 	void Start()
 	{
 		_dockingSessions = new List<DockingSession>();
+
+		//find all children's station component and assign to this
+		StationComponent [] components = transform.GetComponentsInChildren<StationComponent>();
+		foreach(StationComponent comp in components)
+		{
+			comp.ParentStation = this;
+		}
 	}
 
 	void FixedUpdate()
@@ -22,6 +29,7 @@ public class Station : StationBase
 			if(session.Stage == DockingSessionStage.Docked)
 			{
 				//remove the session, close the gate
+				_dockingSessions.Remove(session);
 			}
 		}
 	}
