@@ -1,0 +1,85 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class UIStateMachine 
+{
+	public UIStateBase State;
+	public UIManager UIManager;
+
+	public void Initialize(SceneType sceneType)
+	{
+		UIManager = GameManager.Inst.UIManager;
+		if(sceneType == SceneType.Space)
+		{
+			State = new UIStateInFlight(this);
+		}
+		else if(sceneType == SceneType.Station)
+		{
+			State = new UIStateInStation(this);
+		}
+	}
+
+}
+
+public abstract class UIStateBase
+{
+	public UIStateMachine SM;
+	public string Name;
+	public abstract void BeginState();
+	public abstract void EndState();
+
+	public virtual void UpdateState()
+	{
+
+	}
+}
+
+public class UIStateInFlight : UIStateBase
+{
+
+	public UIStateInFlight(UIStateMachine sm)
+	{
+		Name = "UIStateInFlight";
+		SM = sm;
+		BeginState();
+	}
+
+	public override void BeginState()
+	{
+		//setup panels
+		SM.UIManager.HideAllPanels();
+		SM.UIManager.HUDPanel.Show();
+
+
+
+		//subscribe events
+
+
+
+	}
+
+	public override void EndState()
+	{
+		
+	}
+
+}
+
+public class UIStateInStation : UIStateBase
+{
+	public UIStateInStation(UIStateMachine sm)
+	{
+		
+	}
+
+	public override void BeginState()
+	{
+
+	}
+
+	public override void EndState()
+	{
+
+	}
+}

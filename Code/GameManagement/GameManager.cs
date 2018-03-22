@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
 
 	#endregion
 
+	public SceneType SceneType;
 	public Constants Constants;
 	public PlayerControl PlayerControl;
 	public Camera MainCamera;
@@ -30,20 +31,29 @@ public class GameManager : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
 	{
-		PlayerControl.PerFrameUpdate();
-		UIManager.PerFrameUpdate();
-		CursorManager.PerFrameUpdate();
-		NPCManager.PerFrameUpdate();
+		if(SceneType == SceneType.Space)
+		{
+			PlayerControl.PerFrameUpdate();
+			UIManager.PerFrameUpdate();
+			CursorManager.PerFrameUpdate();
+			NPCManager.PerFrameUpdate();
+		}
 	}
 
 	void FixedUpdate()
 	{
-		PlayerControl.FixedFrameUpdate();
+		if(SceneType == SceneType.Space)
+		{
+			PlayerControl.FixedFrameUpdate();
+		}
 	}
 
 	void LateUpdate()
 	{
-		PlayerControl.LateFrameUpdate();
+		if(SceneType == SceneType.Space)
+		{
+			PlayerControl.LateFrameUpdate();
+		}
 	}
 
 
@@ -57,28 +67,42 @@ public class GameManager : MonoBehaviour
 		DBManager = new DBManager();
 		DBManager.Initialize();
 
-		NPCManager = new NPCManager();
-		NPCManager.Initialize();
-
-		UIManager = new UIManager();
-		UIManager.Initialize();
-
-		CursorManager = new CursorManager();
-		CursorManager.Initialize();
-
-		PlayerControl = new PlayerControl();
-		PlayerControl.Initialize();
-
-		GameObject [] npcs = GameObject.FindGameObjectsWithTag("NPC");
-		foreach(GameObject o in npcs)
+		if(SceneType == SceneType.Space)
 		{
-			AI ai = o.GetComponent<AI>();
-			ai.Initialize();
-			NPCManager.AddExistingShip(ai.MyShip);
+			NPCManager = new NPCManager();
+			NPCManager.Initialize();
+
+			UIManager = new UIManager();
+			UIManager.Initialize();
+
+			CursorManager = new CursorManager();
+			CursorManager.Initialize();
+
+			PlayerControl = new PlayerControl();
+			PlayerControl.Initialize();
+
+			GameObject [] npcs = GameObject.FindGameObjectsWithTag("NPC");
+			foreach(GameObject o in npcs)
+			{
+				AI ai = o.GetComponent<AI>();
+				ai.Initialize();
+				NPCManager.AddExistingShip(ai.MyShip);
+			}
+
+		}
+		else if(SceneType == SceneType.Station)
+		{
+
 		}
 
 
 
-
 	}
+}
+
+public enum SceneType
+{
+	Space,
+	MainMenu,
+	Station,
 }

@@ -6,7 +6,7 @@ public class UIManager
 {
 	public UIRoot Root;
 	public Camera UICamera;
-	//public UIStateMachine UIStateMachine;
+	public UIStateMachine UIStateMachine;
 
 
 	public HUDPanel HUDPanel;
@@ -42,8 +42,8 @@ public class UIManager
 		UIZoom = 1;
 
 
-		//UIStateMachine = new UIStateMachine();
-		//UIStateMachine.Initialize();
+		UIStateMachine = new UIStateMachine();
+		UIStateMachine.Initialize(GameManager.Inst.SceneType);
 	}
 
 	public void PerFrameUpdate()
