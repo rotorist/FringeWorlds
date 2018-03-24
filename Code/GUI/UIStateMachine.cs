@@ -54,14 +54,21 @@ public class UIStateInFlight : UIStateBase
 
 
 		//subscribe events
-
+		UIEventHandler.OnBeginDocking -= OnBeginDocking;
+		UIEventHandler.OnBeginDocking += OnBeginDocking;
 
 
 	}
 
 	public override void EndState()
 	{
-		
+		UIEventHandler.OnBeginDocking -= OnBeginDocking;
+	}
+
+	public void OnBeginDocking()
+	{
+		EndState();
+		SM.State = new UIStateDocking(SM);
 	}
 
 }
@@ -81,5 +88,35 @@ public class UIStateInStation : UIStateBase
 	public override void EndState()
 	{
 
+	}
+}
+
+public class UIStateDocking : UIStateBase
+{
+	public UIStateDocking(UIStateMachine sm)
+	{
+		Name = "UIStateDocking";
+		SM = sm;
+		BeginState();
+	}
+
+	public override void BeginState()
+	{
+		//setup panels
+		SM.UIManager.HideAllPanels();
+		SM.UIManager.FadePanel.Show();
+
+		UIEventHandler.OnFadeOutDone -= OnFadeOutDone;
+		UIEventHandler.OnFadeOutDone += OnFadeOutDone;
+	}
+
+	public override void EndState()
+	{
+		UIEventHandler.OnFadeOutDone -= OnFadeOutDone;
+	}
+
+	public void OnFadeOutDone()
+	{
+		GameManager.Inst.LoadStationScene();
 	}
 }

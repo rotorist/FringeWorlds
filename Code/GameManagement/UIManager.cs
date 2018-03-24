@@ -10,6 +10,7 @@ public class UIManager
 
 
 	public HUDPanel HUDPanel;
+	public FadePanel FadePanel;
 
 
 	public float UIZoom;
@@ -33,10 +34,12 @@ public class UIManager
 
 		HUDPanel = UICamera.transform.Find("HUDPanel").GetComponent<HUDPanel>();
 		HUDPanel.Initialize();
+		FadePanel = UICamera.transform.Find("FadePanel").GetComponent<FadePanel>();
+		FadePanel.Initialize();
 
 
 		_panels.Add(HUDPanel);
-
+		_panels.Add(FadePanel);
 
 
 		UIZoom = 1;
@@ -48,12 +51,12 @@ public class UIManager
 
 	public void PerFrameUpdate()
 	{
-		
-		HUDPanel.PerFrameUpdate();
-
-		//if(WindowPanel.IsActive)
+		foreach(PanelBase panel in _panels)
 		{
-			//WindowPanel.PerFrameUpdate();
+			if(panel.IsActive)
+			{
+				panel.PerFrameUpdate();
+			}
 		}
 
 

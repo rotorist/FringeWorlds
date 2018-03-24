@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour 
 {
@@ -55,6 +56,15 @@ public class GameManager : MonoBehaviour
 			PlayerControl.LateFrameUpdate();
 		}
 	}
+
+
+	public void LoadStationScene()
+	{
+		UIEventHandler.Instance.OnUnloadScene();
+
+		SceneManager.LoadScene("Station");
+	}
+
 
 
 	private void Initialize()

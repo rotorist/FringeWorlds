@@ -18,7 +18,8 @@ public class UIEventHandler
 
 	public void OnUnloadScene()
 	{
-		
+		OnBeginDocking = null;
+		OnFadeOutDone = null;
 	}
 
 	#endregion
@@ -33,7 +34,24 @@ public class UIEventHandler
 
 
 	public delegate void GeneralUIEventDelegate();
+	public static event GeneralUIEventDelegate OnBeginDocking;
+	public static event GeneralUIEventDelegate OnFadeOutDone;
 
 
+	public void TriggerBeginDocking()
+	{
+		if(OnBeginDocking != null)
+		{
+			OnBeginDocking();
+		}
+	}
+
+	public void TriggerFadeOutDone()
+	{
+		if(OnFadeOutDone != null)
+		{
+			OnFadeOutDone();
+		}
+	}
 
 }

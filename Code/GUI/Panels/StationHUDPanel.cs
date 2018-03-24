@@ -13,12 +13,14 @@ public class StationHUDPanel : PanelBase
 
 	public override void Show ()
 	{
-		
+		NGUITools.SetActive(this.gameObject, true);
+		IsActive = true;
 	}
 
 	public override void Hide ()
 	{
-		
+		NGUITools.SetActive(this.gameObject, false);
+		IsActive = false;
 	}
 
 	public override void PerFrameUpdate ()

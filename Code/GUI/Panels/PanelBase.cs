@@ -18,12 +18,12 @@ public class PanelBase : MonoBehaviour
 
 	public virtual void Show()
 	{
-
+		
 	}
 
 	public virtual void Hide()
 	{
-
+		
 	}
 
 

@@ -98,6 +98,13 @@ public class PlayerControl
 		
 	}
 
+
+	public void DockComplete()
+	{
+		GameManager.Inst.UIManager.FadePanel.FadeOut(0.4f);
+	}
+
+
 	private void UpdateKeyInput()
 	{
 		float rollSpeed = 1;
@@ -633,6 +640,8 @@ public class PlayerControl
 			}
 		}
 	}
+
+
 
 }
 

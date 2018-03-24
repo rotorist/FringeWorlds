@@ -54,6 +54,11 @@ public class DockingSession
 				{
 					Stage = DockingSessionStage.Docking;
 					Requester.IsInPortal = true;
+					if(Requester == GameManager.Inst.PlayerControl.PlayerShip)
+					{
+						//trigger begin docking
+						UIEventHandler.Instance.TriggerBeginDocking();
+					}
 				}
 			}
 		}
@@ -96,6 +101,10 @@ public class DockingSession
 				Stage = DockingSessionStage.Docked;
 				Gate.Close();
 				Gate.SetRedLight();
+				if(Requester == GameManager.Inst.PlayerControl.PlayerShip)
+				{
+					GameManager.Inst.PlayerControl.DockComplete();
+				}
 			}
 		}
 	}

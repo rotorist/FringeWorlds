@@ -30,6 +30,8 @@ public class HUDPanel : PanelBase
 	public UIButton PlanetsTab;
 	public UIButton ItemsTab;
 
+
+
 	public Transform ObjEntryAnchor;
 
 	public Dictionary<ShipBase, UISprite> UnselectedShipMarkers { get { return _unselectedShips; } }
@@ -43,6 +45,7 @@ public class HUDPanel : PanelBase
 	private List<HUDListEntry> _allEntries;
 
 	private SelectedHUDTab _selectedTab; 
+
 
 	public override void Initialize ()
 	{
@@ -65,17 +68,22 @@ public class HUDPanel : PanelBase
 		UpdateUnselectedMarkerPosition();
 		UpdateCenterHUD();
 		UpdateRightHUD();
+
 	}
 
 	public override void Show ()
 	{
-		
+		NGUITools.SetActive(this.gameObject, true);
+		IsActive = true;
 	}
 
 	public override void Hide ()
 	{
-		
+		NGUITools.SetActive(this.gameObject, false);
+		IsActive = false;
 	}
+
+
 
 	public void OnSelectPlanetOrStation(Transform obj, string description)
 	{
@@ -401,6 +409,8 @@ public class HUDPanel : PanelBase
 		}
 	}
 
+
+
 	private HUDListEntry LoadHUDListEntry()
 	{
 		GameObject o = GameObject.Instantiate(Resources.Load("HUDListEntry")) as GameObject;
@@ -412,6 +422,8 @@ public class HUDPanel : PanelBase
 		entry.SetAlpha(0);
 		return entry;
 	}
+
+
 }
 
 public enum SelectedHUDTab
