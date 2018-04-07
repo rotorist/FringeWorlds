@@ -15,11 +15,11 @@ public class Projectile : MonoBehaviour
 	private Rigidbody _rigidbody;
 	
 	// Update is called once per frame
-	void Update () 
+	void FixedUpdate () 
 	{
 		if(!_isDestroyed)
 		{
-			_distTraveled += Velocity.magnitude * Time.deltaTime;
+			_distTraveled += Velocity.magnitude * Time.fixedDeltaTime;
 
 
 			if(_distTraveled > 3)
@@ -43,7 +43,7 @@ public class Projectile : MonoBehaviour
 
 			if(_destroyTimer < 0.5f)
 			{
-				_destroyTimer += Time.deltaTime;
+				_destroyTimer += Time.fixedDeltaTime;
 			}
 			else
 			{

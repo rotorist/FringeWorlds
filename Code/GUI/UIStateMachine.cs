@@ -12,11 +12,17 @@ public class UIStateMachine
 		UIManager = GameManager.Inst.UIManager;
 		if(sceneType == SceneType.Space)
 		{
-			State = new UIStateInFlight(this);
+			State = new UIStateUndocking(this);
+			Cursor.lockState = CursorLockMode.Locked;
+			Cursor.lockState = CursorLockMode.None;
+			GameManager.Inst.UIManager.FadePanel.SetBGAlpha(1f);
+			GameManager.Inst.UIManager.FadePanel.FadeIn(0.6f);
 		}
 		else if(sceneType == SceneType.Station)
 		{
-			State = new UIStateInStation(this);
+			State = new UIStateDocking(this);
+			GameManager.Inst.UIManager.FadePanel.FadeIn(0.6f);
+			GameManager.Inst.CameraController.SetCameraBlur(1000, false);
 		}
 	}
 
@@ -73,23 +79,7 @@ public class UIStateInFlight : UIStateBase
 
 }
 
-public class UIStateInStation : UIStateBase
-{
-	public UIStateInStation(UIStateMachine sm)
-	{
-		
-	}
 
-	public override void BeginState()
-	{
-
-	}
-
-	public override void EndState()
-	{
-
-	}
-}
 
 public class UIStateDocking : UIStateBase
 {
@@ -106,17 +96,150 @@ public class UIStateDocking : UIStateBase
 		SM.UIManager.HideAllPanels();
 		SM.UIManager.FadePanel.Show();
 
-		UIEventHandler.OnFadeOutDone -= OnFadeOutDone;
-		UIEventHandler.OnFadeOutDone += OnFadeOutDone;
+		if(GameManager.Inst.SceneType == SceneType.Space || GameManager.Inst.SceneType == SceneType.SpaceTest)
+		{
+			UIEventHandler.OnFadeOutDone -= OnFadeOutDone;
+			UIEventHandler.OnFadeOutDone += OnFadeOutDone;
+		}
+		else if(GameManager.Inst.SceneType == SceneType.Station)
+		{
+			UIEventHandler.OnFadeInDone -= OnFadeInDone;
+			UIEventHandler.OnFadeInDone += OnFadeInDone;
+		}
 	}
 
 	public override void EndState()
 	{
+		UIEventHandler.OnFadeInDone -= OnFadeInDone;
 		UIEventHandler.OnFadeOutDone -= OnFadeOutDone;
 	}
 
 	public void OnFadeOutDone()
 	{
 		GameManager.Inst.LoadStationScene();
+	}
+
+	public void OnFadeInDone()
+	{
+		EndState();
+		SM.State = new UIStateInStation(SM);
+	}
+}
+
+public class UIStateUndocking : UIStateBase
+{
+	public UIStateUndocking(UIStateMachine sm)
+	{
+		Name = "UIStateUndocking";
+		SM = sm;
+		BeginState();
+	}
+
+	public override void BeginState()
+	{
+		//setup panels
+		SM.UIManager.HideAllPanels();
+		SM.UIManager.FadePanel.Show();
+
+		if(GameManager.Inst.SceneType == SceneType.Station)
+		{
+			UIEventHandler.OnFadeOutDone -= OnFadeOutDone;
+			UIEventHandler.OnFadeOutDone += OnFadeOutDone;
+		}
+		else if(GameManager.Inst.SceneType == SceneType.Space || GameManager.Inst.SceneType == SceneType.SpaceTest)
+		{
+			UIEventHandler.OnFadeInDone -= OnFadeInDone;
+			UIEventHandler.OnFadeInDone += OnFadeInDone;
+		}
+	}
+
+	public override void EndState()
+	{
+		UIEventHandler.OnFadeInDone -= OnFadeInDone;
+		UIEventHandler.OnFadeOutDone -= OnFadeOutDone;
+	}
+
+	public void OnFadeOutDone()
+	{
+		GameManager.Inst.LoadSpaceScene();
+	}
+
+	public void OnFadeInDone()
+	{
+		EndState();
+		SM.State = new UIStateInFlight(SM);
+	}
+}
+
+public class UIStateInStation : UIStateBase
+{
+	public UIStateInStation(UIStateMachine sm)
+	{
+		Name = "UIStateInStation";
+		SM = sm;
+		BeginState();
+	}
+
+	public override void BeginState()
+	{
+		
+
+		SM.UIManager.HideAllPanels();
+		SM.UIManager.StationHUDPanel.Show();
+
+		UIEventHandler.OnOpenRepairWindow -= OnOpenRepairWindow;
+		UIEventHandler.OnOpenRepairWindow += OnOpenRepairWindow;
+		UIEventHandler.OnBeginUndocking -= OnBeginUndocking;
+		UIEventHandler.OnBeginUndocking += OnBeginUndocking;
+	}
+
+	public override void EndState()
+	{
+		UIEventHandler.OnOpenRepairWindow -= OnOpenRepairWindow;
+		UIEventHandler.OnBeginUndocking -= OnBeginUndocking;
+	}
+
+	public void OnBeginUndocking()
+	{
+		GameManager.Inst.UIManager.FadePanel.FadeOut(0.4f);
+		EndState();
+		SM.State = new UIStateUndocking(SM);
+	}
+		
+	public void OnOpenRepairWindow()
+	{
+		EndState();
+		SM.State = new UIStateRepair(SM);
+	}
+}
+
+public class UIStateRepair : UIStateBase
+{
+	public UIStateRepair(UIStateMachine sm)
+	{
+		Name = "UIStateRepair";
+		SM = sm;
+		BeginState();
+	}
+
+	public override void BeginState()
+	{
+		SM.UIManager.HideAllPanels();
+		SM.UIManager.StationHUDPanel.Show();
+		SM.UIManager.RepairPanel.Show();
+
+		UIEventHandler.OnCloseStationWindows -= OnCloseWindow;
+		UIEventHandler.OnCloseStationWindows += OnCloseWindow;
+	}
+
+	public override void EndState()
+	{
+		UIEventHandler.OnCloseStationWindows -= OnCloseWindow;
+	}
+
+	public void OnCloseWindow()
+	{
+		EndState();
+		SM.State = new UIStateInStation(SM);
 	}
 }

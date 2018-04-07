@@ -23,14 +23,12 @@ public class FadePanel : PanelBase
 
 	public override void Show ()
 	{
-		NGUITools.SetActive(this.gameObject, true);
-		IsActive = true;
+		base.Show();
 	}
 
 	public override void Hide ()
 	{
-		NGUITools.SetActive(this.gameObject, false);
-		IsActive = false;
+		base.Hide();
 	}
 
 	public void FadeIn(float speed)
@@ -43,6 +41,11 @@ public class FadePanel : PanelBase
 	{
 		_fadeSpeed = speed;
 		_isFadingOut = true;
+	}
+
+	public void SetBGAlpha(float alpha)
+	{
+		BlackBG.alpha = alpha;
 	}
 
 
@@ -59,6 +62,10 @@ public class FadePanel : PanelBase
 		else
 		{
 			BlackBG.alpha = Mathf.Clamp01(BlackBG.alpha - Time.deltaTime * _fadeSpeed);
+			if(BlackBG.alpha <= 0)
+			{
+				UIEventHandler.Instance.TriggerFadeInDone();
+			}
 		}
 	}
 

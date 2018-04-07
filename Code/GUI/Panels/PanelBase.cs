@@ -18,12 +18,14 @@ public class PanelBase : MonoBehaviour
 
 	public virtual void Show()
 	{
-		
+		NGUITools.SetActive(this.gameObject, true);
+		IsActive = true;
 	}
 
 	public virtual void Hide()
 	{
-		
+		NGUITools.SetActive(this.gameObject, false);
+		IsActive = false;
 	}
 
 

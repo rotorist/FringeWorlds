@@ -39,6 +39,50 @@ public class Station : StationBase
 		//check if requester is allowed to dock
 
 		//find an available gate
+		DockGate selectedGate = FindAvailableGate();
+
+		if(selectedGate == null)
+		{
+			return DockRequestResult.Busy;
+		}
+
+		DockingSession session = new DockingSession(selectedGate, requester, this, false);
+		_dockingSessions.Add(session);
+
+		return DockRequestResult.Accept;
+	}
+
+	public override DockRequestResult Undock (ShipBase requester)
+	{
+		//find an available gate
+		DockGate selectedGate = FindAvailableGate();
+
+		if(selectedGate == null)
+		{
+			return DockRequestResult.Busy;
+		}
+
+		DockingSession session = new DockingSession(selectedGate, requester, this, true);
+		_dockingSessions.Add(session);
+
+		return DockRequestResult.Accept;
+
+	}
+
+	public override void OnDetectDocking (string triggerID, ShipBase requester)
+	{
+		//only player will be able to trigger this
+
+	}
+
+	public override void OnDockingSessionComplete (DockingSession session)
+	{
+		session.Requester.IsInPortal = false;
+		_dockingSessions.Remove(session);
+	}
+
+	private DockGate FindAvailableGate()
+	{
 		DockGate selectedGate = null;
 		foreach(DockGate gate in DockGates)
 		{
@@ -58,20 +102,6 @@ public class Station : StationBase
 			}
 		}
 
-		if(selectedGate == null)
-		{
-			return DockRequestResult.Busy;
-		}
-
-		DockingSession session = new DockingSession(selectedGate, requester, this);
-		_dockingSessions.Add(session);
-
-		return DockRequestResult.Accept;
-	}
-
-	public override void OnDetectDocking (string triggerID, ShipBase requester)
-	{
-		//only player will be able to trigger this
-
+		return selectedGate;
 	}
 }

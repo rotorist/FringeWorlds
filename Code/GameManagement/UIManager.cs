@@ -12,6 +12,8 @@ public class UIManager
 	public HUDPanel HUDPanel;
 	public FadePanel FadePanel;
 
+	public StationHUDPanel StationHUDPanel;
+	public RepairPanel RepairPanel;
 
 	public float UIZoom;
 	public bool IsInHUDRegion;
@@ -31,16 +33,36 @@ public class UIManager
 
 		UICamera = Root.transform.Find("Camera").GetComponent<Camera>();
 
+		if(GameManager.Inst.SceneType == SceneType.Space)
+		{
+			HUDPanel = UICamera.transform.Find("HUDPanel").GetComponent<HUDPanel>();
+			HUDPanel.Initialize();
 
-		HUDPanel = UICamera.transform.Find("HUDPanel").GetComponent<HUDPanel>();
-		HUDPanel.Initialize();
+
+			_panels.Add(HUDPanel);
+
+		}
+		else if(GameManager.Inst.SceneType == SceneType.SpaceTest)
+		{
+			HUDPanel = UICamera.transform.Find("HUDPanel").GetComponent<HUDPanel>();
+			HUDPanel.Initialize();
+
+
+			_panels.Add(HUDPanel);
+
+		}
+		else if(GameManager.Inst.SceneType == SceneType.Station)
+		{
+			StationHUDPanel = UICamera.transform.Find("StationHUDPanel").GetComponent<StationHUDPanel>();
+			RepairPanel = UICamera.transform.Find("RepairPanel").GetComponent<RepairPanel>();
+
+			_panels.Add(StationHUDPanel);
+			_panels.Add(RepairPanel);
+		}
+
 		FadePanel = UICamera.transform.Find("FadePanel").GetComponent<FadePanel>();
 		FadePanel.Initialize();
-
-
-		_panels.Add(HUDPanel);
 		_panels.Add(FadePanel);
-
 
 		UIZoom = 1;
 

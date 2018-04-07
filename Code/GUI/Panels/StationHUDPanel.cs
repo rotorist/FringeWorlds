@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityStandardAssets.ImageEffects;
+
 
 public class StationHUDPanel : PanelBase
 {
@@ -13,14 +15,14 @@ public class StationHUDPanel : PanelBase
 
 	public override void Show ()
 	{
-		NGUITools.SetActive(this.gameObject, true);
-		IsActive = true;
+		base.Show();
+
 	}
 
 	public override void Hide ()
 	{
-		NGUITools.SetActive(this.gameObject, false);
-		IsActive = false;
+		base.Hide();
+
 	}
 
 	public override void PerFrameUpdate ()
@@ -31,16 +33,13 @@ public class StationHUDPanel : PanelBase
 	public void OnTopHUDClick()
 	{
 		//enable all buttons first
-		UIButton [] buttons = TopHUDHolder.transform.GetComponentsInChildren<UIButton>();
-		foreach(UIButton button in buttons)
-		{
-			button.isEnabled = true;
-		}
+		EnableAllButtons();
 
 		if(UIButton.current.name == "btnRepair")
 		{
 			UIButton button = TopHUDHolder.transform.Find("btnRepair").GetComponent<UIButton>();
 			button.isEnabled = false;
+			UIEventHandler.Instance.TriggerOpenRepairWindow();
 		}
 
 		if(UIButton.current.name == "btnEquipment")
@@ -55,5 +54,23 @@ public class StationHUDPanel : PanelBase
 			button.isEnabled = false;
 		}
 
+		if(UIButton.current.name == "btnLaunch")
+		{
+			UIEventHandler.Instance.TriggerBeginUndocking();
+		}
+	}
+
+	public void OnCloseWindow()
+	{
+		EnableAllButtons();
+	}
+
+	public void EnableAllButtons()
+	{
+		UIButton [] buttons = TopHUDHolder.transform.GetComponentsInChildren<UIButton>();
+		foreach(UIButton button in buttons)
+		{
+			button.isEnabled = true;
+		}
 	}
 }

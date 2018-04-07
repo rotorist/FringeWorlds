@@ -73,14 +73,12 @@ public class HUDPanel : PanelBase
 
 	public override void Show ()
 	{
-		NGUITools.SetActive(this.gameObject, true);
-		IsActive = true;
+		base.Show();
 	}
 
 	public override void Hide ()
 	{
-		NGUITools.SetActive(this.gameObject, false);
-		IsActive = false;
+		base.Hide();
 	}
 
 

@@ -11,32 +11,94 @@ public class DockingSession
 
 	private float _currentSpeed;
 	private Vector3 _dockEnterTarget;
+	private float _waitTimer;
 
-	public DockingSession(DockGate gate, ShipBase requester, StationBase parent)
+	public DockingSession(DockGate gate, ShipBase requester, StationBase parent, bool isUndocking)
 	{
 		Gate = gate;
 		Requester = requester;
 		ParentStation = parent;
-		Stage = DockingSessionStage.Granted;
 
-		//if requester is player, turn light green
-		if(requester == GameManager.Inst.PlayerControl.PlayerShip)
+
+		if(!isUndocking)
 		{
-			gate.SetGreenLight();
-			_dockEnterTarget = Gate.DockingTrigger.transform.position + Gate.DockingTrigger.transform.forward * 2;
+			Stage = DockingSessionStage.Granted;
+
+			//if requester is player, turn light green
+			if(requester == GameManager.Inst.PlayerControl.PlayerShip)
+			{
+				gate.SetGreenLight();
+				_dockEnterTarget = Gate.DockingTrigger.transform.position + Gate.DockingTrigger.transform.forward * 2;
+			}
+			else
+			{
+				gate.SetRedLight();
+				_dockEnterTarget = Gate.DockingTrigger.transform.position + Gate.DockingTrigger.transform.forward * 20;
+			}
+
+			gate.Open();
+			gate.DockingTrigger.isTrigger = false;
 		}
 		else
 		{
-			gate.SetRedLight();
-			_dockEnterTarget = Gate.DockingTrigger.transform.position + Gate.DockingTrigger.transform.forward * 20;
+			Stage = DockingSessionStage.UndockWaiting;
+			//place requester in the gate
+			Vector3 enterTarget = gate.DockingTrigger.transform.position - gate.DockingTrigger.transform.forward * 4f;
+			requester.transform.position = enterTarget;
+			requester.transform.LookAt(gate.DockingTrigger.transform, gate.DockingTrigger.transform.up);
+			gate.Open();
+			gate.DockingTrigger.isTrigger = false;
+			if(Requester == GameManager.Inst.PlayerControl.PlayerShip)
+			{
+				gate.DockingTrigger.isTrigger = true;
+				GameManager.Inst.PlayerControl.PlayerShip.IsInPortal = true;
+
+			}
+
+			_waitTimer = 0;
 		}
 
-		gate.Open();
-		gate.DockingTrigger.isTrigger = false;
+
 	}
 
 	public void UpdateDockingSession()
 	{
+		if(Stage == DockingSessionStage.UndockWaiting)
+		{
+			_waitTimer += Time.fixedDeltaTime;
+			if(_waitTimer >= 3)
+			{
+				_waitTimer = 0;
+				Stage = DockingSessionStage.Undocking;
+			}
+		}
+		if(Stage == DockingSessionStage.Undocking)
+		{
+			Vector3 exitTarget = Gate.DockingTrigger.transform.position + Gate.DockingTrigger.transform.forward * 5f;
+			float totalDist = Vector3.Distance(exitTarget, Requester.transform.position);
+			float topSpeed = 4f;
+			float acceleration = 1f;
+			if(totalDist < 3f)
+			{
+				acceleration = -0.6f;
+			}
+
+			_currentSpeed = Mathf.Clamp(_currentSpeed + acceleration * Time.fixedDeltaTime, 0, topSpeed);
+
+			Vector3 direction = (exitTarget - Requester.transform.position).normalized;
+			Requester.transform.position = Requester.transform.position + direction * _currentSpeed * Time.fixedDeltaTime;
+			Requester.transform.LookAt(exitTarget);
+			Requester.InPortalSpeed = _currentSpeed;
+
+			if(totalDist < 0.2f)
+			{
+				Stage = DockingSessionStage.NoDock;
+				Gate.Close();
+				Gate.SetRedLight();
+				ParentStation.OnDockingSessionComplete(this);
+			}
+		}
+
 		if(Stage == DockingSessionStage.Granted)
 		{
 			if(Gate.IsDone)
@@ -103,8 +165,10 @@ public class DockingSession
 				Gate.SetRedLight();
 				if(Requester == GameManager.Inst.PlayerControl.PlayerShip)
 				{
-					GameManager.Inst.PlayerControl.DockComplete();
+					GameManager.Inst.PlayerControl.DockComplete(ParentStation, StationType.Station);
 				}
+
+				ParentStation.OnDockingSessionComplete(this);
 			}
 		}
 	}
@@ -134,4 +198,7 @@ public enum DockingSessionStage
 	Docking,
 	Entering,
 	Docked,
+	UndockWaiting,
+	Undocking,
+	NoDock,
 }

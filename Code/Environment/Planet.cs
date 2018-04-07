@@ -18,7 +18,7 @@ public class Planet : MonoBehaviour
 		float camDist = Vector3.Distance(transform.position, Camera.main.transform.position);
 		if(camDist > 1000)
 		{
-			transform.localScale = Vector3.Lerp(OriginalScale, OriginalScale * 0.2f, Mathf.Clamp01((camDist - 1000f) / 6000f));
+			transform.localScale = Vector3.Lerp(OriginalScale, OriginalScale * 0.1f, Mathf.Clamp01((camDist - 1000f) / 4000f));
 		}
 		else
 		{

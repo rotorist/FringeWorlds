@@ -11,15 +11,22 @@ public class GameManager : MonoBehaviour
 
 	#endregion
 
+	public string SystemID;
+	public string SystemName;
+
 	public SceneType SceneType;
 	public Constants Constants;
 	public PlayerControl PlayerControl;
 	public Camera MainCamera;
+	public CameraController CameraController;
 
+	public MaterialManager MaterialManager;
 	public DBManager DBManager;
 	public UIManager UIManager;
 	public CursorManager CursorManager;
 	public NPCManager NPCManager;
+	public WorldManager WorldManager;
+	public SaveGameManager SaveGameManager;
 
 	// Use this for initialization
 	void Start () 
@@ -35,10 +42,27 @@ public class GameManager : MonoBehaviour
 		if(SceneType == SceneType.Space)
 		{
 			PlayerControl.PerFrameUpdate();
-			UIManager.PerFrameUpdate();
 			CursorManager.PerFrameUpdate();
 			NPCManager.PerFrameUpdate();
+			WorldManager.PerFrameUpdate();
 		}
+		else if(SceneType == SceneType.SpaceTest)
+		{
+			PlayerControl.PerFrameUpdate();
+			CursorManager.PerFrameUpdate();
+			NPCManager.PerFrameUpdate();
+			WorldManager.PerFrameUpdate();
+		}
+		else if(SceneType == SceneType.Station)
+		{
+			
+		}
+
+		CameraController.PerFrameUpdate();
+		UIManager.PerFrameUpdate();
+		InputEventHandler.Instance.PerFrameUpdate();
+
+
 	}
 
 	void FixedUpdate()
@@ -46,12 +70,22 @@ public class GameManager : MonoBehaviour
 		if(SceneType == SceneType.Space)
 		{
 			PlayerControl.FixedFrameUpdate();
+			CameraController.PerFrameFixedUpdate();
+		}
+		else if(SceneType == SceneType.SpaceTest)
+		{
+			PlayerControl.FixedFrameUpdate();
+			CameraController.PerFrameFixedUpdate();
 		}
 	}
 
 	void LateUpdate()
 	{
 		if(SceneType == SceneType.Space)
+		{
+			PlayerControl.LateFrameUpdate();
+		}
+		else if(SceneType == SceneType.SpaceTest)
 		{
 			PlayerControl.LateFrameUpdate();
 		}
@@ -65,6 +99,13 @@ public class GameManager : MonoBehaviour
 		SceneManager.LoadScene("Station");
 	}
 
+	public void LoadSpaceScene()
+	{
+		UIEventHandler.Instance.OnUnloadScene();
+
+		SceneManager.LoadScene("Space");
+	}
+
 
 
 	private void Initialize()
@@ -73,11 +114,51 @@ public class GameManager : MonoBehaviour
 		Constants = transform.GetComponent<Constants>();
 		Constants.Initialize();
 		MainCamera = Camera.main;
+		CameraController.Initialize();
 
 		DBManager = new DBManager();
 		DBManager.Initialize();
 
+		SaveGameManager = new SaveGameManager();
+
+		MaterialManager = new MaterialManager();
+		MaterialManager.Initialize();
+
 		if(SceneType == SceneType.Space)
+		{
+			//load the scene from xml
+			DBManager.XMLParserWorld.LoadStarSystem("washington_system");
+
+			NPCManager = new NPCManager();
+			NPCManager.Initialize();
+
+			UIManager = new UIManager();
+			UIManager.Initialize();
+
+			CursorManager = new CursorManager();
+			CursorManager.Initialize();
+
+			PlayerControl = new PlayerControl();
+			PlayerControl.Initialize();
+
+			WorldManager = new WorldManager();
+			WorldManager.Initialize();
+
+			GameObject [] npcs = GameObject.FindGameObjectsWithTag("NPC");
+			foreach(GameObject o in npcs)
+			{
+				AI ai = o.GetComponent<AI>();
+				ai.Initialize();
+				NPCManager.AddExistingShip(ai.MyShip);
+			}
+
+			//temporarily spawn player at a station to undock
+			//StationBase station = GameObject.Find("PlanetColombiaLanding").GetComponent<StationBase>();
+			//station.Undock(PlayerControl.PlayerShip);
+
+
+		}
+		else if(SceneType == SceneType.SpaceTest)
 		{
 			NPCManager = new NPCManager();
 			NPCManager.Initialize();
@@ -91,6 +172,9 @@ public class GameManager : MonoBehaviour
 			PlayerControl = new PlayerControl();
 			PlayerControl.Initialize();
 
+			WorldManager = new WorldManager();
+			WorldManager.Initialize();
+
 			GameObject [] npcs = GameObject.FindGameObjectsWithTag("NPC");
 			foreach(GameObject o in npcs)
 			{
@@ -99,10 +183,16 @@ public class GameManager : MonoBehaviour
 				NPCManager.AddExistingShip(ai.MyShip);
 			}
 
+			//temporarily spawn player at a station to undock
+			StationBase station = GameObject.Find("PlanetColombiaLanding").GetComponent<StationBase>();
+			//station.Undock(PlayerControl.PlayerShip);
+
+
 		}
 		else if(SceneType == SceneType.Station)
 		{
-
+			UIManager = new UIManager();
+			UIManager.Initialize();
 		}
 
 
@@ -115,4 +205,5 @@ public enum SceneType
 	Space,
 	MainMenu,
 	Station,
+	SpaceTest,
 }

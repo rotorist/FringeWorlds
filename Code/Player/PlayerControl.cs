@@ -22,6 +22,11 @@ public class PlayerControl
 	public float Throttle { get { return _throttle; } }
 	public bool IsFAKilled { get { return _isFAKilled; } }
 	public bool IsMouseFlight { get { return _isMouseFlight; } }
+	public float YawForce { get { return _yawForce; } }
+	public float PitchForce { get { return _pitchForce; } }
+	public float RollForce { get { return _rollForce; } }
+	public float ForwardForce { get { return _forwardForce; } }
+	public float ThrusterForce { get { return _thruster; } }
 
 	private Vector2 _mousePosNorm;
 	private float _yawForce;
@@ -82,7 +87,7 @@ public class PlayerControl
 
 		UpdateKeyInput();
 		UpdateMouseInput();
-		UpdateShipRotation();
+
 
 		UpdateWeaponAim();
 
@@ -90,6 +95,7 @@ public class PlayerControl
 
 	public void FixedFrameUpdate()
 	{
+		UpdateShipRotation();
 		UpdateShipMovement();
 	}
 
@@ -99,8 +105,9 @@ public class PlayerControl
 	}
 
 
-	public void DockComplete()
+	public void DockComplete(StationBase dockedStation, StationType type)
 	{
+		GameManager.Inst.SaveGameManager.CreateAnchorSave(dockedStation, type);
 		GameManager.Inst.UIManager.FadePanel.FadeOut(0.4f);
 	}
 
@@ -309,6 +316,8 @@ public class PlayerControl
 		if(PlayerShip.IsInPortal)
 		{
 			PlayerShip.RB.angularVelocity = Vector3.zero;
+			_yawForce = 0;
+			_pitchForce = 0;
 			return;
 		}
 
@@ -316,21 +325,21 @@ public class PlayerControl
 		float engineKillBonus = _isFAKilled ? 2f : 1f;
 
 		//Yaw
-		float maxYawRate = 0.6f;
+		float maxYawRate = 1.2f;
 		if(Mathf.Abs(angularVelocity.y) < maxYawRate * engineKillBonus)
 		{
-			PlayerShip.RB.AddTorque(PlayerShip.transform.up * _yawForce * 0.6f);
+			PlayerShip.RB.AddTorque(PlayerShip.transform.up * _yawForce * 1.2f);
 		}
 
 		//Pitch
-		float maxPitchRate = 1f;
+		float maxPitchRate = 2f;
 		if(Mathf.Abs(angularVelocity.x) < maxPitchRate * engineKillBonus)
 		{
-			PlayerShip.RB.AddTorque(PlayerShip.transform.right * _pitchForce * 0.6f);
+			PlayerShip.RB.AddTorque(PlayerShip.transform.right * _pitchForce * 1.2f);
 		}
 
 		//Roll is based on key press A and D and it lerps to 0
-		float maxRollRate = 1f;
+		float maxRollRate = 2f;
 		if(Mathf.Abs(angularVelocity.z) < maxRollRate)
 		{
 			if(Mathf.Abs(_rollForce) > 0.02f)

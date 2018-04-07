@@ -9,6 +9,7 @@ public class Constants : MonoBehaviour
 	public AnimationCurve MousePitchCurve;
 	public AnimationCurve RollCurve;
 	public AnimationCurve ShieldProtectionCurve;
+	public AnimationCurve CameraFollowCurve;
 
 	public Dictionary<ShieldTech, Dictionary<DamageType, float>> ShieldDamageMultiplier;
 

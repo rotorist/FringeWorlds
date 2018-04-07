@@ -37,6 +37,11 @@ public class UIEventHandler
 	public static event GeneralUIEventDelegate OnBeginDocking;
 	public static event GeneralUIEventDelegate OnFadeOutDone;
 
+	public static event GeneralUIEventDelegate OnBeginUndocking;
+	public static event GeneralUIEventDelegate OnFadeInDone;
+	public static event GeneralUIEventDelegate OnCloseStationWindows;
+	public static event GeneralUIEventDelegate OnOpenRepairWindow;
+
 
 	public void TriggerBeginDocking()
 	{
@@ -51,6 +56,40 @@ public class UIEventHandler
 		if(OnFadeOutDone != null)
 		{
 			OnFadeOutDone();
+		}
+	}
+
+	public void TriggerFadeInDone()
+	{
+		if(OnFadeInDone != null)
+		{
+			OnFadeInDone();
+		}
+	}
+
+	public void TriggerBeginUndocking()
+	{
+		if(OnBeginUndocking != null)
+		{
+			OnBeginUndocking();
+		}
+	}
+
+	public void TriggerCloseStationWindows()
+	{
+		if(OnCloseStationWindows != null)
+		{
+			OnCloseStationWindows();
+		}
+
+		GameManager.Inst.UIManager.StationHUDPanel.OnCloseWindow();
+	}
+
+	public void TriggerOpenRepairWindow()
+	{
+		if(OnOpenRepairWindow != null)
+		{
+			OnOpenRepairWindow();
 		}
 	}
 

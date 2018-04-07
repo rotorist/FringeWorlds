@@ -9,6 +9,10 @@ public class Tradelane : StationBase
 	public DockingTrigger TriggerB;
 	public TLDockingEffect DockingEffectA;
 	public TLDockingEffect DockingEffectB;
+	public Renderer LaneARightDirLight;
+	public Renderer LaneAWrongDirLight;
+	public Renderer LaneBRightDirLight;
+	public Renderer LaneBWrongDirLight;
 
 	public Tradelane NeighborToA;
 	public Tradelane NeighborToB;
@@ -21,11 +25,6 @@ public class Tradelane : StationBase
 	private TLTransitSession _sessionA;
 	private TLTransitSession _sessionB;
 
-	void Start()
-	{
-		DockingEffectA.SetStage(0);
-		DockingEffectB.SetStage(0);
-	}
 
 	void FixedUpdate()
 	{
@@ -60,6 +59,12 @@ public class Tradelane : StationBase
 		}
 	}
 
+	public override void Initialize ()
+	{
+		DockingEffectA.SetStage(0);
+		DockingEffectB.SetStage(0);
+		SetNormalLightStates();
+	}
 
 	public override DockRequestResult Dock (ShipBase requester)
 	{
@@ -150,5 +155,36 @@ public class Tradelane : StationBase
 			_dockingStageB = 3;
 			_dockingTimerB = 0;
 		}
+	}
+
+
+	private void SetNormalLightStates()
+	{
+		LaneAWrongDirLight.sharedMaterial = GameManager.Inst.MaterialManager.TradelaneLightRed;
+		LaneBWrongDirLight.sharedMaterial = GameManager.Inst.MaterialManager.TradelaneLightRed;
+			
+		if(IsTerminalAorB == -1)
+		{
+			LaneARightDirLight.sharedMaterial = GameManager.Inst.MaterialManager.TradelaneLightGreen;
+			LaneBRightDirLight.sharedMaterial = GameManager.Inst.MaterialManager.TradelaneLightRed;
+		}
+		else if(IsTerminalAorB == 1)
+		{
+			LaneARightDirLight.sharedMaterial = GameManager.Inst.MaterialManager.TradelaneLightRed;
+			LaneBRightDirLight.sharedMaterial = GameManager.Inst.MaterialManager.TradelaneLightGreen;
+		}
+		else
+		{
+			LaneARightDirLight.sharedMaterial = GameManager.Inst.MaterialManager.TradelaneLightGreen;
+			LaneBRightDirLight.sharedMaterial = GameManager.Inst.MaterialManager.TradelaneLightGreen;
+		}
+	}
+
+	private void SetShutdownLightStates()
+	{
+		LaneAWrongDirLight.sharedMaterial = GameManager.Inst.MaterialManager.TradelaneLightDown;
+		LaneBWrongDirLight.sharedMaterial = GameManager.Inst.MaterialManager.TradelaneLightDown;
+		LaneARightDirLight.sharedMaterial = GameManager.Inst.MaterialManager.TradelaneLightDown;
+		LaneBRightDirLight.sharedMaterial = GameManager.Inst.MaterialManager.TradelaneLightDown;
 	}
 }
