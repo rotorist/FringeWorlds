@@ -28,6 +28,8 @@ public class GameManager : MonoBehaviour
 	public WorldManager WorldManager;
 	public SaveGameManager SaveGameManager;
 
+	public LevelAnchor LevelAnchor;
+
 	// Use this for initialization
 	void Start () 
 	{
@@ -120,20 +122,21 @@ public class GameManager : MonoBehaviour
 		DBManager.Initialize();
 
 		SaveGameManager = new SaveGameManager();
+		LevelAnchor = GameObject.FindObjectOfType<LevelAnchor>();
 
 		MaterialManager = new MaterialManager();
 		MaterialManager.Initialize();
 
 		if(SceneType == SceneType.Space)
 		{
-			//load the scene from xml
-			DBManager.XMLParserWorld.LoadStarSystem("washington_system");
+			
+
 
 			NPCManager = new NPCManager();
 			NPCManager.Initialize();
 
 			UIManager = new UIManager();
-			UIManager.Initialize();
+
 
 			CursorManager = new CursorManager();
 			CursorManager.Initialize();
@@ -142,7 +145,8 @@ public class GameManager : MonoBehaviour
 			PlayerControl.Initialize();
 
 			WorldManager = new WorldManager();
-			WorldManager.Initialize();
+
+
 
 			GameObject [] npcs = GameObject.FindGameObjectsWithTag("NPC");
 			foreach(GameObject o in npcs)
@@ -156,7 +160,34 @@ public class GameManager : MonoBehaviour
 			//StationBase station = GameObject.Find("PlanetColombiaLanding").GetComponent<StationBase>();
 			//station.Undock(PlayerControl.PlayerShip);
 
+			//check if there's anchor save
+			StarSystem system = null;
+			if(LevelAnchor != null && LevelAnchor.Save != null)
+			{
+				//load system from anchor save
+				Debug.Log("Loading from anchor!");
+				system = DBManager.XMLParserWorld.GenerateSystemScene(LevelAnchor.Save.SpawnSystem);
+				SaveGameManager.Load(LevelAnchor.Save);
 
+			}
+			else
+			{
+				//this should never really happen
+				//load a default scene for now
+				system = DBManager.XMLParserWorld.GenerateSystemScene("washington_system");
+				SaveGameManager.LoadNewGame();
+			}
+
+
+
+			WorldManager.Initialize();
+			WorldManager.CurrentSystem = system;
+			UIManager.Initialize();
+
+			if(LevelAnchor != null && LevelAnchor.Save != null)
+			{
+				PlayerControl.SpawnPlayer();
+			}
 		}
 		else if(SceneType == SceneType.SpaceTest)
 		{
@@ -184,7 +215,7 @@ public class GameManager : MonoBehaviour
 			}
 
 			//temporarily spawn player at a station to undock
-			StationBase station = GameObject.Find("PlanetColombiaLanding").GetComponent<StationBase>();
+			//StationBase station = GameObject.Find("PlanetColombiaLanding").GetComponent<StationBase>();
 			//station.Undock(PlayerControl.PlayerShip);
 
 

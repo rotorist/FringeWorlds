@@ -7,10 +7,12 @@ public class WorldManager
 	public StarSystem CurrentSystem;
 	public StationBase CurrentDockedStation;
 	public Sun [] Suns;
+	public Dictionary<string, StarSystemData> AllSystems;
 
 	public void Initialize()
 	{
 		Suns = GameObject.FindObjectsOfType<Sun>();
+		AllSystems = new Dictionary<string, StarSystemData>();
 
 		StationBase [] stations = GameObject.FindObjectsOfType<StationBase>();
 		foreach(StationBase station in stations)

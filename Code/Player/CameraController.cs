@@ -138,9 +138,11 @@ public class CameraController : MonoBehaviour
 		float fovTarget = 0;
 		fovTarget += GameManager.Inst.PlayerControl.ThrusterForce * 1.5f;
 
-		CloseCamera.fieldOfView = Mathf.Lerp(CloseCamera.fieldOfView, 65 + 10 * fovTarget, deltaTime * 3.5f);
-		FarCamera.fieldOfView = CloseCamera.fieldOfView;
-
+		if(!playerShip.IsInPortal)
+		{
+			CloseCamera.fieldOfView = Mathf.Lerp(CloseCamera.fieldOfView, 65 + 10 * fovTarget, deltaTime * 3.5f);
+			FarCamera.fieldOfView = CloseCamera.fieldOfView;
+		}
 	}
 
 	private void UpdateCameraBlur()

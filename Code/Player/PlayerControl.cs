@@ -6,6 +6,9 @@ public class PlayerControl
 {
 	public ShipBase PlayerShip;
 
+	public string SpawnStationID;
+	public StationType SpawnStationType;
+
 	public ParticleSystem SpaceDust;
 	public ParticleSystem TradelaneDust;
 
@@ -108,8 +111,23 @@ public class PlayerControl
 	public void DockComplete(StationBase dockedStation, StationType type)
 	{
 		GameManager.Inst.SaveGameManager.CreateAnchorSave(dockedStation, type);
-		GameManager.Inst.UIManager.FadePanel.FadeOut(0.4f);
+		if(type == StationType.Station)
+		{
+			GameManager.Inst.UIManager.FadePanel.FadeOut(0.4f);
+		}
+		else if(type == StationType.JumpGate)
+		{
+			GameManager.Inst.UIManager.FadePanel.WhiteFadeOut(0.75f);
+		}
 	}
+
+	public void SpawnPlayer()
+	{
+		Debug.Log(SpawnStationID);
+		StationBase station = GameObject.Find(SpawnStationID).GetComponent<StationBase>();
+		station.Undock(PlayerShip);
+	}
+
 
 
 	private void UpdateKeyInput()
@@ -302,7 +320,7 @@ public class PlayerControl
 		_throttle = Mathf.Clamp01(_throttle);
 
 		//firing weapon
-		LightFighter fighter = (LightFighter)PlayerShip;
+		Fighter fighter = (Fighter)PlayerShip;
 		if(Input.GetMouseButton(0))
 		{
 			fighter.LeftGun.GetComponent<Weapon>().Fire();
@@ -509,7 +527,7 @@ public class PlayerControl
 		mousePos = Input.mousePosition;
 		Vector3 targetPos = camera.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, 100));
 
-		LightFighter fighter = (LightFighter)PlayerShip;
+		Fighter fighter = (Fighter)PlayerShip;
 
 		Vector3 lookDirLeft = targetPos - fighter.LeftGun.position;
 		Vector3 verticalLoSLeft = lookDirLeft - (fighter.LeftGunJoint.forward * 100);

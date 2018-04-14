@@ -13,3 +13,13 @@ public class Sun : MonoBehaviour
 		
 	}
 }
+
+public class SunData
+{
+	public Vector3 Location;
+	public Vector3 Scale;
+	public string ID;
+	public string DisplayName;
+	public float Intensity;
+	public Color Color;
+}

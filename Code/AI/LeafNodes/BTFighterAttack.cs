@@ -17,7 +17,7 @@ public class BTFighterAttack : BTLeaf
 		ShipBase target = (ShipBase)MyAI.Whiteboard.Parameters[Parameters[0]];
 		if(target != null)
 		{
-			LightFighter fighter = (LightFighter)MyAI.MyShip;
+			Fighter fighter = (Fighter)MyAI.MyShip;
 			fighter.LeftGun.GetComponent<Weapon>().Fire();
 			fighter.RightGun.GetComponent<Weapon>().Fire();
 

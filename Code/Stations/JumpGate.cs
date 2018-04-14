@@ -19,6 +19,8 @@ public class JumpGate : StationBase
 	private ParticleSystem.EmissionModule _ringEmission;
 	private float _activeTimer;
 	private Material _horizonMatInst;
+
+	private bool _isPlayerWarping;
 	
 	// Update is called once per frame
 	void Update () 
@@ -33,7 +35,7 @@ public class JumpGate : StationBase
 			}
 			if(_spinnerSpeed >= MaxSpinnerSpeed * 0.9f)
 			{
-				SetHorizonAlpha(Mathf.Clamp(_horizonMatInst.color.a + Time.deltaTime * 1, 0, 0.4f));
+				SetHorizonAlpha(Mathf.Clamp(_horizonMatInst.color.a + Time.deltaTime * 1, 0.1f, 0.4f));
 				EnablePortal();
 			}
 		}
@@ -51,7 +53,13 @@ public class JumpGate : StationBase
 		{
 			IsGateActive = false;
 			_ringEmission.enabled = false;
-			SetHorizonAlpha(Mathf.Clamp(_horizonMatInst.color.a - Time.deltaTime * 1, 0, 0.4f));
+			SetHorizonAlpha(Mathf.Clamp(_horizonMatInst.color.a - Time.deltaTime * 1, 0.1f, 0.4f));
+		}
+
+		if(_isPlayerWarping)
+		{
+			GameManager.Inst.MainCamera.fieldOfView = Mathf.Lerp(GameManager.Inst.MainCamera.fieldOfView, 30f, Time.deltaTime * 3);
+			GameManager.Inst.CameraController.FarCamera.fieldOfView = GameManager.Inst.MainCamera.fieldOfView;
 		}
 	}
 
@@ -68,7 +76,7 @@ public class JumpGate : StationBase
 
 		_ringEmission.enabled = false;
 		_horizonMatInst = Horizon.material;
-		SetHorizonAlpha(0);
+		SetHorizonAlpha(0.1f);
 		DisablePortal();
 	}
 
@@ -80,11 +88,24 @@ public class JumpGate : StationBase
 		return DockRequestResult.Accept;
 	}
 
+	public override DockRequestResult Undock (ShipBase requester)
+	{
+		Vector3 spawnLoc = DockingTrigger.transform.position + DockingTrigger.transform.up * 20;
+		requester.transform.position = spawnLoc;
+		requester.transform.rotation = Quaternion.LookRotation(DockingTrigger.transform.up, Vector3.up);
+
+		return DockRequestResult.Accept;
+	}
+
 	public override void OnDetectDocking (string triggerID, ShipBase requester)
 	{
 		if(requester == GameManager.Inst.PlayerControl.PlayerShip)
 		{
 			Debug.Log("Through the wormhole!");
+			requester.IsInPortal = true;
+			_isPlayerWarping = true;
+			UIEventHandler.Instance.TriggerBeginDocking();
+			GameManager.Inst.PlayerControl.DockComplete(this, StationType.JumpGate);
 		}
 
 	}
@@ -105,4 +126,15 @@ public class JumpGate : StationBase
 	{
 		DockingTrigger.GetComponent<Collider>().enabled = false;
 	}
+}
+
+
+public class JumpGateData
+{
+	public string TargetSystem;
+	public string ExitGateID;
+	public string DisplayName;
+	public string ID;
+	public Vector3 Location;
+	public Vector3 EulerAngles;
 }

@@ -42,4 +42,20 @@ public class SaveGameManager
 		CurrentSave = new SaveGame();
 	}
 
+	public void Load(SaveGame save)
+	{
+		CurrentSave = null;
+		GameManager.Inst.PlayerControl.SpawnStationID = save.SpawnStationID;
+		GameManager.Inst.PlayerControl.SpawnStationType = save.SpawnStationType;
+	}
+
+	public void LoadNewGame()
+	{
+		CurrentSave = null;
+		GameManager.Inst.PlayerControl.SpawnStationID = "alexandria_station";
+		GameManager.Inst.PlayerControl.SpawnStationType = StationType.Station;
+	}
+
+
+
 }

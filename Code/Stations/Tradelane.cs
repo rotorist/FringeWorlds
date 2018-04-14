@@ -16,6 +16,8 @@ public class Tradelane : StationBase
 
 	public Tradelane NeighborToA;
 	public Tradelane NeighborToB;
+	public string NeighborAID;
+	public string NeighborBID;
 
 	private int _dockingStageA;//0 docking not initiated; 1 only ring; 2 all ready; 3 transporting
 	private int _dockingStageB;
@@ -187,4 +189,16 @@ public class Tradelane : StationBase
 		LaneARightDirLight.sharedMaterial = GameManager.Inst.MaterialManager.TradelaneLightDown;
 		LaneBRightDirLight.sharedMaterial = GameManager.Inst.MaterialManager.TradelaneLightDown;
 	}
+}
+
+
+public class TradelaneData
+{
+	public string DisplayName;
+	public string ID;
+	public string NeighborAID;
+	public string NeighborBID;
+	public int IsTerminalAorB;
+	public Vector3 Location;
+	public Vector3 EulerAngles;
 }

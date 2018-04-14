@@ -9,12 +9,13 @@ public class AI : MonoBehaviour
 	public ShipBase AttackTarget;
 	public Rigidbody RB;
 	public Whiteboard Whiteboard;
+	public AvoidanceDetector AvoidanceDetector;
 
 	public Dictionary<string,BehaviorTree> TreeSet;
 
 
 	private bool _isEngineKilled;
-
+	private Vector3 _avoidanceForce;
 
 	
 	// Update is called once per frame
@@ -28,6 +29,7 @@ public class AI : MonoBehaviour
 	void FixedUpdate()
 	{
 		Move();
+		UpdateAvoidance();
 	}
 
 	// Use this for initialization
@@ -41,6 +43,8 @@ public class AI : MonoBehaviour
 
 		TreeSet = new Dictionary<string, BehaviorTree>();
 		TreeSet.Add("FighterCombat", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("FighterCombat", this));
+
+
 	}
 
 
@@ -65,7 +69,14 @@ public class AI : MonoBehaviour
 		if(!_isEngineKilled)
 		{
 			RB.AddForce(los.normalized * force);
+
 		}
+
+		if(_avoidanceForce != Vector3.zero)
+		{
+			Debug.Log(_avoidanceForce);
+		}
+		RB.AddForce(_avoidanceForce);
 
 		float strafeForce = (float)Whiteboard.Parameters["StrafeForce"];
 		if(strafeForce != 0)
@@ -147,7 +158,7 @@ public class AI : MonoBehaviour
 		}
 
 		//aim guns at target
-		LightFighter fighter = (LightFighter)MyShip;
+		Fighter fighter = (Fighter)MyShip;
 		fighter.LeftGun.transform.rotation = Quaternion.LookRotation(aimDir);
 		fighter.RightGun.transform.rotation = Quaternion.LookRotation(aimDir);
 	}
@@ -165,6 +176,28 @@ public class AI : MonoBehaviour
 
 	private void UpdateAvoidance()
 	{
+		AvoidanceDetector.AvoidanceUpdate();
+		if(AvoidanceDetector.Avoidance != Vector3.zero)
+		{
+			float cap = 30;
+			float maxValue = StaticUtility.GetMaxElementV3(AvoidanceDetector.Avoidance);
+			float forceMag = 5f + 10f * Mathf.Clamp01(maxValue / 30);
 
+			Vector3 force1 = (AvoidanceDetector.transform.position - AvoidanceDetector.RaySource1.position).normalized * (AvoidanceDetector.Avoidance.x / maxValue);
+			Vector3 force2 = (AvoidanceDetector.transform.position - AvoidanceDetector.RaySource2.position).normalized * (AvoidanceDetector.Avoidance.y / maxValue);
+			Vector3 force3 = (AvoidanceDetector.transform.position - AvoidanceDetector.RaySource3.position).normalized * (AvoidanceDetector.Avoidance.z / maxValue);
+			Vector3 force4 = Vector3.zero;
+
+			if(AvoidanceDetector.Avoidance.x > cap && AvoidanceDetector.Avoidance.y > cap && AvoidanceDetector.Avoidance.z > cap)
+			{
+				force4 = (RB.velocity * -1).normalized;
+			}
+
+			_avoidanceForce = forceMag * (force1 + force2 + force3 + force4).normalized;
+		}
+		else
+		{
+			_avoidanceForce = Vector3.zero;
+		}
 	}
 }

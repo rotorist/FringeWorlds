@@ -15,8 +15,16 @@ public class UIStateMachine
 			State = new UIStateUndocking(this);
 			Cursor.lockState = CursorLockMode.Locked;
 			Cursor.lockState = CursorLockMode.None;
-			GameManager.Inst.UIManager.FadePanel.SetBGAlpha(1f);
-			GameManager.Inst.UIManager.FadePanel.FadeIn(0.6f);
+			if(GameManager.Inst.PlayerControl.SpawnStationType == StationType.Station)
+			{
+				GameManager.Inst.UIManager.FadePanel.SetBlackBGAlpha(1f);
+				GameManager.Inst.UIManager.FadePanel.FadeIn(0.6f);
+			}
+			else if(GameManager.Inst.PlayerControl.SpawnStationType == StationType.JumpGate)
+			{
+				GameManager.Inst.UIManager.FadePanel.SetWhiteBGAlpha(1f);
+				GameManager.Inst.UIManager.FadePanel.WhiteFadeIn(0.3f);
+			}
 		}
 		else if(sceneType == SceneType.Station)
 		{
@@ -77,6 +85,8 @@ public class UIStateInFlight : UIStateBase
 		SM.State = new UIStateDocking(SM);
 	}
 
+
+
 }
 
 
@@ -100,6 +110,8 @@ public class UIStateDocking : UIStateBase
 		{
 			UIEventHandler.OnFadeOutDone -= OnFadeOutDone;
 			UIEventHandler.OnFadeOutDone += OnFadeOutDone;
+			UIEventHandler.OnWhiteFadeOutDone -= OnWhiteFadeOutDone;
+			UIEventHandler.OnWhiteFadeOutDone += OnWhiteFadeOutDone;
 		}
 		else if(GameManager.Inst.SceneType == SceneType.Station)
 		{
@@ -112,6 +124,7 @@ public class UIStateDocking : UIStateBase
 	{
 		UIEventHandler.OnFadeInDone -= OnFadeInDone;
 		UIEventHandler.OnFadeOutDone -= OnFadeOutDone;
+		UIEventHandler.OnWhiteFadeOutDone -= OnWhiteFadeOutDone;
 	}
 
 	public void OnFadeOutDone()
@@ -124,6 +137,13 @@ public class UIStateDocking : UIStateBase
 		EndState();
 		SM.State = new UIStateInStation(SM);
 	}
+
+	public void OnWhiteFadeOutDone()
+	{
+		GameManager.Inst.LoadSpaceScene();
+	}
+
+
 }
 
 public class UIStateUndocking : UIStateBase
@@ -150,6 +170,8 @@ public class UIStateUndocking : UIStateBase
 		{
 			UIEventHandler.OnFadeInDone -= OnFadeInDone;
 			UIEventHandler.OnFadeInDone += OnFadeInDone;
+			UIEventHandler.OnWhiteFadeInDone -= OnWhiteFadeInDone;
+			UIEventHandler.OnWhiteFadeInDone += OnWhiteFadeInDone;
 		}
 	}
 
@@ -157,6 +179,7 @@ public class UIStateUndocking : UIStateBase
 	{
 		UIEventHandler.OnFadeInDone -= OnFadeInDone;
 		UIEventHandler.OnFadeOutDone -= OnFadeOutDone;
+		UIEventHandler.OnWhiteFadeInDone -= OnWhiteFadeInDone;
 	}
 
 	public void OnFadeOutDone()
@@ -165,6 +188,12 @@ public class UIStateUndocking : UIStateBase
 	}
 
 	public void OnFadeInDone()
+	{
+		EndState();
+		SM.State = new UIStateInFlight(SM);
+	}
+
+	public void OnWhiteFadeInDone()
 	{
 		EndState();
 		SM.State = new UIStateInFlight(SM);

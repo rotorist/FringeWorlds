@@ -28,3 +28,11 @@ public class Planet : MonoBehaviour
 
 
 }
+
+public class PlanetData
+{
+	public string DisplayName;
+	public string ID;
+	public Vector3 Location;
+	public Vector3 OriginalScale;
+}

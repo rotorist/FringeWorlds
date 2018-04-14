@@ -5,10 +5,11 @@ using UnityEngine;
 public class FadePanel : PanelBase
 {
 	public UISprite BlackBG;
+	public UISprite WhiteBG;
 
 	private float _fadeSpeed;
 	private bool _isFadingOut;
-
+	private bool _isWhite;
 
 	public override void Initialize ()
 	{
@@ -35,17 +36,39 @@ public class FadePanel : PanelBase
 	{
 		_fadeSpeed = speed;
 		_isFadingOut = false;
+		_isWhite = false;
 	}
 
 	public void FadeOut(float speed)
 	{
+		
 		_fadeSpeed = speed;
 		_isFadingOut = true;
+		_isWhite = false;
 	}
 
-	public void SetBGAlpha(float alpha)
+	public void WhiteFadeIn(float speed)
+	{
+		_fadeSpeed = speed;
+		_isFadingOut = false;
+		_isWhite = true;
+	}
+
+	public void WhiteFadeOut(float speed)
+	{
+		_fadeSpeed = speed;
+		_isFadingOut = true;
+		_isWhite = true;
+	}
+
+	public void SetBlackBGAlpha(float alpha)
 	{
 		BlackBG.alpha = alpha;
+	}
+
+	public void SetWhiteBGAlpha(float alpha)
+	{
+		WhiteBG.alpha = alpha;
 	}
 
 
@@ -53,18 +76,40 @@ public class FadePanel : PanelBase
 	{
 		if(_isFadingOut)
 		{
-			BlackBG.alpha = Mathf.Clamp01(BlackBG.alpha + Time.deltaTime * _fadeSpeed);
-			if(BlackBG.alpha >= 1)
+			if(_isWhite)
 			{
-				UIEventHandler.Instance.TriggerFadeOutDone();
+				WhiteBG.alpha = Mathf.Clamp01(WhiteBG.alpha + Time.deltaTime * _fadeSpeed);
+				if(WhiteBG.alpha >= 1)
+				{
+					UIEventHandler.Instance.TriggerWhiteFadeOutDone();
+				}
+			}
+			else
+			{
+				BlackBG.alpha = Mathf.Clamp01(BlackBG.alpha + Time.deltaTime * _fadeSpeed);
+				if(BlackBG.alpha >= 1)
+				{
+					UIEventHandler.Instance.TriggerFadeOutDone();
+				}
 			}
 		}
 		else
 		{
-			BlackBG.alpha = Mathf.Clamp01(BlackBG.alpha - Time.deltaTime * _fadeSpeed);
-			if(BlackBG.alpha <= 0)
+			if(_isWhite)
 			{
-				UIEventHandler.Instance.TriggerFadeInDone();
+				WhiteBG.alpha = Mathf.Clamp01(WhiteBG.alpha - Time.deltaTime * _fadeSpeed);
+				if(WhiteBG.alpha <= 0)
+				{
+					UIEventHandler.Instance.TriggerWhiteFadeInDone();
+				}
+			}
+			else
+			{
+				BlackBG.alpha = Mathf.Clamp01(BlackBG.alpha - Time.deltaTime * _fadeSpeed);
+				if(BlackBG.alpha <= 0)
+				{
+					UIEventHandler.Instance.TriggerFadeInDone();
+				}
 			}
 		}
 	}

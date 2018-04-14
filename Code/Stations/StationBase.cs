@@ -7,6 +7,7 @@ public class StationBase : MonoBehaviour
 
 	public string DisplayName;
 	public string ID;
+	public StationType StationType;
 
 	public virtual void Initialize()
 	{
@@ -34,6 +35,16 @@ public class StationBase : MonoBehaviour
 	}
 }
 
+public class StationData
+{
+	public string DisplayName;
+	public string ID;
+	public Vector3 Location;
+	public Vector3 EulerAngles;
+	public StationType StationType;
+
+}
+
 public enum DockRequestResult
 {
 	Accept,
@@ -43,8 +54,8 @@ public enum DockRequestResult
 
 public enum StationType
 {
+	Station,
 	Tradelane,
 	JumpGate,
-	Station,
 	JumpHole,
 }

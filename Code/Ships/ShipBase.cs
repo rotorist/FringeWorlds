@@ -6,10 +6,12 @@ public class ShipBase : MonoBehaviour
 {
 	public string ShipModelID;
 	public GameObject ShipModel;
+	public ShipType ShipType;
 	public Rigidbody RB;
 	public Engine Engine;
 	public ShieldBase Shield;
 	public Thruster Thruster;
+
 
 	public float HullCapacity;
 	public float HullAmount;
@@ -19,4 +21,14 @@ public class ShipBase : MonoBehaviour
 
 	public bool IsInPortal;
 	public float InPortalSpeed;
+}
+
+public enum ShipType
+{
+	Fighter,
+	Transporter,
+	Gunship,
+	CargoShip,
+	BattleCruiser,
+
 }

@@ -9,6 +9,11 @@ public class StaticUtility
 		return GameManager.Inst.Constants.ShieldDamageMultiplier[shieldTech][damageType];
 	}
 
+	public static float GetMaxElementV3(Vector3 input)
+	{
+		return Mathf.Max(Mathf.Max(input.x, input.y), input.z);
+	}
+
 	public static int FlipCoin()
 	{
 		if(UnityEngine.Random.value < 0.5f)

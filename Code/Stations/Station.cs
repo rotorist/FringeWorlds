@@ -8,17 +8,6 @@ public class Station : StationBase
 
 	private List<DockingSession> _dockingSessions;
 
-	void Start()
-	{
-		_dockingSessions = new List<DockingSession>();
-
-		//find all children's station component and assign to this
-		StationComponent [] components = transform.GetComponentsInChildren<StationComponent>();
-		foreach(StationComponent comp in components)
-		{
-			comp.ParentStation = this;
-		}
-	}
 
 	void FixedUpdate()
 	{
@@ -31,6 +20,18 @@ public class Station : StationBase
 				//remove the session, close the gate
 				_dockingSessions.Remove(session);
 			}
+		}
+	}
+
+	public override void Initialize ()
+	{
+		_dockingSessions = new List<DockingSession>();
+
+		//find all children's station component and assign to this
+		StationComponent [] components = transform.GetComponentsInChildren<StationComponent>();
+		foreach(StationComponent comp in components)
+		{
+			comp.ParentStation = this;
 		}
 	}
 

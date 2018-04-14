@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LightFighter : ShipBase
+public class Fighter : ShipBase
 {
 	//for testing only
 	public Transform LeftGunJoint;

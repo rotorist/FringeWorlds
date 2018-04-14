@@ -36,6 +36,8 @@ public class UIEventHandler
 	public delegate void GeneralUIEventDelegate();
 	public static event GeneralUIEventDelegate OnBeginDocking;
 	public static event GeneralUIEventDelegate OnFadeOutDone;
+	public static event GeneralUIEventDelegate OnWhiteFadeOutDone;
+	public static event GeneralUIEventDelegate OnWhiteFadeInDone;
 
 	public static event GeneralUIEventDelegate OnBeginUndocking;
 	public static event GeneralUIEventDelegate OnFadeInDone;
@@ -56,6 +58,22 @@ public class UIEventHandler
 		if(OnFadeOutDone != null)
 		{
 			OnFadeOutDone();
+		}
+	}
+
+	public void TriggerWhiteFadeOutDone()
+	{
+		if(OnWhiteFadeOutDone != null)
+		{
+			OnWhiteFadeOutDone();
+		}
+	}
+
+	public void TriggerWhiteFadeInDone()
+	{
+		if(OnWhiteFadeInDone != null)
+		{
+			OnWhiteFadeInDone();
 		}
 	}
 
