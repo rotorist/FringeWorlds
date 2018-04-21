@@ -188,6 +188,8 @@ public class GameManager : MonoBehaviour
 			{
 				PlayerControl.SpawnPlayer();
 			}
+
+			NPCManager.TestSpawn();
 		}
 		else if(SceneType == SceneType.SpaceTest)
 		{

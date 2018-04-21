@@ -5,6 +5,7 @@ using UnityEngine;
 public class Station : StationBase
 {
 	public List<DockGate> DockGates;
+	public List<MacroAIParty> DockedParties;
 
 	private List<DockingSession> _dockingSessions;
 
@@ -33,6 +34,8 @@ public class Station : StationBase
 		{
 			comp.ParentStation = this;
 		}
+
+		DockedParties = new List<MacroAIParty>();
 	}
 
 	public override DockRequestResult Dock (ShipBase requester)

@@ -11,6 +11,8 @@ public class StarSystem
 	public List<StationBase> Stations;
 	public List<Tradelane> Tradelanes;
 
+
+
 	public StarSystem(string id, string displayName)
 	{
 		ID = id;
@@ -19,14 +21,17 @@ public class StarSystem
 		Planets = new List<Planet>();
 		Stations = new List<StationBase>();
 		Tradelanes = new List<Tradelane>();
+
+
 	}
+
 
 }
 
 
-public class StarSystemData
+public class StarSystemData : NavNode
 {
-	public string ID;
+
 	public string DisplayName;
 	public string SkyboxName;
 	public Color AmbientColor;
@@ -35,6 +40,9 @@ public class StarSystemData
 	public List<StationData> Stations;
 	public List<JumpGateData> JumpGates;
 	public List<TradelaneData> Tradelanes;
+	public List<NavNode> ChildNodes;
+
+	public List<MacroAIParty> Parties; //this is used for spawning NPC ships
 
 	public StarSystemData(string id, string displayName)
 	{
@@ -45,6 +53,11 @@ public class StarSystemData
 		Stations = new List<StationData>();
 		JumpGates = new List<JumpGateData>();
 		Tradelanes  = new List<TradelaneData>();
+		ChildNodes = new List<NavNode>();
+		Parties = new List<MacroAIParty>();
+		NeighborIDs = new List<string>();
+		Neighbors = new List<NavNode>();
+		NavNodeType = NavNodeType.System;
 	}
 
 }

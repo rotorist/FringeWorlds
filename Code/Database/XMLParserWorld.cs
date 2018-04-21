@@ -13,7 +13,8 @@ public class XMLParserWorld
 
 	public StarSystem GenerateSystemScene(string id)
 	{
-		StarSystemData system = LoadStarSystemData(id);
+		string path = Application.dataPath + "/GameData/StarSystem/" + id + ".xml";
+		StarSystemData system = LoadStarSystemData(path);
 
 		StarSystem starSystem = new StarSystem(system.ID, system.DisplayName);
 		RenderSettings.skybox = Resources.Load<Material>(system.SkyboxName);
@@ -31,14 +32,97 @@ public class XMLParserWorld
 			starSystem.Suns.Add(sun);
 		}
 
+		foreach(PlanetData planetData in system.Planets)
+		{
+			GameObject planetObject = GameObject.Instantiate(Resources.Load(planetData.ID)) as GameObject;
+			planetObject.name = planetData.ID;
+			Planet planet = planetObject.GetComponent<Planet>();
+			planet.transform.position = planetData.Location;
+			planet.transform.localScale = planetData.OriginalScale;
+			planet.OriginalScale = planetData.OriginalScale;
+			starSystem.Planets.Add(planet);
+		}
+
+		foreach(StationData stationData in system.Stations)
+		{
+			GameObject stationObject = GameObject.Instantiate(Resources.Load(stationData.ID)) as GameObject;
+			stationObject.name = stationData.ID;
+			StationBase station = stationObject.GetComponent<StationBase>();
+			station.transform.position = stationData.Location;
+			station.transform.eulerAngles = stationData.EulerAngles;
+			starSystem.Stations.Add(station);
+		}
+
+		foreach(JumpGateData jumpGateData in system.JumpGates)
+		{
+			GameObject stationObject = GameObject.Instantiate(Resources.Load("JumpGate")) as GameObject;
+			stationObject.name = jumpGateData.ID;
+			JumpGate gate = stationObject.GetComponent<JumpGate>();
+			gate.transform.position = jumpGateData.Location;
+			gate.transform.eulerAngles = jumpGateData.EulerAngles;
+			gate.TargetSystem = jumpGateData.TargetSystem;
+			gate.ExitGateID = jumpGateData.ExitGateID;
+			starSystem.Stations.Add(gate);
+		}
+
+		foreach(TradelaneData tradelaneData in system.Tradelanes)
+		{
+			GameObject tlObject = GameObject.Instantiate(Resources.Load("Tradelane")) as GameObject;
+			tlObject.name = tradelaneData.ID;
+			Tradelane tl = tlObject.transform.Find("TradelaneBody").GetComponent<Tradelane>();
+			tlObject.transform.position = tradelaneData.Location;
+			tlObject.transform.eulerAngles = tradelaneData.EulerAngles;
+			tl.ID = tradelaneData.ID;
+			tl.DisplayName = tradelaneData.DisplayName;
+			tl.IsTerminalAorB = tradelaneData.IsTerminalAorB;
+			tl.NeighborAID = tradelaneData.NeighborAID;
+			tl.NeighborBID = tradelaneData.NeighborBID;
+			tl.NeighborToA = null;
+			tl.NeighborToB = null;
+			starSystem.Tradelanes.Add(tl);
+		}
+
+		//now assign neighbors to tradelanes
+		List<Tradelane> tradelanes = starSystem.Tradelanes;
+		foreach(Tradelane tl in tradelanes)
+		{
+			foreach(Tradelane neighbor in tradelanes)
+			{
+				if(tl.NeighborAID == neighbor.ID)
+				{
+					tl.NeighborToA = neighbor;
+				}
+
+				if(tl.NeighborBID == neighbor.ID)
+				{
+					tl.NeighborToB = neighbor;
+				}
+			}
+		}
 
 		return starSystem;
 	}
 
-	public StarSystemData LoadStarSystemData(string id)
+	public Dictionary<string, StarSystemData> LoadAllSystemsFromXML()
+	{
+		Dictionary<string, StarSystemData> allSystems = new Dictionary<string, StarSystemData>();
+		DirectoryInfo dirInfo = new DirectoryInfo(Application.dataPath + "/GameData/StarSystem/");
+
+		FileInfo [] files = dirInfo.GetFiles("*.xml");
+		foreach(FileInfo fileInfo in files)
+		{
+			string path = Application.dataPath + "/GameData/StarSystem/" + fileInfo.Name;
+			StarSystemData systemData = LoadStarSystemData(path);
+			allSystems.Add(systemData.ID, systemData);
+		}
+
+		return allSystems;
+	}
+
+	public StarSystemData LoadStarSystemData(string path)
 	{
 		//
-		string path = Application.dataPath + "/GameData/StarSystem/" + id + ".xml";
+
 		XmlDocument doc = new XmlDocument();
 
 		string file = File.ReadAllText(path);
@@ -179,13 +263,7 @@ public class XMLParserWorld
 
 
 
-				GameObject planetObject = GameObject.Instantiate(Resources.Load(planetID)) as GameObject;
-				planetObject.name = planetID;
-				Planet planet = planetObject.GetComponent<Planet>();
-				planet.transform.position = location;
-				planet.transform.localScale = scale;
-				planet.OriginalScale = scale;
-				system.Planets.Add(planet);
+
 			}
 			if(node.Name == "station")
 			{
@@ -197,6 +275,7 @@ public class XMLParserWorld
 				XmlNodeList content = node.ChildNodes;
 				string targetSystem = "";
 				string exitGateID = "";
+				List<string> neighborIDs = new List<string>();
 
 
 				foreach(XmlNode subnode in content)
@@ -230,6 +309,10 @@ public class XMLParserWorld
 					{
 						exitGateID = subnode.InnerText;
 					}
+					if(subnode.Name == "navneighbor")
+					{
+						neighborIDs.Add(subnode.InnerText);
+					}
 				}
 
 				if(stationType == "JumpGate")
@@ -241,17 +324,12 @@ public class XMLParserWorld
 					jumpGateData.ExitGateID = exitGateID;
 					jumpGateData.Location = location;
 					jumpGateData.EulerAngles = eulerAngles;
+					jumpGateData.NeighborIDs = neighborIDs;
+					jumpGateData.NavNodeType = NavNodeType.JumpGate;
 					systemData.JumpGates.Add(jumpGateData);
+					systemData.ChildNodes.Add(jumpGateData);
+					systemData.NeighborIDs.Add(targetSystem);
 
-
-					GameObject stationObject = GameObject.Instantiate(Resources.Load("JumpGate")) as GameObject;
-					stationObject.name = stationID;
-					JumpGate gate = stationObject.GetComponent<JumpGate>();
-					gate.transform.position = location;
-					gate.transform.eulerAngles = eulerAngles;
-					gate.TargetSystem = targetSystem;
-					gate.ExitGateID = exitGateID;
-					system.Stations.Add(gate);
 				}
 				else if(stationType == "Station")
 				{
@@ -260,15 +338,10 @@ public class XMLParserWorld
 					stationData.ID = stationID;
 					stationData.Location = location;
 					stationData.EulerAngles = eulerAngles;
+					stationData.NeighborIDs = neighborIDs;
+					stationData.NavNodeType = NavNodeType.Station;
 					systemData.Stations.Add(stationData);
-
-
-					GameObject stationObject = GameObject.Instantiate(Resources.Load(stationID)) as GameObject;
-					stationObject.name = stationID;
-					StationBase station = stationObject.GetComponent<StationBase>();
-					station.transform.position = location;
-					station.transform.eulerAngles = eulerAngles;
-					system.Stations.Add(station);
+					systemData.ChildNodes.Add(stationData);
 				}
 
 			}
@@ -282,6 +355,7 @@ public class XMLParserWorld
 				string terminal = "";
 				string neighborA = "";
 				string neighborB = "";
+				List<string> neighborIDs = new List<string>();
 				foreach(XmlNode subnode in content)
 				{
 
@@ -308,10 +382,22 @@ public class XMLParserWorld
 					if(subnode.Name == "neighbor_a")
 					{
 						neighborA = subnode.InnerText;
+						if(neighborA != "NULL")
+						{
+							neighborIDs.Add(neighborA);
+						}
 					}
 					if(subnode.Name == "neighbor_b")
 					{
 						neighborB = subnode.InnerText;
+						if(neighborB != "NULL")
+						{
+							neighborIDs.Add(neighborB);
+						}
+					}
+					if(subnode.Name == "navneighbor")
+					{
+						neighborIDs.Add(subnode.InnerText);
 					}
 				}
 
@@ -323,43 +409,17 @@ public class XMLParserWorld
 				tradelaneData.NeighborBID = neighborB;
 				tradelaneData.Location = location;
 				tradelaneData.EulerAngles = eulerAngles;
+				tradelaneData.NeighborIDs = neighborIDs;
+				tradelaneData.NavNodeType = NavNodeType.Tradelane;
 				systemData.Tradelanes.Add(tradelaneData);
+				systemData.ChildNodes.Add(tradelaneData);
 
 
-				GameObject tlObject = GameObject.Instantiate(Resources.Load("Tradelane")) as GameObject;
-				tlObject.name = stationID;
-				Tradelane tl = tlObject.transform.Find("TradelaneBody").GetComponent<Tradelane>();
-				tlObject.transform.position = location;
-				tlObject.transform.eulerAngles = eulerAngles;
-				tl.ID = stationID;
-				tl.DisplayName = displayName;
-				tl.IsTerminalAorB = Convert.ToInt32(terminal);
-				tl.NeighborAID = neighborA;
-				tl.NeighborBID = neighborB;
-				tl.NeighborToA = null;
-				tl.NeighborToB = null;
-				system.Tradelanes.Add(tl);
 			}
 
 		}
 
-		//now assign neighbors to tradelanes
-		List<Tradelane> tradelanes = system.Tradelanes;
-		foreach(Tradelane tl in tradelanes)
-		{
-			foreach(Tradelane neighbor in tradelanes)
-			{
-				if(tl.NeighborAID == neighbor.ID)
-				{
-					tl.NeighborToA = neighbor;
-				}
 
-				if(tl.NeighborBID == neighbor.ID)
-				{
-					tl.NeighborToB = neighbor;
-				}
-			}
-		}
 
 
 
@@ -385,6 +445,15 @@ public class XMLParserWorld
 		_xmlWriter.WriteStartElement("system");
 		_xmlWriter.WriteAttributeString("id", id);
 		_xmlWriter.WriteAttributeString("displayname", GameManager.Inst.SystemName);
+
+		//system location in system map
+		_xmlWriter.WriteStartElement("system_location");
+		_xmlWriter.WriteStartElement("vector3");
+		_xmlWriter.WriteAttributeString("x", "0");
+		_xmlWriter.WriteAttributeString("y", "0");
+		_xmlWriter.WriteAttributeString("z", "0");
+		_xmlWriter.WriteEndElement();
+		_xmlWriter.WriteFullEndElement();
 
 		//ambience
 		_xmlWriter.WriteStartElement("ambience");
@@ -520,6 +589,13 @@ public class XMLParserWorld
 			_xmlWriter.WriteEndElement();
 			_xmlWriter.WriteFullEndElement();
 
+			foreach(StationBase neighbor in station.NeighborStations)
+			{
+				_xmlWriter.WriteStartElement("navneighbor");
+				_xmlWriter.WriteString(neighbor.ID);
+				_xmlWriter.WriteFullEndElement();
+			}
+
 			if(station.StationType == StationType.JumpGate)
 			{
 				JumpGate gate = (JumpGate)station;
@@ -590,6 +666,13 @@ public class XMLParserWorld
 				_xmlWriter.WriteString("NULL");
 			}
 			_xmlWriter.WriteFullEndElement();
+
+			foreach(StationBase neighbor in tl.NeighborStations)
+			{
+				_xmlWriter.WriteStartElement("navneighbor");
+				_xmlWriter.WriteString(neighbor.ID);
+				_xmlWriter.WriteFullEndElement();
+			}
 
 			_xmlWriter.WriteFullEndElement();
 		}

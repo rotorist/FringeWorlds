@@ -8,6 +8,7 @@ public class StationBase : MonoBehaviour
 	public string DisplayName;
 	public string ID;
 	public StationType StationType;
+	public List<StationBase> NeighborStations;
 
 	public virtual void Initialize()
 	{
@@ -35,13 +36,17 @@ public class StationBase : MonoBehaviour
 	}
 }
 
-public class StationData
+public class StationData : NavNode
 {
 	public string DisplayName;
-	public string ID;
-	public Vector3 Location;
 	public Vector3 EulerAngles;
 	public StationType StationType;
+	public List<MacroAIParty> DockedParties;
+
+	public StationData()
+	{
+		DockedParties = new List<MacroAIParty>();
+	}
 
 }
 

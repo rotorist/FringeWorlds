@@ -129,12 +129,10 @@ public class JumpGate : StationBase
 }
 
 
-public class JumpGateData
+public class JumpGateData : NavNode
 {
 	public string TargetSystem;
 	public string ExitGateID;
 	public string DisplayName;
-	public string ID;
-	public Vector3 Location;
 	public Vector3 EulerAngles;
 }

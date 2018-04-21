@@ -192,13 +192,11 @@ public class Tradelane : StationBase
 }
 
 
-public class TradelaneData
+public class TradelaneData : NavNode
 {
 	public string DisplayName;
-	public string ID;
 	public string NeighborAID;
 	public string NeighborBID;
 	public int IsTerminalAorB;
-	public Vector3 Location;
 	public Vector3 EulerAngles;
 }
