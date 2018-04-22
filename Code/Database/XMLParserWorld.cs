@@ -447,7 +447,7 @@ public class XMLParserWorld
 		_xmlWriter.WriteAttributeString("displayname", GameManager.Inst.SystemName);
 
 		//system location in system map
-		_xmlWriter.WriteStartElement("system_location");
+		_xmlWriter.WriteStartElement("systemlocation");
 		_xmlWriter.WriteStartElement("vector3");
 		_xmlWriter.WriteAttributeString("x", "0");
 		_xmlWriter.WriteAttributeString("y", "0");
