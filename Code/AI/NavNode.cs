@@ -5,6 +5,7 @@ using UnityEngine;
 public abstract class NavNode 
 {
 	public string ID;
+	public string SystemID;
 	public Vector3 Location;
 	public List<string> NeighborIDs;
 	public List<NavNode> Neighbors;

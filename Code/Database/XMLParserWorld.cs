@@ -140,14 +140,20 @@ public class XMLParserWorld
 		string systemID = systemAttrs["id"].Value.ToString();
 		string systemName = systemAttrs["displayname"].Value.ToString();
 
-		StarSystem system = new StarSystem(systemID, systemName);
-
 		StarSystemData systemData = new StarSystemData(systemID, systemName);
+		systemData.SystemID = systemID;
 
 		XmlNodeList systemContent = systemNode.ChildNodes;
 
 		foreach(XmlNode node in systemContent)
 		{
+			if(node.Name == "systemlocation")
+			{
+				Vector3 location = location = DBManager.ParseXmlVector3(node.FirstChild);
+
+				systemData.Location = location;
+			}
+
 			if(node.Name == "ambience")
 			{
 				XmlNodeList content = node.ChildNodes;
@@ -326,6 +332,7 @@ public class XMLParserWorld
 					jumpGateData.EulerAngles = eulerAngles;
 					jumpGateData.NeighborIDs = neighborIDs;
 					jumpGateData.NavNodeType = NavNodeType.JumpGate;
+					jumpGateData.SystemID = systemID;
 					systemData.JumpGates.Add(jumpGateData);
 					systemData.ChildNodes.Add(jumpGateData);
 					systemData.NeighborIDs.Add(targetSystem);
@@ -340,6 +347,7 @@ public class XMLParserWorld
 					stationData.EulerAngles = eulerAngles;
 					stationData.NeighborIDs = neighborIDs;
 					stationData.NavNodeType = NavNodeType.Station;
+					stationData.SystemID = systemID;
 					systemData.Stations.Add(stationData);
 					systemData.ChildNodes.Add(stationData);
 				}
@@ -411,6 +419,7 @@ public class XMLParserWorld
 				tradelaneData.EulerAngles = eulerAngles;
 				tradelaneData.NeighborIDs = neighborIDs;
 				tradelaneData.NavNodeType = NavNodeType.Tradelane;
+				tradelaneData.SystemID = systemID;
 				systemData.Tradelanes.Add(tradelaneData);
 				systemData.ChildNodes.Add(tradelaneData);
 

@@ -9,7 +9,7 @@ public class WorldManager
 	public Sun [] Suns;
 	public Dictionary<string, StarSystemData> AllSystems { get { return _allSystems; } }
 	public Dictionary<string, NavNode> AllNavNodes { get { return _allNavNodes; } }
-	public MacroAI MacroAI;
+
 
 	private Dictionary<string, StarSystemData> _allSystems;
 	private Dictionary<string, NavNode> _allNavNodes;
@@ -22,9 +22,8 @@ public class WorldManager
 
 		BuildNavMap();
 
-		MacroAI = new MacroAI();
-		MacroAI.Initialize();
-		MacroAI.GenerateParties();
+
+
 
 		StationBase [] stations = GameObject.FindObjectsOfType<StationBase>();
 		foreach(StationBase station in stations)
@@ -45,7 +44,7 @@ public class WorldManager
 			}
 		}
 
-		MacroAI.PerFrameUpdate();
+
 
 		if(Input.GetKeyDown(KeyCode.F12))
 		{

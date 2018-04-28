@@ -5,6 +5,7 @@ using System.Linq;
 
 public class NPCManager
 {
+	public MacroAI MacroAI;
 
 	public List<ShipBase> AllShips { get { return _allShips; } }
 	public List<MacroAIParty> AllParties { get { return _allParties; } }
@@ -15,6 +16,8 @@ public class NPCManager
 	private List<ShipBase> _allShips;
 	private Dictionary<string, Faction> _allFactions;
 	private List<MacroAIParty> _allParties;
+
+
 
 	public void Initialize()
 	{
@@ -109,20 +112,21 @@ public class NPCManager
 			{fac4.ID, 1}
 		};
 
-
+		MacroAI = new MacroAI();
+		MacroAI.Initialize();
 
 	}
 
 	public void TestSpawn()
 	{
 		//spawn 1 party
-		MacroAIParty party1 = SpawnParty("otu_patrol", GameManager.Inst.WorldManager.AllSystems["washington_system"], Vector3.zero, "annandale_station", true, Vector3.zero, "planet_colombia_landing");
-		_allParties.Add(party1);
+		MacroAI.GenerateParties();
+
 	}
 
 	public void PerFrameUpdate()
 	{
-
+		MacroAI.PerFrameUpdate();
 	}
 
 	public void AddExistingShip(ShipBase ship)
@@ -133,33 +137,7 @@ public class NPCManager
 		}
 	}
 
-	public MacroAIParty SpawnParty(string factionID, StarSystemData system, Vector3 location, string dockedStationID, bool isDestAStation, Vector3 destCoord, string destStationID)
-	{
-		MacroAIParty party = new MacroAIParty();
-		party.FactionID = factionID;
-		party.CurrentSystemID = system.ID;
 
-		GameManager.Inst.WorldManager.AllSystems[system.ID].Parties.Add(party);
-
-
-		if(dockedStationID != null)
-		{
-			party.DockedStationID = dockedStationID;
-			StationData station = GameManager.Inst.WorldManager.AllSystems[system.ID].Stations.First(x => x.ID == dockedStationID);
-			station.DockedParties.Add(party);
-			party.Location = station.Location;
-		}
-		else
-		{
-			party.Location = location;
-		}
-
-		party.IsDestinationAStation = isDestAStation;
-		party.DestinationCoord = destCoord;
-		party.DestinationStationID = destStationID;
-
-		return party;
-	}
 }
 
 public enum Factions
