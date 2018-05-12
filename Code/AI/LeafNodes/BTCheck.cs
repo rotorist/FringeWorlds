@@ -14,6 +14,7 @@ public class BTCheck : BTLeaf
 
 	public override BTResult Process ()
 	{
+		Debug.Log("Checking " + Action);
 		switch(Action)
 		{
 		case "IsNearFriendlyTarget":
@@ -39,6 +40,7 @@ public class BTCheck : BTLeaf
 			break;
 		case "IsEnemyOnMyTail":
 			{
+				Debug.Log("Checking is enemy on my tail, param0 " + Parameters[0]);
 				ShipBase target = (ShipBase)MyAI.Whiteboard.Parameters[Parameters[0]];
 				if(target != null)
 				{
@@ -53,6 +55,10 @@ public class BTCheck : BTLeaf
 						return BTResult.Fail;
 					}
 				}
+				else
+				{
+					Debug.Log("No target enemy found!");
+				}
 			}
 			break;
 		case "IsThereDanger":
@@ -63,9 +69,11 @@ public class BTCheck : BTLeaf
 					float dist = Vector3.Distance(MyAI.MyShip.transform.position, target.transform.position);
 					if(dist < (float)MyAI.Whiteboard.Parameters["MinEnemyRange"])
 					{
+						Debug.Log("found danger");
 						return BTResult.Success;
 					}
 				}
+				Debug.Log("no danger");
 				return BTResult.Fail;
 			}
 			break;
@@ -103,6 +111,52 @@ public class BTCheck : BTLeaf
 						return BTResult.Fail;
 					}
 				}
+			}
+			break;
+		case "IsEnemyDetected":
+			{
+				if(MyAI.Whiteboard.Parameters["TargetEnemy"] == null)
+				{
+					return BTResult.Fail;
+				}
+				else
+				{
+					return BTResult.Success;
+				}
+			}
+			break;
+		case "IspartyLeader":
+			{
+				if(MyAI.MyParty.SpawnedShipsLeader == MyAI.MyShip)
+				{
+					return BTResult.Success;
+				}
+				else
+				{
+					return BTResult.Fail;
+				}
+			}
+			break;
+		case "HasDestination":
+			{
+				if(MyAI.MyParty == null || MyAI.MyParty.CurrentTask == null)
+				{
+					return BTResult.Fail;
+				}
+
+				if(MyAI.MyParty.CurrentTask.TaskType == MacroAITaskType.Travel)
+				{
+					return BTResult.Success;
+				}
+				else
+				{
+					return BTResult.Fail;
+				}
+			}
+			break;
+		case "HasReachedDestination":
+			{
+
 			}
 			break;
 		}

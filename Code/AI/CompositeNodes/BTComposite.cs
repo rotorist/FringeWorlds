@@ -16,4 +16,5 @@ public enum BTCompType
 	ParallelOr,
 	ParallelMain,
 	Random,
+	Switch,
 }

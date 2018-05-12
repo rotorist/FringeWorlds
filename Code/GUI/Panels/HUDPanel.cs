@@ -260,12 +260,28 @@ public class HUDPanel : PanelBase
 				_currentSelectMarker.SetVisible(false);
 			}
 		}
+		else if(_currentSelectMarker != null && _selectedObject == null)
+		{
+			_currentSelectMarker.SetVisible(false);
+		}
 	}
 
 	private void UpdateUnselectedMarkerPosition()
 	{
 		//show all ships
 		ShipBase playerShip = GameManager.Inst.PlayerControl.PlayerShip;
+
+		//remove despawned ship markers
+		Dictionary<ShipBase, UISprite> _unselectedShipsCopy = new Dictionary<ShipBase, UISprite>(_unselectedShips);
+		foreach(KeyValuePair<ShipBase, UISprite> marker in _unselectedShipsCopy)
+		{
+			if(!GameManager.Inst.NPCManager.AllShips.Contains(marker.Key))
+			{
+				_unselectedShips.Remove(marker.Key);
+				GameObject.Destroy(marker.Value.gameObject);
+			}
+		}
+
 
 		foreach(ShipBase ship in GameManager.Inst.NPCManager.AllShips)
 		{
@@ -396,13 +412,21 @@ public class HUDPanel : PanelBase
 		if(_selectedTab == SelectedHUDTab.Ship)
 		{
 			List<ShipBase> allShips = GameManager.Inst.NPCManager.AllShips;
-			//sort by distance from playership
-			List<ShipBase> sorted = allShips.OrderBy(x=>Vector3.Distance(x.transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position)).ToList<ShipBase>();
-			for(int i=0; i<sorted.Count; i++)
+			if(allShips.Count > 0)
 			{
-				_allEntries[i].SetDistance(Vector3.Distance(sorted[i].transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position));
-				_allEntries[i].SetDescription(sorted[i].ShipModel.GetComponent<ShipReference>().Name);
-				_allEntries[i].SetAlpha(0.5f);
+				//sort by distance from playership
+				List<ShipBase> sorted = allShips.OrderBy(x=>Vector3.Distance(x.transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position)).ToList<ShipBase>();
+				int count = 10;
+				if(sorted.Count < count)
+				{
+					count = sorted.Count;
+				}
+				for(int i=0; i<count; i++)
+				{
+					_allEntries[i].SetDistance(Vector3.Distance(sorted[i].transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position));
+					_allEntries[i].SetDescription(sorted[i].ShipModel.GetComponent<ShipReference>().Name);
+					_allEntries[i].SetAlpha(0.5f);
+				}
 			}
 		}
 	}

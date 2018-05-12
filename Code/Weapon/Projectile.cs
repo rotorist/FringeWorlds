@@ -57,9 +57,10 @@ public class Projectile : MonoBehaviour
 		//detect shield hit
 		//if hitting shield, process damage with shield, if penetration damage is 0 then destroy projectile
 		//else keep going until it hits hull
+		Debug.Log("Hit something " + other.name);
 		if(other.tag == "Shield")
 		{
-			//Debug.Log("Hit shield");
+			Debug.Log("Hit shield");
 			ShieldBase shield = other.GetComponent<ShieldBase>();
 			Damage.HitLocation = transform.position;
 			Damage result = shield.ProcessDamage(Damage);
@@ -74,6 +75,8 @@ public class Projectile : MonoBehaviour
 
 	void OnCollisionEnter(Collision collision) 
 	{
+		Debug.Log("Hit something " + collision.collider.name);
+
 		ShipReference hitShip = null;
 		//Debug.Log(collision.collider.name);
 

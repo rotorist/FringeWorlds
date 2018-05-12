@@ -5,15 +5,19 @@ using UnityEngine;
 public class AI : MonoBehaviour 
 {
 	public ShipBase MyShip;
-	
-	public ShipBase AttackTarget;
+	public bool IsActive { get { return _isActive; } }
+
+	public Faction myFaction;
+	public MacroAIParty MyParty;
+
+	//public ShipBase AttackTarget;
 	public Rigidbody RB;
 	public Whiteboard Whiteboard;
 	public AvoidanceDetector AvoidanceDetector;
 
 	public Dictionary<string,BehaviorTree> TreeSet;
 
-
+	private bool _isActive;
 	private bool _isEngineKilled;
 	private Vector3 _avoidanceForce;
 
@@ -21,30 +25,61 @@ public class AI : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
 	{
-		TreeSet["FighterCombat"].Run();
 
-		Turn();
+		if(IsActive)
+		{
+			
+			TreeSet["FighterCombat"].Run();
+
+			Turn();
+
+			UpdateSensor();
+		}
 	}
 
 	void FixedUpdate()
 	{
-		Move();
-		UpdateAvoidance();
+		if(IsActive)
+		{
+			Move();
+
+			UpdateAvoidance();
+		}
 	}
 
 	// Use this for initialization
 	public void Initialize() 
 	{
+		MyShip = transform.GetComponent<ShipBase>();
+		AvoidanceDetector = MyShip.MyReference.AvoidanceDetector;
+		AvoidanceDetector.ParentShip = MyShip;
+
 		Whiteboard = new Whiteboard();
 		Whiteboard.Initialize();
 
-		Whiteboard.Parameters["TargetEnemy"] = AttackTarget;
+		//AttackTarget = GameManager.Inst.PlayerControl.PlayerShip;
+
+		//Whiteboard.Parameters["TargetEnemy"] = AttackTarget;
 		Whiteboard.Parameters["SpeedLimit"] = -1f;
 
 		TreeSet = new Dictionary<string, BehaviorTree>();
 		TreeSet.Add("FighterCombat", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("FighterCombat", this));
 
 
+	}
+
+	public void Activate()
+	{
+		_isActive = true;
+		Collider collider = MyShip.ShipModel.GetComponent<Collider>();
+		collider.isTrigger = true;
+	}
+
+	public void Deactivate()
+	{
+		_isActive = false;
+		Collider collider = MyShip.ShipModel.GetComponent<Collider>();
+		collider.isTrigger = true;
 	}
 
 
@@ -74,7 +109,7 @@ public class AI : MonoBehaviour
 
 		if(_avoidanceForce != Vector3.zero)
 		{
-			Debug.Log(_avoidanceForce);
+			//Debug.Log(_avoidanceForce);
 		}
 		RB.AddForce(_avoidanceForce);
 
@@ -128,6 +163,7 @@ public class AI : MonoBehaviour
 		{
 			aimPoint = StaticUtility.FirstOrderIntercept(MyShip.transform.position, MyShip.RB.velocity,
 															30, aimTarget.transform.position, aimTarget.RB.velocity);
+			
 		}
 		if(aimPoint != Vector3.zero)
 		{
@@ -158,9 +194,19 @@ public class AI : MonoBehaviour
 		}
 
 		//aim guns at target
+		if(aimPoint != Vector3.zero)
+		{
+			foreach(WeaponJoint joint in MyShip.MyReference.WeaponJoints)
+			{
+				joint.TargetPos = aimPoint;
+			}
+		}
+
+		/*
 		Fighter fighter = (Fighter)MyShip;
 		fighter.LeftGun.transform.rotation = Quaternion.LookRotation(aimDir);
 		fighter.RightGun.transform.rotation = Quaternion.LookRotation(aimDir);
+		*/
 	}
 
 	private void AddLookTorque(Vector3 direction)
@@ -198,6 +244,46 @@ public class AI : MonoBehaviour
 		else
 		{
 			_avoidanceForce = Vector3.zero;
+		}
+	}
+
+	private void UpdateSensor()
+	{
+		if(MyShip.Scanner != null)
+		{
+			//check if current target enemy is still valid or within range
+			ShipBase currentTarget = (ShipBase)Whiteboard.Parameters["TargetEnemy"];
+			if(currentTarget != null && Vector3.Distance(MyShip.transform.position, currentTarget.transform.position) < MyShip.Scanner.Range)
+			{
+				return;
+			}
+			else
+			{
+				Whiteboard.Parameters["TargetEnemy"] = null;
+			}
+
+			foreach(ShipBase ship in GameManager.Inst.NPCManager.AllShips)
+			{
+				if(Vector3.Distance(MyShip.transform.position, ship.transform.position) < MyShip.Scanner.Range)
+				{
+					Faction otherFaction;
+					if(ship == GameManager.Inst.PlayerControl.PlayerShip)
+					{
+						otherFaction = GameManager.Inst.NPCManager.AllFactions["player"];
+					}
+					else
+					{
+						otherFaction = ship.GetComponent<AI>().myFaction;
+					}
+
+					float relationship = GameManager.Inst.NPCManager.GetFactionRelationship(myFaction, otherFaction);
+					if(relationship < 0.4f)
+					{
+						Whiteboard.Parameters["TargetEnemy"] = ship;
+						break;
+					}
+				}
+			}
 		}
 	}
 }

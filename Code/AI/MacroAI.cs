@@ -4,21 +4,47 @@ using UnityEngine;
 
 public class MacroAI
 {
-	public List<MacroAIParty> UnspawnedParties;
-	public List<MacroAIParty> SpawnedParties;
+
 
 	private int _lastUsedPartyNumber;
 
 	public void Initialize()
 	{
-		UnspawnedParties = new List<MacroAIParty>();
-		SpawnedParties = new List<MacroAIParty>();
+		
+	}
+
+	public void GenerateTestParty()
+	{
+		MacroAIParty party = new MacroAIParty();
+		party.FactionID = "otu";
+		party.SpawnedShips = new List<ShipBase>();
+
+		List<string> keyList = new List<string>(GameManager.Inst.WorldManager.AllSystems.Keys);
+		StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems["washington_system"];
+		party.CurrentSystemID = currentSystem.ID;
+		StationData currentStation = currentSystem.GetStationByID("planet_columbia_landing");
+		party.DockedStationID = currentStation.ID;
+		party.Location = currentStation.Location;
+		party.PartyNumber = _lastUsedPartyNumber + 1;
+		_lastUsedPartyNumber = party.PartyNumber;
+
+
+		MacroAITask task = AssignMacroAITask(MacroAITaskType.None, party);
+
+		party.IsInTradelane = false;
+		//party.DestinationCoord = GameManager.Inst.WorldManager.AllNavNodes["cambridge_station"].Location;
+		party.MoveSpeed = 10f;
+		party.NextNode = null;
+		party.PrevNode = null;//CreateTempNode(party.Location, "tempstart", GameManager.Inst.WorldManager.AllSystems[party.CurrentSystemID]);
+
+		GameManager.Inst.NPCManager.AllParties.Add(party);
 	}
 
 	public void GenerateParties()
 	{
 		MacroAIParty party = new MacroAIParty();
 		party.FactionID = "otu";
+		party.SpawnedShips = new List<ShipBase>();
 
 		List<string> keyList = new List<string>(GameManager.Inst.WorldManager.AllSystems.Keys);
 		StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems[keyList[UnityEngine.Random.Range(0, keyList.Count)]];
@@ -42,37 +68,88 @@ public class MacroAI
 		party.NextNode = null;
 		party.PrevNode = null;//CreateTempNode(party.Location, "tempstart", GameManager.Inst.WorldManager.AllSystems[party.CurrentSystemID]);
 
-
-
-
-		UnspawnedParties.Add(party);
 		GameManager.Inst.NPCManager.AllParties.Add(party);
 	}
 
 	public void PerFrameUpdate()
 	{
 		//each frame update 1 party
-		foreach(MacroAIParty party in UnspawnedParties)
+		foreach(MacroAIParty party in GameManager.Inst.NPCManager.AllParties)
 		{
-			//if party is in the same system as player, and there's no test sphere spawned, then spawn a test sphere, and make the test sphere follow party location
+
+			//if party is in the same system as player, and there's no leader ship spawned, then spawn a ship, and make it follow party location
 			if(party.CurrentSystemID == GameManager.Inst.WorldManager.CurrentSystem.ID)
 			{
-				if(party.TestSphere == null)
+				if(party.SpawnedShipsLeader == null)
 				{
-					party.TestSphere = GameObject.Instantiate(Resources.Load("TestSphere")) as GameObject;
+					party.SpawnedShipsLeader = GameManager.Inst.NPCManager.SpawnAIShip("LightFighter", ShipType.Fighter, party.FactionID);
+					party.SpawnedShipsLeader.transform.position = party.Location;
+					party.SpawnedShips.Add(party.SpawnedShipsLeader);
+					AI ai = party.SpawnedShipsLeader.GetComponent<AI>();
+					ai.MyParty = party;
+					ai.Deactivate();
+					GameManager.Inst.NPCManager.AddExistingShip(ai.MyShip);
 				}
 				else
 				{
-					party.TestSphere.transform.position = party.Location;
+					if(!party.ShouldEnableAI)
+					{
+						party.SpawnedShipsLeader.transform.position = party.Location;
+					}
+					else
+					{
+						party.Location = party.SpawnedShipsLeader.transform.position;
+					}
+				}
+
+				//if one ship near player then turn on AI for all party
+				//if all party are too far from player then turn off ai for all party
+				party.ShouldEnableAI = false;
+				foreach(ShipBase ship in party.SpawnedShips)
+				{
+					if(Vector3.Distance(ship.transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position) < 200)
+					{
+						party.ShouldEnableAI = true;
+					}
+				}
+
+				bool needRepath = false;
+
+				foreach(ShipBase ship in party.SpawnedShips)
+				{
+					AI ai = ship.GetComponent<AI>();
+					if(party.ShouldEnableAI)
+					{
+						if(!ai.IsActive)
+						{
+							Debug.Log("Activating AI");
+
+							ai.Activate();
+						}
+					}
+					else 
+					{
+						if(ai.IsActive)
+						{
+							Debug.Log("Deactivating AI");
+							ai.Deactivate();
+							needRepath = true;
+						}
+					}
+				}
+
+				if(needRepath)
+				{
+					party.NextNode = null;
+					party.PrevNode = null;
 				}
 
 			}
 			else
 			{
-				if(party.TestSphere != null)
+				if(party.SpawnedShipsLeader != null)
 				{
-					GameObject.Destroy(party.TestSphere.gameObject);
-					party.TestSphere = null;
+					DespawnParty(party);
 				}
 			}
 
@@ -82,7 +159,7 @@ public class MacroAI
 				continue;
 			}
 
-			if(party.CurrentTask.TaskType == MacroAITaskType.Travel)
+			if(party.CurrentTask.TaskType == MacroAITaskType.Travel && !party.ShouldEnableAI)
 			{
 
 				//if there's no prev node or next node, get nearest node to party current location and set nextnode to that
@@ -102,7 +179,7 @@ public class MacroAI
 				}
 				else if(party.NextNode != null)
 				{
-					if(Vector3.Distance(party.Location, party.NextNode.Location) > 20f)
+					if(Vector3.Distance(party.Location, party.NextNode.Location) > 5f)
 					{
 						//move towards the next node
 						float deltaTime = Time.time - party.LastUpdateTime;
@@ -120,7 +197,7 @@ public class MacroAI
 								//move towards dest coord
 								float deltaTime = Time.time - party.LastUpdateTime;
 								party.Location = party.Location + (party.CurrentTask.TravelDestCoord - party.Location).normalized * deltaTime * party.MoveSpeed;
-								if(Vector3.Distance(party.Location, party.CurrentTask.TravelDestCoord) < 20)
+								if(Vector3.Distance(party.Location, party.CurrentTask.TravelDestCoord) < 5)
 								{
 									//done travelling!
 									Debug.Log("Party " + party.PartyNumber + " Done travelling to " + party.CurrentTask.TravelDestCoord.ToString());
@@ -157,6 +234,10 @@ public class MacroAI
 								if(party.NextNode != null && party.NextNode.NavNodeType == NavNodeType.Tradelane && party.PrevNode.NavNodeType == NavNodeType.Tradelane)
 								{
 									party.IsInTradelane = true;
+								}
+								else
+								{
+									party.IsInTradelane = false;
 								}
 
 							}
@@ -321,9 +402,7 @@ public class MacroAI
 	}
 
 
-
-
-	private MacroAITask AssignMacroAITask(MacroAITaskType prevTaskType, MacroAIParty party)
+	public MacroAITask AssignMacroAITask(MacroAITaskType prevTaskType, MacroAIParty party)
 	{
 		MacroAITask task = new MacroAITask();
 
@@ -422,6 +501,16 @@ public class MacroAI
 
 		return tempNode;
 	}
+
+	private void DespawnParty(MacroAIParty party)
+	{
+		GameManager.Inst.NPCManager.RemoveExistingShip(party.SpawnedShipsLeader);
+		party.SpawnedShips.Remove(party.SpawnedShipsLeader);
+		party.SpawnedShipsLeader.GetComponent<AI>().Deactivate();
+		GameObject.Destroy(party.SpawnedShipsLeader.gameObject);
+		party.SpawnedShipsLeader = null;
+		party.ShouldEnableAI = false;
+	}
 }
 
 public class MacroAIParty
@@ -446,6 +535,9 @@ public class MacroAIParty
 	public float LastUpdateTime;
 
 	public GameObject TestSphere;
+	public List<ShipBase> SpawnedShips;
+	public ShipBase SpawnedShipsLeader;
+	public bool ShouldEnableAI;
 }
 
 public class MacroAITask

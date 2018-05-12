@@ -8,4 +8,8 @@ public class ShipReference : MonoBehaviour
 	public ShipBase ParentShip;
 	public GameObject Shield;
 	public float HologramScale;
+	public ShipType ShipType;
+	public AvoidanceDetector AvoidanceDetector;
+	public List<WeaponJoint> WeaponJoints;
+
 }

@@ -82,7 +82,7 @@ public class GameManager : MonoBehaviour
 
 		if(Time.time % 5 == 0)
 		{
-			if(GameManager.Inst.NPCManager.AllParties.Count < 20)
+			if(GameManager.Inst.NPCManager.AllParties.Count < 1)
 			{
 				NPCManager.TestSpawn();
 			}
@@ -238,7 +238,7 @@ public class GameManager : MonoBehaviour
 
 		for(int i=0; i<10; i++)
 		{
-			NPCManager.TestSpawn();
+			//NPCManager.TestSpawn();
 		}
 
 	}

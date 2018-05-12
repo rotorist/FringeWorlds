@@ -120,8 +120,42 @@ public class NPCManager
 	public void TestSpawn()
 	{
 		//spawn 1 party
-		MacroAI.GenerateParties();
+		//MacroAI.GenerateParties();
+		MacroAI.GenerateTestParty();
+	}
 
+	public ShipBase SpawnAIShip(string shipModelID, ShipType shipType, string factionID)
+	{
+		ShipBase ship = (GameObject.Instantiate(Resources.Load("AIShip")) as GameObject).GetComponent<ShipBase>();
+
+
+		GameObject shipModel = GameObject.Instantiate(Resources.Load(shipModelID)) as GameObject;
+		shipModel.transform.parent = ship.transform;
+		shipModel.transform.localScale = new Vector3(1, 1, 1);
+		shipModel.transform.localPosition = Vector3.zero;
+		shipModel.transform.localEulerAngles = Vector3.zero;
+		ship.ShipModel = shipModel;
+		ship.ShipModelID = shipModelID;
+		ship.MyReference = shipModel.GetComponent<ShipReference>();
+		ship.MyReference.ParentShip = ship;
+		ship.Shield = ship.MyReference.Shield.GetComponent<ShieldBase>();
+		ship.RB = ship.GetComponent<Rigidbody>();
+		ship.Engine = shipModel.GetComponent<Engine>();
+		ship.Thruster = shipModel.GetComponent<Thruster>();
+		ship.Scanner = shipModel.GetComponent<Scanner>();
+
+		AI ai = ship.GetComponent<AI>();
+		ai.Initialize();
+		ai.myFaction = _allFactions[factionID];
+
+		//load weapons
+		foreach(WeaponJoint joint in ship.MyReference.WeaponJoints)
+		{
+			joint.ParentShip = ship;
+			joint.LoadWeapon("Gun1");
+		}
+
+		return ship;
 	}
 
 	public void PerFrameUpdate()
@@ -134,6 +168,27 @@ public class NPCManager
 		if(!_allShips.Contains(ship))
 		{
 			_allShips.Add(ship);
+		}
+	}
+
+	public void RemoveExistingShip(ShipBase ship)
+	{
+		if(_allShips.Contains(ship))
+		{
+			_allShips.Remove(ship);
+		}
+	}
+
+	public float GetFactionRelationship(Faction faction1, Faction faction2)
+	{
+		
+		if(faction1.Relationships.ContainsKey(faction2.ID))
+		{
+			return faction1.Relationships[faction2.ID];
+		}
+		else
+		{
+			return 0;
 		}
 	}
 

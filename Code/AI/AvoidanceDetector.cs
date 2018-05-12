@@ -16,7 +16,7 @@ public class AvoidanceDetector : MonoBehaviour
 	public void AvoidanceUpdate()
 	{
 		
-		if(ParentShip.ShipType == ShipType.Fighter)
+		if(ParentShip.MyReference.ShipType == ShipType.Fighter)
 		{
 			Vector3 velocity = ParentShip.RB.velocity;
 			if(velocity == Vector3.zero)

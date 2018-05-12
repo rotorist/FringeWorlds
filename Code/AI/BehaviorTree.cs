@@ -12,11 +12,10 @@ public class BehaviorTree
 		RootNode.Initialize();
 	}
 
-	public void Run()
+	public BTResult Run()
 	{
-		
 		BTResult result = RootNode.Process();
-
+		return result;
 	}
 
 

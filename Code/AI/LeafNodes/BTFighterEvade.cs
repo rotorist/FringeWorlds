@@ -43,7 +43,7 @@ public class BTFighterEvade : BTLeaf
 		Vector3 evadeDir = (Vector3)MyAI.Whiteboard.Parameters["EvadeDir"];
 		if(evadeDir == Vector3.zero)
 		{
-			Debug.Log("Recalculating evade dir");
+			//Debug.Log("Recalculating evade dir");
 			_rawDest = MyAI.MyShip.transform.position + new Vector3(UnityEngine.Random.value * 30, UnityEngine.Random.value * 30, UnityEngine.Random.value * 30);
 			//find a random direction perpendicular to los
 			Vector3 planeNormal = MyAI.MyShip.transform.forward;

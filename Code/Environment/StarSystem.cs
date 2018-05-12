@@ -60,4 +60,17 @@ public class StarSystemData : NavNode
 		NavNodeType = NavNodeType.System;
 	}
 
+	public StationData GetStationByID(string id)
+	{
+		foreach(StationData station in Stations)
+		{
+			if(station.ID == id)
+			{
+				return station;
+			}
+		}
+
+		return null;
+	}
+
 }

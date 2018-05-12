@@ -76,6 +76,12 @@ public class XMLParserBT
 				randNode.CompNodeType = BTCompType.Random;
 				compNode = randNode;
 			}
+			if(nodeAttributes["type"] != null && nodeAttributes["type"].Value == "Switch")
+			{
+				BTSwitch swNode = new BTSwitch();
+				swNode.CompNodeType = BTCompType.Switch;
+				compNode = swNode;
+			}
 
 			compNode.Children = new List<BTNode>();
 

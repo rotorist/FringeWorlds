@@ -37,8 +37,9 @@ public class BTFighterAttackMove : BTLeaf
 		float deltaTime = Time.time - this.LastRunTime;
 		this.LastRunTime = Time.time;
 
-		//Debug.Log("Processing FighterAttackMove current state " + State.ToString() + " dist " + _targetDist);
+
 		ShipBase target = (ShipBase)MyAI.Whiteboard.Parameters[Parameters[0]];
+		//Debug.Log("Processing FighterAttackMove current state " + State.ToString() + " dist " + _targetDist + " is target null? " + (target == null));
 		if(target != null)
 		{
 			_target = target;

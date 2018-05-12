@@ -323,8 +323,14 @@ public class PlayerControl
 		Fighter fighter = (Fighter)PlayerShip;
 		if(Input.GetMouseButton(0))
 		{
-			fighter.LeftGun.GetComponent<Weapon>().Fire();
-			fighter.RightGun.GetComponent<Weapon>().Fire();
+			foreach(WeaponJoint joint in PlayerShip.MyReference.WeaponJoints)
+			{
+				if(joint.MountedWeapon != null)
+				{
+					joint.MountedWeapon.Fire();
+				}
+			}
+
 		}
 
 	}
@@ -527,6 +533,12 @@ public class PlayerControl
 		mousePos = Input.mousePosition;
 		Vector3 targetPos = camera.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, 100));
 
+		foreach(WeaponJoint joint in PlayerShip.MyReference.WeaponJoints)
+		{
+			joint.TargetPos = targetPos;
+		}
+
+		/*
 		Fighter fighter = (Fighter)PlayerShip;
 
 		Vector3 lookDirLeft = targetPos - fighter.LeftGun.position;
@@ -563,7 +575,7 @@ public class PlayerControl
 		}
 		Quaternion rotationRight = Quaternion.LookRotation(lookDirRight, fighter.RightGunJoint.up);
 		fighter.RightGun.rotation = Quaternion.Lerp(fighter.RightGun.rotation, rotationRight, Time.deltaTime * 9);
-
+		*/
 	}
 
 

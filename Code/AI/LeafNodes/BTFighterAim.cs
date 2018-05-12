@@ -13,7 +13,7 @@ public class BTFighterAim : BTLeaf
 
 	public override BTResult Process ()
 	{
-		//Debug.Log("Processing Fighter Aim");
+		Debug.Log("Processing Fighter Aim");
 		ShipBase target = (ShipBase)MyAI.Whiteboard.Parameters[Parameters[0]];
 		if(target != null)
 		{

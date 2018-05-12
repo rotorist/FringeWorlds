@@ -52,7 +52,7 @@ public class StaticUtility
 		Vector3 los = myPos - targetPos;
 		float angleLosMyForward = Vector3.Angle(los, myForward);
 		float angleLosTargetForward = Vector3.Angle(los, targetForward);
-		Debug.Log(angleLosMyForward + ", " +  angleLosTargetForward + ", " + los.magnitude);
+		//Debug.Log(angleLosMyForward + ", " +  angleLosTargetForward + ", " + los.magnitude);
 		if(los.magnitude <= 5)
 		{
 			return true;

@@ -6,12 +6,12 @@ public class ShipBase : MonoBehaviour
 {
 	public string ShipModelID;
 	public GameObject ShipModel;
-	public ShipType ShipType;
+	public ShipReference MyReference;
 	public Rigidbody RB;
 	public Engine Engine;
 	public ShieldBase Shield;
 	public Thruster Thruster;
-
+	public Scanner Scanner;
 
 	public float HullCapacity;
 	public float HullAmount;
