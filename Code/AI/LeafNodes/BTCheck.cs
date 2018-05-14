@@ -156,7 +156,28 @@ public class BTCheck : BTLeaf
 			break;
 		case "HasReachedDestination":
 			{
-
+				if(!MyAI.MyParty.CurrentTask.IsDestAStation)
+				{
+					if(Vector3.Distance(MyAI.MyShip.transform.position, MyAI.MyParty.CurrentTask.TravelDestCoord) < 5)
+					{
+						return BTResult.Success;
+					}
+					else
+					{
+						return BTResult.Fail;
+					}
+				}
+				else
+				{
+					if(MyAI.MyParty.DockedStationID == MyAI.MyParty.CurrentTask.TravelDestNodeID)
+					{
+						return BTResult.Success;
+					}
+					else
+					{
+						return BTResult.Fail;
+					}
+				}
 			}
 			break;
 		}

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DockingSession
+public class DockingSession : DockSessionBase
 {
 	public DockingSessionStage Stage;
 	public DockGate Gate;
@@ -163,6 +163,7 @@ public class DockingSession
 				Stage = DockingSessionStage.Docked;
 				Gate.Close();
 				Gate.SetRedLight();
+				Requester.IsDocked = true;
 				if(Requester == GameManager.Inst.PlayerControl.PlayerShip)
 				{
 					GameManager.Inst.PlayerControl.DockComplete(ParentStation, StationType.Station);
@@ -173,6 +174,10 @@ public class DockingSession
 		}
 	}
 
+	public Vector3 GetDockEnterTarget()
+	{
+		return _dockEnterTarget;
+	}
 
 	private bool CheckRequesterInPosition()
 	{
@@ -202,3 +207,4 @@ public enum DockingSessionStage
 	Undocking,
 	NoDock,
 }
+

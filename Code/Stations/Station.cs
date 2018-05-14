@@ -38,20 +38,21 @@ public class Station : StationBase
 		DockedParties = new List<MacroAIParty>();
 	}
 
-	public override DockRequestResult Dock (ShipBase requester)
+	public override DockRequestResult Dock (ShipBase requester, out DockSessionBase session)
 	{
 		//check if requester is allowed to dock
 
 		//find an available gate
 		DockGate selectedGate = FindAvailableGate();
-
 		if(selectedGate == null)
 		{
+			session = null;
 			return DockRequestResult.Busy;
 		}
 
-		DockingSession session = new DockingSession(selectedGate, requester, this, false);
-		_dockingSessions.Add(session);
+		DockingSession stationSession = new DockingSession(selectedGate, requester, this, false);
+		_dockingSessions.Add(stationSession);
+		session = stationSession;
 
 		return DockRequestResult.Accept;
 	}

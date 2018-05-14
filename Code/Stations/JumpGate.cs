@@ -80,11 +80,11 @@ public class JumpGate : StationBase
 		DisablePortal();
 	}
 
-	public override DockRequestResult Dock (ShipBase requester)
+	public override DockRequestResult Dock (ShipBase requester, out DockSessionBase session)
 	{
 		IsGateActive = true;
 		_activeTimer = 0;
-
+		session = null;
 		return DockRequestResult.Accept;
 	}
 

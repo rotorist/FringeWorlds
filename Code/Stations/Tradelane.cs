@@ -68,7 +68,7 @@ public class Tradelane : StationBase
 		SetNormalLightStates();
 	}
 
-	public override DockRequestResult Dock (ShipBase requester)
+	public override DockRequestResult Dock (ShipBase requester, out DockSessionBase session)
 	{
 		//determine direction from requester's location
 		float angleA = Vector3.Angle(TriggerA.transform.up, TriggerA.transform.position - requester.transform.position);
@@ -83,11 +83,13 @@ public class Tradelane : StationBase
 			//check if anyone is already docking A
 			if(_dockingStageA > 0 || _sessionA != null)
 			{
+				session = null;
 				return DockRequestResult.Busy;
 			}
 			DockingEffectA.SetStage(1);
 			_dockingStageA = 1;
 			_sessionA = new TLTransitSession(requester, -1, this);
+			session = _sessionA;
 			return DockRequestResult.Accept;
 
 		}
@@ -97,14 +99,17 @@ public class Tradelane : StationBase
 			//directoin is going towards B
 			if(_dockingStageB > 0 || _sessionB != null)
 			{
+				session = null;
 				return DockRequestResult.Busy;
 			}
 			DockingEffectB.SetStage(1);
 			_dockingStageB = 1;
 			_sessionB = new TLTransitSession(requester, 1, this);
+			session = _sessionB;
 			return DockRequestResult.Accept;
 		}
 
+		session = null;
 		return DockRequestResult.Deny;
 	}
 

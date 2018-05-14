@@ -675,7 +675,8 @@ public class PlayerControl
 			StationBase station = (StationBase)SelectedObject;
 			if(station != null)
 			{
-				station.Dock(PlayerShip);
+				DockSessionBase session;
+				station.Dock(PlayerShip, out session);
 			}
 		}
 	}

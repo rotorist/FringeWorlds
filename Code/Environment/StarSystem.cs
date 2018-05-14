@@ -25,6 +25,18 @@ public class StarSystem
 
 	}
 
+	public StationBase GetStationByID(string id)
+	{
+		foreach(StationBase station in Stations)
+		{
+			if(station.ID == id)
+			{
+				return station;
+			}
+		}
+
+		return null;
+	}
 
 }
 

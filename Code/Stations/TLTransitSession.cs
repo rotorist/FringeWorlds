@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TLTransitSession
+public class TLTransitSession : DockSessionBase
 {
 	public TLSessionStage Stage;
 	public int Direction; //-1 = towards A, 1 = towards B

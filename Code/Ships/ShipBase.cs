@@ -21,6 +21,7 @@ public class ShipBase : MonoBehaviour
 
 	public bool IsInPortal;
 	public float InPortalSpeed;
+	public bool IsDocked;
 }
 
 public enum ShipType
