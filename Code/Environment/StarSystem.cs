@@ -38,6 +38,21 @@ public class StarSystem
 		return null;
 	}
 
+	public Tradelane GetTradelaneByID(string id)
+	{
+		foreach(Tradelane tl in Tradelanes)
+		{
+			if(tl.ID == id)
+			{
+				return tl;
+			}
+		}
+
+		return null;
+	}
+
+
+
 }
 
 

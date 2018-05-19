@@ -29,7 +29,7 @@ public class AI : MonoBehaviour
 		if(IsActive)
 		{
 			
-			TreeSet["FighterCombat"].Run();
+			TreeSet["BaseBehavior"].Run();
 
 			Turn();
 
@@ -63,6 +63,9 @@ public class AI : MonoBehaviour
 		Whiteboard.Parameters["SpeedLimit"] = -1f;
 
 		TreeSet = new Dictionary<string, BehaviorTree>();
+		TreeSet.Add("BaseBehavior", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("BaseBehavior", this));
+		TreeSet.Add("Travel", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("Travel", this));
+		TreeSet.Add("FollowFriendly", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("FollowFriendly", this));
 		TreeSet.Add("FighterCombat", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("FighterCombat", this));
 
 

@@ -408,7 +408,7 @@ public class MacroAI
 
 		if(prevTaskType == MacroAITaskType.None)
 		{
-			if(UnityEngine.Random.value > 0.5f)
+			if(UnityEngine.Random.value > 0.1f)
 			{
 				prevTaskType = MacroAITaskType.Stay;
 			}
@@ -458,7 +458,7 @@ public class MacroAI
 		return task;
 	}
 
-	private NavNode GetClosestNodeToLocation(Vector3 location, StarSystemData systemData)
+	public NavNode GetClosestNodeToLocation(Vector3 location, StarSystemData systemData)
 	{
 		//find the nearest navnode
 		float lowDist = Mathf.Infinity;

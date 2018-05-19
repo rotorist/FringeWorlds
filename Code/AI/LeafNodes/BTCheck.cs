@@ -14,7 +14,8 @@ public class BTCheck : BTLeaf
 
 	public override BTResult Process ()
 	{
-		Debug.Log("Checking " + Action);
+		
+		BTResult result = BTResult.Success;
 		switch(Action)
 		{
 		case "IsNearFriendlyTarget":
@@ -25,16 +26,16 @@ public class BTCheck : BTLeaf
 					float dist = Vector3.Distance(MyAI.MyShip.transform.position, target.transform.position);
 					if(dist <= (float)MyAI.Whiteboard.Parameters["FriendlyFollowDist"])
 					{
-						return BTResult.Success;
+						result = BTResult.Success;
 					}
 					else
 					{
-						return BTResult.Fail;
+						result = BTResult.Fail;
 					}
 				}
 				else
 				{
-					return BTResult.Fail;
+					result = BTResult.Fail;
 				}
 			}
 			break;
@@ -46,18 +47,16 @@ public class BTCheck : BTLeaf
 				{
 					if(StaticUtility.CheckFighterOnTail(target.transform.position, MyAI.MyShip.transform.position, target.transform.forward, MyAI.MyShip.transform.forward))
 					{
-						Debug.Log("Got enemy on my tail!");
-						return BTResult.Success;
+						result = BTResult.Success;
 					}
 					else
 					{
-						Debug.Log("No enemy on my tail.");
-						return BTResult.Fail;
+						result = BTResult.Fail;
 					}
 				}
 				else
 				{
-					Debug.Log("No target enemy found!");
+					result = BTResult.Fail;
 				}
 			}
 			break;
@@ -69,12 +68,10 @@ public class BTCheck : BTLeaf
 					float dist = Vector3.Distance(MyAI.MyShip.transform.position, target.transform.position);
 					if(dist < (float)MyAI.Whiteboard.Parameters["MinEnemyRange"])
 					{
-						Debug.Log("found danger");
-						return BTResult.Success;
+						result = BTResult.Success;
 					}
 				}
-				Debug.Log("no danger");
-				return BTResult.Fail;
+				result = BTResult.Fail;
 			}
 			break;
 		case "IsTargetInAttackFov":
@@ -88,11 +85,11 @@ public class BTCheck : BTLeaf
 					float angleLosMyForward = Vector3.Angle(los, MyAI.MyShip.transform.forward);
 					if(angleLosMyForward < 20)
 					{
-						return BTResult.Success;
+						result = BTResult.Success;
 					}
 					else
 					{
-						return BTResult.Fail;
+						result = BTResult.Fail;
 					}
 				}
 			}
@@ -104,11 +101,11 @@ public class BTCheck : BTLeaf
 				{
 					if(Vector3.Distance(MyAI.MyShip.transform.position, target.transform.position) < (float)MyAI.Whiteboard.Parameters["FiringRange"])
 					{
-						return BTResult.Success;
+						result = BTResult.Success;
 					}
 					else
 					{
-						return BTResult.Fail;
+						result = BTResult.Fail;
 					}
 				}
 			}
@@ -117,11 +114,11 @@ public class BTCheck : BTLeaf
 			{
 				if(MyAI.Whiteboard.Parameters["TargetEnemy"] == null)
 				{
-					return BTResult.Fail;
+					result = BTResult.Fail;
 				}
 				else
 				{
-					return BTResult.Success;
+					result = BTResult.Success;
 				}
 			}
 			break;
@@ -129,11 +126,11 @@ public class BTCheck : BTLeaf
 			{
 				if(MyAI.MyParty.SpawnedShipsLeader == MyAI.MyShip)
 				{
-					return BTResult.Success;
+					result = BTResult.Success;
 				}
 				else
 				{
-					return BTResult.Fail;
+					result = BTResult.Fail;
 				}
 			}
 			break;
@@ -141,16 +138,16 @@ public class BTCheck : BTLeaf
 			{
 				if(MyAI.MyParty == null || MyAI.MyParty.CurrentTask == null)
 				{
-					return BTResult.Fail;
+					result = BTResult.Fail;
 				}
 
 				if(MyAI.MyParty.CurrentTask.TaskType == MacroAITaskType.Travel)
 				{
-					return BTResult.Success;
+					result = BTResult.Success;
 				}
 				else
 				{
-					return BTResult.Fail;
+					result = BTResult.Fail;
 				}
 			}
 			break;
@@ -160,31 +157,43 @@ public class BTCheck : BTLeaf
 				{
 					if(Vector3.Distance(MyAI.MyShip.transform.position, MyAI.MyParty.CurrentTask.TravelDestCoord) < 5)
 					{
-						return BTResult.Success;
+						result = BTResult.Success;
 					}
 					else
 					{
-						return BTResult.Fail;
+						result = BTResult.Fail;
 					}
 				}
 				else
 				{
 					if(MyAI.MyParty.DockedStationID == MyAI.MyParty.CurrentTask.TravelDestNodeID)
 					{
-						return BTResult.Success;
+						result = BTResult.Success;
 					}
 					else
 					{
-						return BTResult.Fail;
+						result = BTResult.Fail;
 					}
+				}
+			}
+			break;
+		case "HasNextNode":
+			{
+				if(MyAI.MyParty == null || MyAI.MyParty.NextNode == null)
+				{
+					result = BTResult.Fail;
+				}
+				else
+				{
+					result = BTResult.Success;
 				}
 			}
 			break;
 		}
 
+		Debug.Log("Checking " + Action + " result " + result);
 
-
-		return BTResult.Success;
+		return result;
 	}
 
 	public override BTResult Exit (BTResult result)

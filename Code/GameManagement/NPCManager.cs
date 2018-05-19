@@ -181,8 +181,13 @@ public class NPCManager
 
 	public float GetFactionRelationship(Faction faction1, Faction faction2)
 	{
-		
-		if(faction1.Relationships.ContainsKey(faction2.ID))
+		//Debug.Log("Getting faction relationship for " + faction1.ID + " " + faction2.ID);
+		if(faction1.ID == faction2.ID)
+		{
+			return 1;
+		}
+
+		else if(faction1.Relationships.ContainsKey(faction2.ID))
 		{
 			return faction1.Relationships[faction2.ID];
 		}

@@ -14,7 +14,7 @@ public class BTGetDestination : BTLeaf
 	{
 		if(MyAI.MyParty == null)
 		{
-			return BTResult.Fail;
+			return Exit(BTResult.Fail);
 		}
 
 		if(MyAI.MyParty.CurrentTask == null)
@@ -22,11 +22,12 @@ public class BTGetDestination : BTLeaf
 			GameManager.Inst.NPCManager.MacroAI.AssignMacroAITask(MacroAITaskType.None, MyAI.MyParty);
 		}
 
-		return BTResult.Success;
+		return Exit(BTResult.Success);
 	}
 
 	public override BTResult Exit (BTResult result)
 	{
+		Debug.Log("BTGetDestination: " + result);
 		return result;
 	}
 }

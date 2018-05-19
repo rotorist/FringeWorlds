@@ -11,6 +11,7 @@ public class JumpGate : StationBase
 	public ParticleSystem GateRing;
 	public Renderer Horizon;
 	public bool IsGateActive;
+	public bool IsPortalReady;
 	public float InactivityTimeout;
 	public float MaxSpinnerSpeed;
 	public DockingTrigger DockingTrigger;
@@ -107,6 +108,11 @@ public class JumpGate : StationBase
 			UIEventHandler.Instance.TriggerBeginDocking();
 			GameManager.Inst.PlayerControl.DockComplete(this, StationType.JumpGate);
 		}
+		else
+		{
+			AI npcAI = requester.GetComponent<AI>();
+			npcAI.MyParty.CurrentSystemID = TargetSystem;
+		}
 
 	}
 
@@ -120,11 +126,13 @@ public class JumpGate : StationBase
 	private void EnablePortal()
 	{
 		DockingTrigger.GetComponent<Collider>().enabled = true;
+		IsPortalReady = true;
 	}
 
 	private void DisablePortal()
 	{
 		DockingTrigger.GetComponent<Collider>().enabled = false;
+		IsPortalReady = false;
 	}
 }
 
