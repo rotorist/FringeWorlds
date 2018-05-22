@@ -29,7 +29,7 @@ public class JumpGate : StationBase
 		if(IsGateActive)
 		{
 			//gradually increase spinner speed 
-			_spinnerSpeed = Mathf.Clamp(_spinnerSpeed + Time.deltaTime * 6, 0, MaxSpinnerSpeed);
+			_spinnerSpeed = Mathf.Clamp(_spinnerSpeed + Time.deltaTime * 60, 0, MaxSpinnerSpeed);
 			if(_spinnerSpeed >= MaxSpinnerSpeed * 0.6f)
 			{
 				_ringEmission.enabled = true;

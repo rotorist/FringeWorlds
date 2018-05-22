@@ -5,7 +5,9 @@ using UnityEngine;
 public class BTDockAtNextNode : BTLeaf
 {
 	private DockSessionBase _currentSession;
-
+	private float _waitDistance;
+	private int _dockingStage;
+	private Vector3 _dockStart;
 
 	public override void Initialize ()
 	{
@@ -80,18 +82,50 @@ public class BTDockAtNextNode : BTLeaf
 		else if(MyAI.MyParty.NextNode.NavNodeType == NavNodeType.Tradelane)
 		{
 			//if too far away from station then go to
-			if(Vector3.Distance(MyAI.MyParty.Location, MyAI.MyParty.NextNode.Location) > 20)
+			if(Vector3.Distance(MyAI.MyParty.Location, MyAI.MyParty.NextNode.Location) > 40)
 			{
 				MyAI.Whiteboard.Parameters["Destination"] = MyAI.MyParty.NextNode.Location;
-				Debug.Log("BTDockAtNextNode: running");
+				Debug.Log("BTDockAtNextNode: running next node " + MyAI.MyParty.NextNode.ID);
 				return BTResult.Running;
 			}
+
+
+
+			if(_dockingStage == 0 && _currentSession == null)
+			{
+				//need to decide if we want to dock here. find the next node after the tradelane, if it's 
+				//a trade lane and is this tradelane's neighbor then dock. if not, return fail
+				Tradelane currentLane = GameManager.Inst.WorldManager.CurrentSystem.GetTradelaneByID(MyAI.MyParty.NextNode.ID);
+				NavNode nextNextNode = GameManager.Inst.NPCManager.MacroAI.FindNextNavNode(MyAI.MyParty.NextNode, MyAI.MyParty.DestNode);
+				if(nextNextNode.NavNodeType == NavNodeType.Tradelane)
+				{
+					if(nextNextNode.ID == currentLane.NeighborAID)
+					{
+
+					}
+					else if(nextNextNode.ID == currentLane.NeighborBID)
+					{
+
+					}
+					else
+					{
+						return Exit(BTResult.Fail);
+					}
+				}
+				else
+				{
+					return Exit(BTResult.Fail);
+				}
+			}
+
+
 
 			if(MyAI.MyShip.IsInPortal)
 			{
 				if(Vector3.Distance(MyAI.MyParty.Location, MyAI.MyParty.NextNode.Location) < 10)
 				{
 					MyAI.MyParty.PrevNode = MyAI.MyParty.NextNode;
+					Debug.LogError("BTDockAtNextNode tradelane: Successful");
 					return Exit(BTResult.Success);
 				}
 				else
@@ -103,7 +137,7 @@ public class BTDockAtNextNode : BTLeaf
 
 			if(_currentSession == null)
 			{
-				DockRequestResult result = GameManager.Inst.WorldManager.CurrentSystem.GetTradelaneByID(MyAI.MyParty.NextNode.ID).Dock(MyAI.MyShip, out _currentSession);
+				DockRequestResult result = currentLane.Dock(MyAI.MyShip, out _currentSession);
 				if(result == DockRequestResult.Busy)
 				{
 					return BTResult.Running;
@@ -133,48 +167,95 @@ public class BTDockAtNextNode : BTLeaf
 		}
 		else if(MyAI.MyParty.NextNode.NavNodeType == NavNodeType.JumpGate)
 		{
-			//if too far away from station then go to
-			if(Vector3.Distance(MyAI.MyParty.Location, MyAI.MyParty.NextNode.Location) > 30)
+			Debug.Log("Trying to dock at jump gate");
+			JumpGate jg = (JumpGate)GameManager.Inst.WorldManager.CurrentSystem.GetStationByID(MyAI.MyParty.NextNode.ID);
+			if(_waitDistance == 0)
 			{
-				MyAI.Whiteboard.Parameters["Destination"] = MyAI.MyParty.NextNode.Location;
-				Debug.Log("BTDockAtNextNode: running");
+				_waitDistance = UnityEngine.Random.Range(25f, 40f);
+			}
+			_dockStart = jg.DockingTrigger.transform.position + jg.DockingTrigger.transform.up * 20;
+
+			//if too far away from station then go to
+			if(Vector3.Distance(MyAI.MyParty.Location, MyAI.MyParty.NextNode.Location) > _waitDistance)
+			{
+				MyAI.Whiteboard.Parameters["Destination"] = _dockStart;
+				Debug.Log("BTDockAtNextNode: running " + _waitDistance);
 				return BTResult.Running;
 			}
 
 			MyAI.MyParty.PrevNode = MyAI.MyParty.NextNode;
 
-			JumpGate jg = (JumpGate)GameManager.Inst.WorldManager.CurrentSystem.GetStationByID(MyAI.MyParty.NextNode.ID);
+
 			if(!jg.IsGateActive && !jg.IsPortalReady)
 			{
 				DockSessionBase session;
 				jg.Dock(MyAI.MyShip, out session);
+
 			}
-			else if(jg.IsGateActive && jg.IsPortalReady)
+
+			if(jg.IsGateActive && jg.IsPortalReady)
 			{
 				//first go to docking trigger Y + 10 and then towards docking trigger
-				if(Vector3.Angle((MyAI.MyShip.transform.position - jg.transform.position), jg.DockingTrigger.transform.up) > 10 && Vector3.Distance(MyAI.MyShip.transform.position, jg.transform.position) > 5)
+
+
+				if(_dockingStage <= 0)
 				{
-					MyAI.Whiteboard.Parameters["Destination"] = jg.DockingTrigger.transform.position + jg.DockingTrigger.transform.up * (UnityEngine.Random.Range(5f, 15f));
+					MyAI.Whiteboard.Parameters["Destination"] = _dockStart;
+					if(Vector3.Distance(MyAI.MyShip.transform.position, _dockStart) <= 5)
+					{
+						_dockingStage = 1;
+					}
+					Debug.Log("Going to dockstart");
+				}
+				else if(_dockingStage == 1)
+				{
+					Debug.Log("Tring to stop at dock start " + MyAI.MyShip.RB.velocity.magnitude);
+					if(MyAI.MyShip.RB.velocity.magnitude > 0.1f)
+					{
+						MyAI.Whiteboard.Parameters["Destination"] = Vector3.zero;
+					}
+					else
+					{
+						_dockingStage = 2;
+					}
+				}
+				else if(_dockingStage >= 2)
+				{
+					MyAI.Whiteboard.Parameters["IgnoreAvoidance"] = true;
+					MyAI.Whiteboard.Parameters["Destination"] = jg.DockingTrigger.transform.position;
+					Debug.Log("Going to dock trigger");
+				}
+				//GameObject.Find("Sphere").transform.position = (Vector3)MyAI.Whiteboard.Parameters["Destination"];
+				Debug.Log("BTDockAtNextNode: running");
+				return BTResult.Running;
+			}
+			else
+			{
+				if(Vector3.Distance(MyAI.MyShip.transform.position, _dockStart) <= 5)
+				{
+					MyAI.Whiteboard.Parameters["Destination"] = Vector3.zero;
 				}
 				else
 				{
-					MyAI.Whiteboard.Parameters["Destination"] = jg.DockingTrigger.transform.position;
+					MyAI.Whiteboard.Parameters["Destination"] = _dockStart;
 				}
-
-				Debug.Log("BTDockAtNextNode: running");
+				Debug.Log("BTDOckAtNextNode: waiting for jumpgate to start");
 				return BTResult.Running;
 			}
 
 		}
 
 
-		return Exit(BTResult.Success);
+		return Exit(BTResult.Fail);
 	}
 
 	public override BTResult Exit (BTResult result)
 	{
 		Debug.Log("BTDockAtNextNode: " + result);
 		_currentSession = null;
+		_waitDistance = 0;
+		_dockingStage = 0;
+		_dockStart = Vector3.zero;
 		return result;
 	}
 }

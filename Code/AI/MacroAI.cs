@@ -80,6 +80,9 @@ public class MacroAI
 			//if party is in the same system as player, and there's no leader ship spawned, then spawn a ship, and make it follow party location
 			if(party.CurrentSystemID == GameManager.Inst.WorldManager.CurrentSystem.ID)
 			{
+				if(party.NextNode != null)
+					Debug.Log("next node : " + party.NextNode.ID);
+
 				if(party.SpawnedShipsLeader == null)
 				{
 					party.SpawnedShipsLeader = GameManager.Inst.NPCManager.SpawnAIShip("LightFighter", ShipType.Fighter, party.FactionID);
@@ -90,17 +93,16 @@ public class MacroAI
 					ai.Deactivate();
 					GameManager.Inst.NPCManager.AddExistingShip(ai.MyShip);
 				}
+
+				if(!party.ShouldEnableAI)
+				{
+					party.SpawnedShipsLeader.transform.position = party.Location;
+				}
 				else
 				{
-					if(!party.ShouldEnableAI)
-					{
-						party.SpawnedShipsLeader.transform.position = party.Location;
-					}
-					else
-					{
-						party.Location = party.SpawnedShipsLeader.transform.position;
-					}
+					party.Location = party.SpawnedShipsLeader.transform.position;
 				}
+
 
 				//if one ship near player then turn on AI for all party
 				//if all party are too far from player then turn off ai for all party
@@ -133,7 +135,7 @@ public class MacroAI
 						{
 							Debug.Log("Deactivating AI");
 							ai.Deactivate();
-							needRepath = true;
+							//needRepath = true;
 						}
 					}
 				}
@@ -179,12 +181,14 @@ public class MacroAI
 				}
 				else if(party.NextNode != null)
 				{
+					
 					if(Vector3.Distance(party.Location, party.NextNode.Location) > 5f)
 					{
 						//move towards the next node
 						float deltaTime = Time.time - party.LastUpdateTime;
 						float speed = party.IsInTradelane ? 100 : party.MoveSpeed;
 						party.Location = party.Location + (party.NextNode.Location - party.Location).normalized * deltaTime * speed;
+						Debug.Log("moving party to " + party.NextNode.ID + " at speed " + speed);
 						//GameObject.Find("Sphere").transform.position = party.Location;
 						//Debug.Log("Travelling to next node: " + party.NextNode.ID + " Final dest " + (party.CurrentTask.IsDestAStation ? party.CurrentTask.TravelDestNodeID : party.CurrentTask.TravelDestCoord.ToString()));
 					}
@@ -285,7 +289,7 @@ public class MacroAI
 					destJumpGate = (NavNode)jg;
 				}
 			}
-
+			Debug.Log("find next nav node");
 			return PathFind(start, destJumpGate);
 		}
 
@@ -431,7 +435,10 @@ public class MacroAI
 		{
 			task.TaskType = MacroAITaskType.Travel;
 			List<string> keyList = new List<string>(GameManager.Inst.WorldManager.AllSystems.Keys);
-			StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems[keyList[UnityEngine.Random.Range(0, keyList.Count)]];
+
+			//StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems[keyList[UnityEngine.Random.Range(0, keyList.Count)]];
+			StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems["carolina_system"];
+
 			task.TravelDestSystemID = destSystem.ID;
 			task.TravelDestNodeID = destSystem.Stations[UnityEngine.Random.Range(0, destSystem.Stations.Count)].ID;
 			task.IsDestAStation = true;

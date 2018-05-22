@@ -27,6 +27,15 @@ public class TLTransitSession : DockSessionBase
 		Stage = TLSessionStage.None;
 		CurrentTradelane = currentTradelane;
 
+		if(Direction == -1)
+		{
+			CurrentTrigger = CurrentTradelane.TriggerA;
+		}
+		else
+		{
+			CurrentTrigger = CurrentTradelane.TriggerB;
+		}
+
 		if(leader == GameManager.Inst.PlayerControl.PlayerShip)
 		{
 			GameManager.Inst.PlayerControl.CurrentTradelaneSession = this;
@@ -38,14 +47,7 @@ public class TLTransitSession : DockSessionBase
 		if(Stage == TLSessionStage.Initializing)
 		{
 			
-			if(Direction == -1)
-			{
-				CurrentTrigger = CurrentTradelane.TriggerA;
-			}
-			else
-			{
-				CurrentTrigger = CurrentTradelane.TriggerB;
-			}
+
 
 			if(!PassengerTargetRotations.ContainsKey(LeaderPassenger))
 			{

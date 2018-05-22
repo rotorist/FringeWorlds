@@ -88,67 +88,83 @@ public class AI : MonoBehaviour
 
 	private void Move()
 	{
-		_isEngineKilled = (bool)Whiteboard.Parameters["IsEngineKilled"];
-		Vector3 dest = (Vector3)Whiteboard.Parameters["Destination"];
-		if(dest == Vector3.zero)
+		if(!MyShip.IsInPortal)
 		{
-			return;
-		}
+			_isEngineKilled = (bool)Whiteboard.Parameters["IsEngineKilled"];
+			Vector3 dest = (Vector3)Whiteboard.Parameters["Destination"];
+			bool isStopping = false;
+			if(dest == Vector3.zero)
+			{
+				//try to stop
+				isStopping = true;
+			}
 
-		Vector3 los = dest - transform.position;
+			Vector3 los = dest - transform.position;
+			if(isStopping)
+			{
+				los = RB.velocity * -1;
+			}
 
-		float force = 5;
-		if((bool)Whiteboard.Parameters["IsThrusting"])
-		{
-			force = 14;
+			float force = 5;
+			if((bool)Whiteboard.Parameters["IsThrusting"])
+			{
+				force = 14;
 
-		}
+			}
 
-		if(!_isEngineKilled)
-		{
-			RB.AddForce(los.normalized * force);
+			if(!_isEngineKilled)
+			{
+				RB.AddForce(los.normalized * force);
 
-		}
+			}
 
-		if(_avoidanceForce != Vector3.zero)
-		{
-			//Debug.Log(_avoidanceForce);
-		}
-		RB.AddForce(_avoidanceForce);
+			if(_avoidanceForce != Vector3.zero)
+			{
+				//Debug.Log(_avoidanceForce);
+			}
 
-		float strafeForce = (float)Whiteboard.Parameters["StrafeForce"];
-		if(strafeForce != 0)
-		{
-			RB.AddForce(MyShip.transform.right * strafeForce);
-		}
+			if((bool)Whiteboard.Parameters["IgnoreAvoidance"] == false)
+			{
+				RB.AddForce(_avoidanceForce);
+			}
 
-		//drag
-		Vector3 velocity = RB.velocity;
-		float maxSpeed = MyShip.Engine.MaxSpeed;
-		//Debug.Log(velocity.magnitude);
-		float speedLimit = (float)Whiteboard.Parameters["SpeedLimit"];
-		if(speedLimit >= 0 && speedLimit < maxSpeed)
-		{
-			maxSpeed = speedLimit;
-		}
+			float strafeForce = (float)Whiteboard.Parameters["StrafeForce"];
+			if(strafeForce != 0)
+			{
+				RB.AddForce(MyShip.transform.right * strafeForce);
+			}
+
+			//drag
+			Vector3 velocity = RB.velocity;
+			float maxSpeed = MyShip.Engine.MaxSpeed;
+			//Debug.Log(velocity.magnitude);
+			float speedLimit = (float)Whiteboard.Parameters["SpeedLimit"];
+			if(speedLimit >= 0 && speedLimit < maxSpeed)
+			{
+				maxSpeed = speedLimit;
+			}
 
 
-		if(velocity.magnitude > maxSpeed)
-		{
-			RB.AddForce(-1 * velocity * 1);
+			if(velocity.magnitude > maxSpeed)
+			{
+				RB.AddForce(-1 * velocity * 1);
+			}
+			else
+			{
+				RB.AddForce(-1 * velocity.normalized * 0.01f);
+			}
+
+			if(!_isEngineKilled)
+			{
+				Vector3 driftVelocity = velocity - Vector3.Dot(velocity, transform.forward) * transform.forward;
+				RB.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * 0.1f);
+
+			}
 		}
 		else
 		{
-			RB.AddForce(-1 * velocity.normalized * 0.01f);
+			RB.velocity = Vector3.zero;
 		}
-
-		if(!_isEngineKilled)
-		{
-			Vector3 driftVelocity = velocity - Vector3.Dot(velocity, transform.forward) * transform.forward;
-			RB.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * 0.1f);
-
-		}
-
 
 	}
 
@@ -156,6 +172,12 @@ public class AI : MonoBehaviour
 
 	private void Turn()
 	{
+		if(MyShip.IsInPortal)
+		{
+			MyShip.RB.angularVelocity = Vector3.zero;
+			return;
+		}
+
 		Vector3 dest = (Vector3)Whiteboard.Parameters["Destination"];
 		ShipBase aimTarget = (ShipBase)Whiteboard.Parameters["AimTarget"];
 		Vector3 aimPoint = Vector3.zero;

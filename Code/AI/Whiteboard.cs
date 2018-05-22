@@ -29,5 +29,6 @@ public class Whiteboard
 		Parameters.Add("AimTarget", null);
 		Parameters.Add("SpeedLimit", 0f);
 		Parameters.Add("StrafeForce", 0f);
+		Parameters.Add("IgnoreAvoidance", false);
 	}
 }
