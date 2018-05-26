@@ -23,15 +23,25 @@ public class BTGetNextNode : BTLeaf
 			//GameManager.Inst.NPCManager.MacroAI.AssignMacroAITask(MacroAITaskType.None, MyAI.MyParty);
 			if(MyAI.MyParty.PrevNode == null && MyAI.MyParty.NextNode == null)
 			{
-				MyAI.MyParty.NextNode = GameManager.Inst.NPCManager.MacroAI.GetClosestNodeToLocation(MyAI.MyParty.Location, GameManager.Inst.WorldManager.AllSystems[MyAI.MyParty.CurrentSystemID]);
-
+				List<NavNode> nextTwoNodes = new List<NavNode>();
+				NavNode nextNode = GameManager.Inst.NPCManager.MacroAI.GetClosestNodeToLocation(MyAI.MyParty.Location, GameManager.Inst.WorldManager.AllSystems[MyAI.MyParty.CurrentSystemID]);
+				List<NavNode> nextNextTwoNodes = GameManager.Inst.NPCManager.MacroAI.FindNextNavNode(nextNode, MyAI.MyParty.DestNode);
+				nextTwoNodes.Add(nextNode);
+				if(nextNextTwoNodes.Count > 0)
+				{
+					nextTwoNodes.Add(nextNextTwoNodes[0]);
+				}
+				MyAI.MyParty.NextTwoNodes = nextTwoNodes;
 			}
 			else if(MyAI.MyParty.PrevNode != null)
 			{
-				MyAI.MyParty.NextNode = GameManager.Inst.NPCManager.MacroAI.FindNextNavNode(MyAI.MyParty.PrevNode, MyAI.MyParty.DestNode);
+				MyAI.MyParty.NextTwoNodes = GameManager.Inst.NPCManager.MacroAI.FindNextNavNode(MyAI.MyParty.PrevNode, MyAI.MyParty.DestNode);
 
 			}
-			Debug.Log("BTGetNextNode: " + MyAI.MyParty.NextNode.ID);
+			if(MyAI.MyParty.NextNode != null)
+			{
+				Debug.Log("BTGetNextNode: " + MyAI.MyParty.NextNode.ID);
+			}
 			return Exit(BTResult.Success);
 		}
 		else

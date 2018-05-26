@@ -33,13 +33,17 @@ public class BTDockAtNextNode : BTLeaf
 			//if too far away from station then go to node
 			if(Vector3.Distance(MyAI.MyParty.Location, MyAI.MyParty.NextNode.Location) > 40)
 			{
+				_dockingStage = 0;
 				MyAI.Whiteboard.Parameters["Destination"] = MyAI.MyParty.NextNode.Location;
-				Debug.Log("BTDockAtNextNode: running");
+				Debug.Log("BTDockAtNextNode: running, going towards station position");
 				return BTResult.Running;
 			}
+			else if(_dockingStage == 0)
+			{
+				_dockingStage = 1;
 
-
-
+			}
+				
 
 			if(MyAI.MyShip.IsDocked)
 			{
@@ -49,6 +53,7 @@ public class BTDockAtNextNode : BTLeaf
 			if(_currentSession == null)
 			{
 				DockRequestResult result = GameManager.Inst.WorldManager.CurrentSystem.GetStationByID(MyAI.MyParty.NextNode.ID).Dock(MyAI.MyShip, out _currentSession);
+
 				if(result == DockRequestResult.Busy)
 				{
 					return BTResult.Running;
@@ -65,14 +70,22 @@ public class BTDockAtNextNode : BTLeaf
 			}
 			else
 			{
+				//find dock start
+				DockingSession session = (DockingSession)_currentSession;
+				_dockStart = session.GetDockEnterTarget();
+				GameObject.Find("Sphere").transform.position = _dockStart;
 				if(!MyAI.MyShip.IsInPortal)
 				{
-					//fly towards docking target
-					DockingSession session = (DockingSession)_currentSession;
-					Vector3 dockTarget = session.GetDockEnterTarget();
-					MyAI.Whiteboard.Parameters["Destination"] = dockTarget;
+					if(Vector3.Distance(MyAI.MyShip.transform.position, _dockStart) >= 3)
+					{
+						//fly towards docking target
+						MyAI.Whiteboard.Parameters["Destination"] = _dockStart;
+					}
+					else
+					{
+						MyAI.Whiteboard.Parameters["Destination"] = Vector3.zero;
 
-
+					}
 				}
 				Debug.Log("BTDockAtNextNode: running");
 				return BTResult.Running;
@@ -84,33 +97,40 @@ public class BTDockAtNextNode : BTLeaf
 			//if too far away from station then go to
 			if(Vector3.Distance(MyAI.MyParty.Location, MyAI.MyParty.NextNode.Location) > 40)
 			{
+				_dockingStage = 0;
 				MyAI.Whiteboard.Parameters["Destination"] = MyAI.MyParty.NextNode.Location;
 				Debug.Log("BTDockAtNextNode: running next node " + MyAI.MyParty.NextNode.ID);
 				return BTResult.Running;
 			}
+			else if(_dockingStage == 0)
+			{
+				_dockingStage = 1;
+			}
 
+			Tradelane currentLane = GameManager.Inst.WorldManager.CurrentSystem.GetTradelaneByID(MyAI.MyParty.NextNode.ID);
 
-
-			if(_dockingStage == 0 && _currentSession == null)
+			if(_dockStart == Vector3.zero)
 			{
 				//need to decide if we want to dock here. find the next node after the tradelane, if it's 
 				//a trade lane and is this tradelane's neighbor then dock. if not, return fail
-				Tradelane currentLane = GameManager.Inst.WorldManager.CurrentSystem.GetTradelaneByID(MyAI.MyParty.NextNode.ID);
-				NavNode nextNextNode = GameManager.Inst.NPCManager.MacroAI.FindNextNavNode(MyAI.MyParty.NextNode, MyAI.MyParty.DestNode);
-				if(nextNextNode.NavNodeType == NavNodeType.Tradelane)
+
+				NavNode nextNextNode = MyAI.MyParty.NextNextNode;
+
+				if(nextNextNode != null && nextNextNode.NavNodeType == NavNodeType.Tradelane)
 				{
 					if(nextNextNode.ID == currentLane.NeighborAID)
 					{
-
+						_dockStart = currentLane.TriggerA.transform.position - currentLane.TriggerA.transform.up * 10;
 					}
 					else if(nextNextNode.ID == currentLane.NeighborBID)
 					{
-
+						_dockStart = currentLane.TriggerB.transform.position - currentLane.TriggerB.transform.up * 10;
 					}
 					else
 					{
 						return Exit(BTResult.Fail);
 					}
+
 				}
 				else
 				{
@@ -118,7 +138,24 @@ public class BTDockAtNextNode : BTLeaf
 				}
 			}
 
+			GameObject.Find("Sphere").transform.position = _dockStart;
 
+			if(_dockingStage == 1)
+			{
+				if(Vector3.Distance(_dockStart, MyAI.MyShip.transform.position) > 5)
+				{
+					MyAI.Whiteboard.Parameters["Destination"] = _dockStart;
+					Debug.Log("BTDockAtNextNode: going to dock start " + Vector3.Distance(_dockStart, MyAI.MyShip.transform.position));
+					return BTResult.Running;
+				}
+				else
+				{
+					MyAI.Whiteboard.Parameters["Destination"] = Vector3.zero;
+					_dockingStage = 2;
+				}
+			}
+
+			MyAI.Whiteboard.Parameters["IgnoreAvoidance"] = true;
 
 			if(MyAI.MyShip.IsInPortal)
 			{
@@ -156,10 +193,18 @@ public class BTDockAtNextNode : BTLeaf
 			{
 				if(!MyAI.MyShip.IsInPortal)
 				{
-					//fly towards docking trigger
-					TLTransitSession session = (TLTransitSession)_currentSession;
-					Vector3 dockingTrigger = session.CurrentTrigger.transform.position;
-					MyAI.Whiteboard.Parameters["Destination"] = dockingTrigger;
+					if(MyAI.MyShip.RB.velocity.magnitude < 0.1f || _dockingStage == 3)
+					{
+						//fly towards docking trigger
+						TLTransitSession session = (TLTransitSession)_currentSession;
+						Vector3 dockingTrigger = session.CurrentTrigger.transform.position;
+						MyAI.Whiteboard.Parameters["Destination"] = dockingTrigger;
+						_dockingStage = 3;
+					}
+					else if(_dockingStage == 2)
+					{
+						MyAI.Whiteboard.Parameters["Destination"] = Vector3.zero;
+					}
 				}
 				Debug.Log("BTDockAtNextNode: running");
 				return BTResult.Running;
@@ -167,6 +212,20 @@ public class BTDockAtNextNode : BTLeaf
 		}
 		else if(MyAI.MyParty.NextNode.NavNodeType == NavNodeType.JumpGate)
 		{
+			//if only 1 node in path or if next next node is in same system then don't dock
+			if(MyAI.MyParty.NextTwoNodes.Count <= 1)
+			{
+				return Exit(BTResult.Fail);
+			}
+			else
+			{
+				NavNode nextNextNode = MyAI.MyParty.NextTwoNodes[1];
+				if(nextNextNode.SystemID == MyAI.MyParty.CurrentSystemID)
+				{
+					return Exit(BTResult.Fail);
+				}
+			}
+
 			Debug.Log("Trying to dock at jump gate");
 			JumpGate jg = (JumpGate)GameManager.Inst.WorldManager.CurrentSystem.GetStationByID(MyAI.MyParty.NextNode.ID);
 			if(_waitDistance == 0)
@@ -252,6 +311,7 @@ public class BTDockAtNextNode : BTLeaf
 	public override BTResult Exit (BTResult result)
 	{
 		Debug.Log("BTDockAtNextNode: " + result);
+		MyAI.Whiteboard.Parameters["IgnoreAvoidance"] = false;
 		_currentSession = null;
 		_waitDistance = 0;
 		_dockingStage = 0;

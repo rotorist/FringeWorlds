@@ -157,7 +157,7 @@ public class AI : MonoBehaviour
 			if(!_isEngineKilled)
 			{
 				Vector3 driftVelocity = velocity - Vector3.Dot(velocity, transform.forward) * transform.forward;
-				RB.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * 0.1f);
+				RB.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * 0.5f);
 
 			}
 		}
@@ -190,6 +190,11 @@ public class AI : MonoBehaviour
 															30, aimTarget.transform.position, aimTarget.RB.velocity);
 			
 		}
+		else
+		{
+			aimPoint = StaticUtility.FirstOrderIntercept(MyShip.transform.position, MyShip.RB.velocity, 0, dest, Vector3.zero);
+		}
+
 		if(aimPoint != Vector3.zero)
 		{
 			//Quaternion rotation = Quaternion.LookRotation(aimPoint - MyShip.transform.position);
@@ -238,7 +243,7 @@ public class AI : MonoBehaviour
 	{
 		float angle = Vector3.Angle(direction, transform.forward);
 		Vector3 cross = Vector3.Cross(transform.forward, direction).normalized;
-		RB.AddTorque(cross * angle * 0.06f);
+		RB.AddTorque(cross * angle * 0.2f);
 		//get the angle between transform.right and direction projected on plane with up normal
 		Vector3 proj = Vector3.ProjectOnPlane(direction, transform.up);
 		float horizontalAngle = Vector3.Angle(transform.right, proj);
