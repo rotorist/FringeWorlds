@@ -109,7 +109,7 @@ public class DockingSession : DockSessionBase
 					Gate.DockingTrigger.isTrigger = true;
 				}
 
-				GameObject.Find("Sphere").transform.position = _dockEnterTarget;
+				//GameObject.Find("Sphere").transform.position = _dockEnterTarget;
 
 				float dist = Vector3.Distance(Requester.transform.position, _dockEnterTarget);
 				if(dist < 3)
@@ -163,7 +163,7 @@ public class DockingSession : DockSessionBase
 				Stage = DockingSessionStage.Docked;
 				Gate.Close();
 				Gate.SetRedLight();
-				Requester.IsDocked = true;
+				Requester.DockedStationID = ParentStation.ID;
 				if(Requester == GameManager.Inst.PlayerControl.PlayerShip)
 				{
 					GameManager.Inst.PlayerControl.DockComplete(ParentStation, StationType.Station);

@@ -7,6 +7,10 @@ public class ShipBase : MonoBehaviour
 	public string ShipModelID;
 	public GameObject ShipModel;
 	public ShipReference MyReference;
+	public AI MyAI 
+	{
+		get { return GetComponent<AI>(); }
+	}
 	public Rigidbody RB;
 	public Engine Engine;
 	public ShieldBase Shield;
@@ -21,7 +25,45 @@ public class ShipBase : MonoBehaviour
 
 	public bool IsInPortal;
 	public float InPortalSpeed;
-	public bool IsDocked;
+	public string DockedStationID;
+
+	public virtual void Hide()
+	{
+		if(ShipModel != null)
+		{
+			Renderer shipRenderer = ShipModel.GetComponent<Renderer>();
+			shipRenderer.enabled = false;
+			foreach(Renderer r in ShipModel.GetComponentsInChildren<Renderer>())
+			{
+				r.enabled = false;
+			}
+			DisableColliders();
+		}
+	}
+
+	public virtual void Show()
+	{
+		if(ShipModel != null)
+		{
+			Renderer shipRenderer = ShipModel.GetComponent<Renderer>();
+			shipRenderer.enabled = true;
+			foreach(Renderer r in ShipModel.GetComponentsInChildren<Renderer>())
+			{
+				r.enabled = true;
+			}
+			EnableColliders();
+		}
+	}
+
+	public virtual void EnableColliders()
+	{
+
+	}
+
+	public virtual void DisableColliders()
+	{
+
+	}
 }
 
 public enum ShipType

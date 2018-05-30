@@ -42,6 +42,10 @@ public class BTGetNextNode : BTLeaf
 			{
 				Debug.Log("BTGetNextNode: " + MyAI.MyParty.NextNode.ID);
 			}
+			else
+			{
+				Debug.Log("BTGetNextNode: Can't find next node");
+			}
 			return Exit(BTResult.Success);
 		}
 		else

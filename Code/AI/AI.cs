@@ -5,6 +5,7 @@ using UnityEngine;
 public class AI : MonoBehaviour 
 {
 	public ShipBase MyShip;
+	public bool IsDocked;
 	public bool IsActive { get { return _isActive; } }
 
 	public Faction myFaction;
@@ -31,9 +32,12 @@ public class AI : MonoBehaviour
 			
 			TreeSet["BaseBehavior"].Run();
 
-			Turn();
+			if(!IsDocked)
+			{
+				Turn();
 
-			UpdateSensor();
+				UpdateSensor();
+			}
 		}
 	}
 
@@ -41,9 +45,12 @@ public class AI : MonoBehaviour
 	{
 		if(IsActive)
 		{
-			Move();
+			if(!IsDocked)
+			{
+				Move();
 
-			UpdateAvoidance();
+				UpdateAvoidance();
+			}
 		}
 	}
 
@@ -98,8 +105,9 @@ public class AI : MonoBehaviour
 				//try to stop
 				isStopping = true;
 			}
-
-			Vector3 los = dest - transform.position;
+			Vector3 interceptDest = StaticUtility.FirstOrderIntercept(MyShip.transform.position, MyShip.RB.velocity, 0, dest, Vector3.zero);
+			Whiteboard.Parameters["InterceptDest"] = interceptDest;
+			Vector3 los = interceptDest - transform.position;
 			if(isStopping)
 			{
 				los = RB.velocity * -1;
@@ -112,10 +120,14 @@ public class AI : MonoBehaviour
 
 			}
 
+
+
 			if(!_isEngineKilled)
 			{
-				RB.AddForce(los.normalized * force);
-
+				if(Vector3.Angle(MyShip.transform.forward, los) < 30)
+				{
+					RB.AddForce(los.normalized * force);
+				}
 			}
 
 			if(_avoidanceForce != Vector3.zero)
@@ -143,6 +155,9 @@ public class AI : MonoBehaviour
 			{
 				maxSpeed = speedLimit;
 			}
+
+			//adjust max speed bASED on how close is to destination
+			maxSpeed *= Mathf.Lerp(0.2f, 1f, Mathf.Clamp01(los.magnitude / 10));
 
 
 			if(velocity.magnitude > maxSpeed)
@@ -192,8 +207,10 @@ public class AI : MonoBehaviour
 		}
 		else
 		{
-			aimPoint = StaticUtility.FirstOrderIntercept(MyShip.transform.position, MyShip.RB.velocity, 0, dest, Vector3.zero);
+			aimPoint = (Vector3)Whiteboard.Parameters["InterceptDest"];
 		}
+
+		Whiteboard.Parameters["AimPoint"] = aimPoint;
 
 		if(aimPoint != Vector3.zero)
 		{
@@ -243,7 +260,7 @@ public class AI : MonoBehaviour
 	{
 		float angle = Vector3.Angle(direction, transform.forward);
 		Vector3 cross = Vector3.Cross(transform.forward, direction).normalized;
-		RB.AddTorque(cross * angle * 0.2f);
+		RB.AddTorque(cross * angle * 1f);
 		//get the angle between transform.right and direction projected on plane with up normal
 		Vector3 proj = Vector3.ProjectOnPlane(direction, transform.up);
 		float horizontalAngle = Vector3.Angle(transform.right, proj);

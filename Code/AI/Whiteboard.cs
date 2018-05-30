@@ -20,6 +20,7 @@ public class Whiteboard
 		//dynamic variables
 		Parameters.Add("FriendlyTarget", null);
 		Parameters.Add("Destination", Vector3.zero);
+		Parameters.Add("InterceptDest", Vector3.zero);
 		Parameters.Add("AvoidanceVector", Vector3.zero);
 		Parameters.Add("EvadeDir", Vector3.zero);
 		Parameters.Add("AimPoint", Vector3.zero);

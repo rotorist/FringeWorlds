@@ -31,7 +31,7 @@ public class AvoidanceDetector : MonoBehaviour
 			RaycastHit hit;
 			//ignore pickups, shields
 			int mask = ~(1<<2 | 1<<8 | 1<<9 | 1<<10);
-			float rayDist = Mathf.Lerp(20, 60, Mathf.Clamp01(velocity.magnitude / 10));
+			float rayDist = Mathf.Lerp(10, 30, Mathf.Clamp01(velocity.magnitude / 10));
 			//if there's a hit, add 1 * dist/rayDist to avoidance x
 			//if there's no hit, minus 2 from avoidance x
 			if(Physics.Raycast(RaySource1.position, velocity, out hit, rayDist, mask))

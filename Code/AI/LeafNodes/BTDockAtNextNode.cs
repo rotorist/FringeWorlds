@@ -29,9 +29,9 @@ public class BTDockAtNextNode : BTLeaf
 				return Exit(BTResult.Fail);
 			}
 
-
+			//GameObject.Find("Sphere").transform.position = (Vector3)MyAI.Whiteboard.Parameters["Destination"];
 			//if too far away from station then go to node
-			if(Vector3.Distance(MyAI.MyParty.Location, MyAI.MyParty.NextNode.Location) > 40)
+			if(Vector3.Distance(MyAI.MyParty.Location, MyAI.MyParty.NextNode.Location) > 80)
 			{
 				_dockingStage = 0;
 				MyAI.Whiteboard.Parameters["Destination"] = MyAI.MyParty.NextNode.Location;
@@ -45,15 +45,15 @@ public class BTDockAtNextNode : BTLeaf
 			}
 				
 
-			if(MyAI.MyShip.IsDocked)
+			if(MyAI.MyShip.DockedStationID == MyAI.MyParty.NextNode.ID)
 			{
+				MyAI.MyShip.Hide();
 				return Exit(BTResult.Success);
 			}
 
 			if(_currentSession == null)
 			{
 				DockRequestResult result = GameManager.Inst.WorldManager.CurrentSystem.GetStationByID(MyAI.MyParty.NextNode.ID).Dock(MyAI.MyShip, out _currentSession);
-
 				if(result == DockRequestResult.Busy)
 				{
 					return BTResult.Running;
@@ -73,7 +73,7 @@ public class BTDockAtNextNode : BTLeaf
 				//find dock start
 				DockingSession session = (DockingSession)_currentSession;
 				_dockStart = session.GetDockEnterTarget();
-				GameObject.Find("Sphere").transform.position = _dockStart;
+
 				if(!MyAI.MyShip.IsInPortal)
 				{
 					if(Vector3.Distance(MyAI.MyShip.transform.position, _dockStart) >= 3)

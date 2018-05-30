@@ -11,4 +11,28 @@ public class Fighter : ShipBase
 	public Transform RightGunJoint;
 	public Transform RightGun;
 	*/
+
+	public override void EnableColliders ()
+	{
+		//hull collider
+		Collider collider = this.ShipModel.GetComponent<Collider>();
+		collider.enabled = true;
+		//shield collider
+		if(this.Shield != null)
+		{
+			this.Shield.GetComponent<Collider>().enabled = true;
+		}
+	}
+
+	public override void DisableColliders ()
+	{
+		//hull collider
+		Collider collider = this.ShipModel.GetComponent<Collider>();
+		collider.enabled = false;
+		//shield collider
+		if(this.Shield != null)
+		{
+			this.Shield.GetComponent<Collider>().enabled = false;
+		}
+	}
 }

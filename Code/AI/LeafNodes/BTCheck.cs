@@ -166,8 +166,9 @@ public class BTCheck : BTLeaf
 				}
 				else
 				{
-					if(MyAI.MyParty.DockedStationID == MyAI.MyParty.CurrentTask.TravelDestNodeID)
+					if(MyAI.MyShip.DockedStationID == MyAI.MyParty.CurrentTask.TravelDestNodeID)
 					{
+						MyAI.MyParty.HasReachedDestNode = true;
 						result = BTResult.Success;
 					}
 					else
