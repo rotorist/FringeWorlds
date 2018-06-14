@@ -12,35 +12,45 @@ public class BTGetNextNode : BTLeaf
 
 	public override BTResult Process ()
 	{
-		if(MyAI.MyParty == null)
+		if(MyParty == null)
 		{
 			return Exit(BTResult.Fail);
 		}
 
-		if(MyAI.MyParty.CurrentTask != null)
+		if(MyParty.CurrentTask != null)
 		{
-			//MyAI.MyParty.NextNode = GameManager.Inst.NPCManager.MacroAI.FindNextNavNode(MyAI.MyParty.n
-			//GameManager.Inst.NPCManager.MacroAI.AssignMacroAITask(MacroAITaskType.None, MyAI.MyParty);
-			if(MyAI.MyParty.PrevNode == null && MyAI.MyParty.NextNode == null)
+			//MyParty.NextNode = GameManager.Inst.NPCManager.MacroAI.FindNextNavNode(MyParty.n
+			//GameManager.Inst.NPCManager.MacroAI.AssignMacroAITask(MacroAITaskType.None, MyParty);
+			if(MyParty.PrevNode == null && MyParty.NextNode == null)
 			{
 				List<NavNode> nextTwoNodes = new List<NavNode>();
-				NavNode nextNode = GameManager.Inst.NPCManager.MacroAI.GetClosestNodeToLocation(MyAI.MyParty.Location, GameManager.Inst.WorldManager.AllSystems[MyAI.MyParty.CurrentSystemID]);
-				List<NavNode> nextNextTwoNodes = GameManager.Inst.NPCManager.MacroAI.FindNextNavNode(nextNode, MyAI.MyParty.DestNode);
+				NavNode nextNode = GameManager.Inst.NPCManager.MacroAI.GetClosestNodeToLocation(MyParty.Location.RealPos, GameManager.Inst.WorldManager.AllSystems[MyParty.CurrentSystemID]);
+				List<NavNode> nextNextTwoNodes = GameManager.Inst.NPCManager.MacroAI.FindNextNavNode(nextNode, MyParty.DestNode);
 				nextTwoNodes.Add(nextNode);
 				if(nextNextTwoNodes.Count > 0)
 				{
 					nextTwoNodes.Add(nextNextTwoNodes[0]);
 				}
-				MyAI.MyParty.NextTwoNodes = nextTwoNodes;
+				MyParty.NextTwoNodes = nextTwoNodes;
 			}
-			else if(MyAI.MyParty.PrevNode != null)
+			else if(MyParty.PrevNode != null)
 			{
-				MyAI.MyParty.NextTwoNodes = GameManager.Inst.NPCManager.MacroAI.FindNextNavNode(MyAI.MyParty.PrevNode, MyAI.MyParty.DestNode);
+				MyParty.NextTwoNodes = GameManager.Inst.NPCManager.MacroAI.FindNextNavNode(MyParty.PrevNode, MyParty.DestNode);
 
 			}
-			if(MyAI.MyParty.NextNode != null)
+
+			if(MyParty.NextNode != null && MyParty.NextNode.NavNodeType == NavNodeType.Tradelane && MyParty.PrevNode.NavNodeType == NavNodeType.Tradelane)
 			{
-				Debug.Log("BTGetNextNode: " + MyAI.MyParty.NextNode.ID);
+				MyParty.IsInTradelane = true;
+			}
+			else
+			{
+				MyParty.IsInTradelane = false;
+			}
+
+			if(MyParty.NextNode != null)
+			{
+				Debug.Log("BTGetNextNode: " + MyParty.NextNode.ID);
 			}
 			else
 			{

@@ -44,6 +44,7 @@ public class TLTransitSession : DockSessionBase
 
 	public void UpdateTransit()
 	{
+		Debug.Log("TLTransit stage " + Stage + " parent lane " + CurrentTradelane.ID);
 		if(Stage == TLSessionStage.Initializing)
 		{
 			
@@ -123,7 +124,7 @@ public class TLTransitSession : DockSessionBase
 			LeaderPassenger.transform.position = LeaderPassenger.transform.position + direction * _currentSpeed * Time.fixedDeltaTime;
 			LeaderPassenger.transform.LookAt(NextTrigger.transform);
 			LeaderPassenger.InPortalSpeed = _currentSpeed;
-			//if 1/3 way in, unbusy the current lane
+			//unbusy the current lane
 			float myDist = Vector3.Distance(LeaderPassenger.transform.position, NextTrigger.transform.position);
 
 			if(myDist / totalDist < 0.66f && myDist / totalDist > 0.2f)
@@ -132,7 +133,7 @@ public class TLTransitSession : DockSessionBase
 				((Tradelane)NextTrigger.ParentStation).AssignLiveSession(Direction, this);
 			}
 			//if 4/5 way in, go back to FindingDest
-			else if(myDist / totalDist <= 0.2f)
+			if(myDist / totalDist <= 0.2f)
 			{
 				CurrentTradelane = ((Tradelane)NextTrigger.ParentStation);
 				Stage = TLSessionStage.FindingDest;
@@ -142,10 +143,13 @@ public class TLTransitSession : DockSessionBase
 		{
 			float acceleration = -40f;
 			float slowAcceleration = -25f;
-			Vector3 direction = (NextTrigger.transform.position - LeaderPassenger.transform.position).normalized;
+			Vector3 direction = (NextTrigger.transform.position - LeaderPassenger.transform.position);
 			float distToTrigger = Vector3.Distance(NextTrigger.transform.position, LeaderPassenger.transform.position);
 
-			direction = NextTrigger.transform.up;
+			if(direction.magnitude < 50)
+			{
+				direction = NextTrigger.transform.up;
+			}
 			
 			if(Vector3.Angle((LeaderPassenger.transform.position - NextTrigger.transform.position), NextTrigger.transform.up) < 90)
 			{
@@ -153,9 +157,10 @@ public class TLTransitSession : DockSessionBase
 			}
 			else
 			{
-				_currentSpeed = Mathf.Clamp(_currentSpeed + slowAcceleration * Time.fixedDeltaTime, 0, 100);
+				_currentSpeed = Mathf.Clamp(_currentSpeed + slowAcceleration * Time.fixedDeltaTime, 20, 100);
 			}
-			LeaderPassenger.transform.position = LeaderPassenger.transform.position + direction * _currentSpeed * Time.fixedDeltaTime;
+
+			LeaderPassenger.transform.position = LeaderPassenger.transform.position + direction.normalized * _currentSpeed * Time.fixedDeltaTime;
 			LeaderPassenger.InPortalSpeed = _currentSpeed;
 
 			if(_currentSpeed <= 0)
@@ -174,11 +179,11 @@ public class TLTransitSession : DockSessionBase
 		else if(Stage == TLSessionStage.Cancelling)
 		{
 			float acceleration = -40f;
-			Vector3 direction = LeaderPassenger.transform.forward;
+			Vector3 direction = (NextTrigger.transform.position - LeaderPassenger.transform.position);
 			_currentSpeed = Mathf.Clamp(_currentSpeed + acceleration * Time.fixedDeltaTime, 0, 100);
-			LeaderPassenger.transform.position = LeaderPassenger.transform.position + direction * _currentSpeed * Time.fixedDeltaTime;
+			LeaderPassenger.transform.position = LeaderPassenger.transform.position + direction.normalized * _currentSpeed * Time.fixedDeltaTime;
 			LeaderPassenger.InPortalSpeed = _currentSpeed;
-
+			Debug.LogError(_currentSpeed);
 			if(_currentSpeed <= 0)
 			{
 				LeaderPassenger.InPortalSpeed = 0;
@@ -202,8 +207,26 @@ public class TLTransitSession : DockSessionBase
 
 	public void StartSession()
 	{
-		Debug.Log("Starting tradelane session");
+		Debug.Log("Starting tradelane session " + CurrentTradelane.ID);
 		Stage = TLSessionStage.Initializing;
+		LeaderPassenger.IsInPortal = true;
+	}
+
+	public void StartMidwaySession()
+	{
+		if(Direction == -1)
+		{
+			NextTrigger = CurrentTradelane.NeighborToA.TriggerA;
+
+		}
+		else
+		{
+			NextTrigger = CurrentTradelane.NeighborToB.TriggerB;
+		}
+		Debug.Log("Starting tradelane session midway" + CurrentTradelane.ID);
+		CurrentTradelane.ClearSession(Direction);
+		((Tradelane)NextTrigger.ParentStation).AssignLiveSession(Direction, this);
+		Stage = TLSessionStage.Sending;
 		LeaderPassenger.IsInPortal = true;
 	}
 

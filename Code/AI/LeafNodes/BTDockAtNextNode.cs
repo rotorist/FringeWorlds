@@ -16,26 +16,27 @@ public class BTDockAtNextNode : BTLeaf
 
 	public override BTResult Process ()
 	{
-		if(MyAI.MyParty == null || MyAI.MyParty.NextNode == null)
+
+		if(MyAI.IsDocked || MyParty == null || MyParty.NextNode == null)
 		{
 			return Exit(BTResult.Fail);
 		}
 
-		if(MyAI.MyParty.NextNode.NavNodeType == NavNodeType.Station)
+		if(MyParty.NextNode.NavNodeType == NavNodeType.Station)
 		{
 			//if not destination then don't dock, just get close enough and move on to next node in GoTo
-			if(MyAI.MyParty.CurrentTask.TravelDestNodeID != MyAI.MyParty.NextNode.ID)
+			if(MyParty.CurrentTask.TravelDestNodeID != MyParty.NextNode.ID)
 			{
 				return Exit(BTResult.Fail);
 			}
 
 			//GameObject.Find("Sphere").transform.position = (Vector3)MyAI.Whiteboard.Parameters["Destination"];
 			//if too far away from station then go to node
-			if(Vector3.Distance(MyAI.MyParty.Location, MyAI.MyParty.NextNode.Location) > 80)
+			if(Vector3.Distance(MyAI.MyShip.transform.position, MyParty.NextNode.Location.RealPos) > 40)
 			{
 				_dockingStage = 0;
-				MyAI.Whiteboard.Parameters["Destination"] = MyAI.MyParty.NextNode.Location;
-				Debug.Log("BTDockAtNextNode: running, going towards station position");
+				MyAI.Whiteboard.Parameters["Destination"] = MyParty.NextNode.Location.RealPos;
+				Debug.Log("BTDockAtNextNode: running, going towards station position " + MyParty.NextNode.Location.RealPos);
 				return BTResult.Running;
 			}
 			else if(_dockingStage == 0)
@@ -45,7 +46,7 @@ public class BTDockAtNextNode : BTLeaf
 			}
 				
 
-			if(MyAI.MyShip.DockedStationID == MyAI.MyParty.NextNode.ID)
+			if(MyAI.MyShip.DockedStationID == MyParty.NextNode.ID)
 			{
 				MyAI.MyShip.Hide();
 				return Exit(BTResult.Success);
@@ -53,7 +54,7 @@ public class BTDockAtNextNode : BTLeaf
 
 			if(_currentSession == null)
 			{
-				DockRequestResult result = GameManager.Inst.WorldManager.CurrentSystem.GetStationByID(MyAI.MyParty.NextNode.ID).Dock(MyAI.MyShip, out _currentSession);
+				DockRequestResult result = GameManager.Inst.WorldManager.CurrentSystem.GetStationByID(MyParty.NextNode.ID).Dock(MyAI.MyShip, out _currentSession);
 				if(result == DockRequestResult.Busy)
 				{
 					return BTResult.Running;
@@ -92,66 +93,106 @@ public class BTDockAtNextNode : BTLeaf
 			}
 
 		}
-		else if(MyAI.MyParty.NextNode.NavNodeType == NavNodeType.Tradelane)
+		else if(MyParty.NextNode.NavNodeType == NavNodeType.Tradelane)
 		{
-			//if too far away from station then go to
-			if(Vector3.Distance(MyAI.MyParty.Location, MyAI.MyParty.NextNode.Location) > 40)
+			//if already in tradelane then do a midway dock on prevNode tradelane
+			if(MyParty.PrevNode.NavNodeType == NavNodeType.Tradelane && MyParty.NextNode.NavNodeType == NavNodeType.Tradelane && !MyAI.MyShip.IsInPortal && _currentSession == null)
 			{
-				_dockingStage = 0;
-				MyAI.Whiteboard.Parameters["Destination"] = MyAI.MyParty.NextNode.Location;
-				Debug.Log("BTDockAtNextNode: running next node " + MyAI.MyParty.NextNode.ID);
-				return BTResult.Running;
-			}
-			else if(_dockingStage == 0)
-			{
-				_dockingStage = 1;
-			}
-
-			Tradelane currentLane = GameManager.Inst.WorldManager.CurrentSystem.GetTradelaneByID(MyAI.MyParty.NextNode.ID);
-
-			if(_dockStart == Vector3.zero)
-			{
-				//need to decide if we want to dock here. find the next node after the tradelane, if it's 
-				//a trade lane and is this tradelane's neighbor then dock. if not, return fail
-
-				NavNode nextNextNode = MyAI.MyParty.NextNextNode;
-
-				if(nextNextNode != null && nextNextNode.NavNodeType == NavNodeType.Tradelane)
+				int direction = 0;
+				TradelaneData prevTL = (TradelaneData)MyParty.PrevNode;
+				TradelaneData nextTL = (TradelaneData)MyParty.NextNode;
+				if(prevTL.NeighborAID == nextTL.ID)
 				{
-					if(nextNextNode.ID == currentLane.NeighborAID)
+					direction = -1;
+				}
+				else if(prevTL.NeighborBID == nextTL.ID)
+				{
+					direction = 1;
+				}
+
+				if(direction != 0)
+				{
+					Tradelane currentLane = GameManager.Inst.WorldManager.CurrentSystem.GetTradelaneByID(prevTL.ID);
+					DockRequestResult result = currentLane.MidwayDock(MyAI.MyShip, out _currentSession, direction);
+					if(result == DockRequestResult.Busy)
 					{
-						_dockStart = currentLane.TriggerA.transform.position - currentLane.TriggerA.transform.up * 10;
+						return BTResult.Running;
 					}
-					else if(nextNextNode.ID == currentLane.NeighborBID)
+					else if(result == DockRequestResult.Deny)
 					{
-						_dockStart = currentLane.TriggerB.transform.position - currentLane.TriggerB.transform.up * 10;
+						return Exit(BTResult.Fail);
+					}
+					else
+					{
+						Debug.Log("BTDockAtNextNode: running");
+						_dockingStage = 2;
+						return BTResult.Running;
+					}
+				}
+
+			}
+
+			if(_currentSession == null)
+			{
+				//if too far away from station then go to
+				if(Vector3.Distance(MyAI.MyShip.transform.position, MyParty.NextNode.Location.RealPos) > 40)
+				{
+					_dockingStage = 0;
+					MyAI.Whiteboard.Parameters["Destination"] = MyParty.NextNode.Location.RealPos;
+					Debug.Log("BTDockAtNextNode: running next node " + MyParty.NextNode.ID);
+					return BTResult.Running;
+				}
+				else if(_dockingStage == 0)
+				{
+					_dockingStage = 1;
+				}
+
+				Tradelane currentLane = GameManager.Inst.WorldManager.CurrentSystem.GetTradelaneByID(MyParty.NextNode.ID);
+
+				if(_dockStart == Vector3.zero)
+				{
+					//need to decide if we want to dock here. find the next node after the tradelane, if it's 
+					//a trade lane and is this tradelane's neighbor then dock. if not, return fail
+
+					NavNode nextNextNode = MyParty.NextNextNode;
+
+					if(nextNextNode != null && nextNextNode.NavNodeType == NavNodeType.Tradelane)
+					{
+						if(nextNextNode.ID == currentLane.NeighborAID)
+						{
+							_dockStart = currentLane.TriggerA.transform.position - currentLane.TriggerA.transform.up * 10;
+						}
+						else if(nextNextNode.ID == currentLane.NeighborBID)
+						{
+							_dockStart = currentLane.TriggerB.transform.position - currentLane.TriggerB.transform.up * 10;
+						}
+						else
+						{
+							return Exit(BTResult.Fail);
+						}
+
 					}
 					else
 					{
 						return Exit(BTResult.Fail);
 					}
-
 				}
-				else
-				{
-					return Exit(BTResult.Fail);
-				}
-			}
 
-			GameObject.Find("Sphere").transform.position = _dockStart;
+				GameObject.Find("Sphere").transform.position = _dockStart;
 
-			if(_dockingStage == 1)
-			{
-				if(Vector3.Distance(_dockStart, MyAI.MyShip.transform.position) > 5)
+				if(_dockingStage == 1)
 				{
-					MyAI.Whiteboard.Parameters["Destination"] = _dockStart;
-					Debug.Log("BTDockAtNextNode: going to dock start " + Vector3.Distance(_dockStart, MyAI.MyShip.transform.position));
-					return BTResult.Running;
-				}
-				else
-				{
-					MyAI.Whiteboard.Parameters["Destination"] = Vector3.zero;
-					_dockingStage = 2;
+					if(Vector3.Distance(_dockStart, MyAI.MyShip.transform.position) > 5)
+					{
+						MyAI.Whiteboard.Parameters["Destination"] = _dockStart;
+						Debug.Log("BTDockAtNextNode: going to dock start " + Vector3.Distance(_dockStart, MyAI.MyShip.transform.position));
+						return BTResult.Running;
+					}
+					else
+					{
+						MyAI.Whiteboard.Parameters["Destination"] = Vector3.zero;
+						_dockingStage = 2;
+					}
 				}
 			}
 
@@ -159,9 +200,13 @@ public class BTDockAtNextNode : BTLeaf
 
 			if(MyAI.MyShip.IsInPortal)
 			{
-				if(Vector3.Distance(MyAI.MyParty.Location, MyAI.MyParty.NextNode.Location) < 10)
+				if(Vector3.Distance(MyAI.MyShip.transform.position, MyParty.NextNode.Location.RealPos) < 10)
 				{
-					MyAI.MyParty.PrevNode = MyAI.MyParty.NextNode;
+					if(MyParty.NextNextNode == null || MyParty.NextNextNode.NavNodeType != NavNodeType.Tradelane)
+					{
+						((TLTransitSession)_currentSession).Stage = TLSessionStage.Cancelling;
+					}
+					MyParty.PrevNode = MyParty.NextNode;
 					Debug.LogError("BTDockAtNextNode tradelane: Successful");
 					return Exit(BTResult.Success);
 				}
@@ -174,6 +219,7 @@ public class BTDockAtNextNode : BTLeaf
 
 			if(_currentSession == null)
 			{
+				Tradelane currentLane = GameManager.Inst.WorldManager.CurrentSystem.GetTradelaneByID(MyParty.NextNode.ID);
 				DockRequestResult result = currentLane.Dock(MyAI.MyShip, out _currentSession);
 				if(result == DockRequestResult.Busy)
 				{
@@ -210,24 +256,24 @@ public class BTDockAtNextNode : BTLeaf
 				return BTResult.Running;
 			}
 		}
-		else if(MyAI.MyParty.NextNode.NavNodeType == NavNodeType.JumpGate)
+		else if(MyParty.NextNode.NavNodeType == NavNodeType.JumpGate)
 		{
 			//if only 1 node in path or if next next node is in same system then don't dock
-			if(MyAI.MyParty.NextTwoNodes.Count <= 1)
+			if(MyParty.NextTwoNodes.Count <= 1)
 			{
 				return Exit(BTResult.Fail);
 			}
 			else
 			{
-				NavNode nextNextNode = MyAI.MyParty.NextTwoNodes[1];
-				if(nextNextNode.SystemID == MyAI.MyParty.CurrentSystemID)
+				NavNode nextNextNode = MyParty.NextTwoNodes[1];
+				if(nextNextNode.SystemID == MyParty.CurrentSystemID)
 				{
 					return Exit(BTResult.Fail);
 				}
 			}
 
 			Debug.Log("Trying to dock at jump gate");
-			JumpGate jg = (JumpGate)GameManager.Inst.WorldManager.CurrentSystem.GetStationByID(MyAI.MyParty.NextNode.ID);
+			JumpGate jg = (JumpGate)GameManager.Inst.WorldManager.CurrentSystem.GetStationByID(MyParty.NextNode.ID);
 			if(_waitDistance == 0)
 			{
 				_waitDistance = UnityEngine.Random.Range(25f, 40f);
@@ -235,14 +281,14 @@ public class BTDockAtNextNode : BTLeaf
 			_dockStart = jg.DockingTrigger.transform.position + jg.DockingTrigger.transform.up * 20;
 
 			//if too far away from station then go to
-			if(Vector3.Distance(MyAI.MyParty.Location, MyAI.MyParty.NextNode.Location) > _waitDistance)
+			if(Vector3.Distance(MyAI.MyShip.transform.position, MyParty.NextNode.Location.RealPos) > _waitDistance)
 			{
 				MyAI.Whiteboard.Parameters["Destination"] = _dockStart;
 				Debug.Log("BTDockAtNextNode: running " + _waitDistance);
 				return BTResult.Running;
 			}
 
-			MyAI.MyParty.PrevNode = MyAI.MyParty.NextNode;
+			MyParty.PrevNode = MyParty.NextNode;
 
 
 			if(!jg.IsGateActive && !jg.IsPortalReady)

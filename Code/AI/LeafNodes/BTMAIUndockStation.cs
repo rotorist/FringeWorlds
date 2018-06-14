@@ -2,35 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BTGetDestination : BTLeaf
+public class BTMAIUndockStation : BTLeaf
 {
 
 	public override void Initialize ()
 	{
-		
+
 	}
 
 	public override BTResult Process ()
 	{
-		if(MyParty == null)
+		if(MyParty == null || MyParty.CurrentTask == null || MyParty.DockedStationID == "")
 		{
 			return Exit(BTResult.Fail);
 		}
 
-		if(MyParty.CurrentTask != null)
+		MyParty.DockedStationID = "";
+
+		foreach(ShipBase ship in MyParty.SpawnedShips)
 		{
-			if(MyParty.CurrentTask.TaskType == MacroAITaskType.Travel)
+			if(ship.MyAI != null)
 			{
-				return Exit(BTResult.Success);
+				ship.DockedStationID = "";
+				ship.MyAI.IsDocked = false;
 			}
-			else
-			{
-				return Exit(BTResult.Fail);
-			}
-		}
-		else
-		{
-			return Exit(BTResult.Fail);
 		}
 
 		return Exit(BTResult.Success);
@@ -38,7 +33,7 @@ public class BTGetDestination : BTLeaf
 
 	public override BTResult Exit (BTResult result)
 	{
-		Debug.Log("BTGetDestination: " + result);
+
 		return result;
 	}
 }

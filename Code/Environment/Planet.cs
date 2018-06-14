@@ -33,6 +33,6 @@ public class PlanetData
 {
 	public string DisplayName;
 	public string ID;
-	public Vector3 Location;
+	public RelLoc Location;
 	public Vector3 OriginalScale;
 }

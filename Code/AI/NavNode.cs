@@ -6,7 +6,7 @@ public abstract class NavNode
 {
 	public string ID;
 	public string SystemID;
-	public Vector3 Location;
+	public RelLoc Location;
 	public List<string> NeighborIDs;
 	public List<NavNode> Neighbors;
 	public NavNodeType NavNodeType;

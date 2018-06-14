@@ -87,6 +87,11 @@ public class PlayerControl
 
 	public void PerFrameUpdate()
 	{
+		if(GameManager.Inst.SceneType == SceneType.SpaceTest)
+		{
+			return;
+		}
+
 
 		UpdateKeyInput();
 		UpdateMouseInput();
@@ -98,6 +103,11 @@ public class PlayerControl
 
 	public void FixedFrameUpdate()
 	{
+		if(GameManager.Inst.SceneType == SceneType.SpaceTest)
+		{
+			return;
+		}
+
 		UpdateShipRotation();
 		UpdateShipMovement();
 	}
@@ -125,7 +135,8 @@ public class PlayerControl
 	{
 		Debug.Log(SpawnStationID);
 		StationBase station = GameObject.Find(SpawnStationID).GetComponent<StationBase>();
-		station.Undock(PlayerShip);
+		DockSessionBase session = null;
+		station.Undock(PlayerShip, out session);
 	}
 
 

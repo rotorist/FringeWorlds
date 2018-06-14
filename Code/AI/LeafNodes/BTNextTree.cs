@@ -12,8 +12,15 @@ public class BTNextTree : BTLeaf
 
 	public override BTResult Process ()
 	{
-		BTResult result = MyAI.TreeSet[Parameters[0]].Run();
-
+		BTResult result = BTResult.Fail;
+		if(MyAI != null)
+		{
+			result = MyAI.TreeSet[Parameters[0]].Run();
+		}
+		else if(MyParty != null)
+		{
+			result = MyParty.TreeSet[Parameters[0]].Run();
+		}
 		return result;
 	}
 

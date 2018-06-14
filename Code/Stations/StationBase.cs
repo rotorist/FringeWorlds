@@ -21,8 +21,9 @@ public class StationBase : MonoBehaviour
 		return DockRequestResult.Deny;
 	}
 
-	public virtual DockRequestResult Undock(ShipBase requester)
+	public virtual DockRequestResult Undock(ShipBase requester, out DockSessionBase session)
 	{
+		session = null;
 		return DockRequestResult.Deny;
 	}
 

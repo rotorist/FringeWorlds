@@ -57,18 +57,19 @@ public class Station : StationBase
 		return DockRequestResult.Accept;
 	}
 
-	public override DockRequestResult Undock (ShipBase requester)
+	public override DockRequestResult Undock (ShipBase requester, out DockSessionBase session)
 	{
 		//find an available gate
 		DockGate selectedGate = FindAvailableGate();
 
 		if(selectedGate == null)
 		{
+			session = null;
 			return DockRequestResult.Busy;
 		}
 
-		DockingSession session = new DockingSession(selectedGate, requester, this, true);
-		_dockingSessions.Add(session);
+		session = new DockingSession(selectedGate, requester, this, true);
+		_dockingSessions.Add((DockingSession)session);
 
 		return DockRequestResult.Accept;
 

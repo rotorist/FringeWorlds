@@ -8,7 +8,7 @@ public class AI : MonoBehaviour
 	public bool IsDocked;
 	public bool IsActive { get { return _isActive; } }
 
-	public Faction myFaction;
+	public Faction MyFaction;
 	public MacroAIParty MyParty;
 
 	//public ShipBase AttackTarget;
@@ -26,7 +26,6 @@ public class AI : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
 	{
-
 		if(IsActive)
 		{
 			
@@ -55,7 +54,7 @@ public class AI : MonoBehaviour
 	}
 
 	// Use this for initialization
-	public void Initialize() 
+	public void Initialize(MacroAIParty party, Faction faction) 
 	{
 		MyShip = transform.GetComponent<ShipBase>();
 		AvoidanceDetector = MyShip.MyReference.AvoidanceDetector;
@@ -69,11 +68,14 @@ public class AI : MonoBehaviour
 		//Whiteboard.Parameters["TargetEnemy"] = AttackTarget;
 		Whiteboard.Parameters["SpeedLimit"] = -1f;
 
+		MyParty = party;
+		MyFaction = faction;
+
 		TreeSet = new Dictionary<string, BehaviorTree>();
-		TreeSet.Add("BaseBehavior", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("BaseBehavior", this));
-		TreeSet.Add("Travel", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("Travel", this));
-		TreeSet.Add("FollowFriendly", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("FollowFriendly", this));
-		TreeSet.Add("FighterCombat", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("FighterCombat", this));
+		TreeSet.Add("BaseBehavior", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("BaseBehavior", this, party));
+		TreeSet.Add("Travel", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("Travel", this, party));
+		TreeSet.Add("FollowFriendly", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("FollowFriendly", this, party));
+		TreeSet.Add("FighterCombat", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("FighterCombat", this, party));
 
 
 	}
@@ -124,7 +126,7 @@ public class AI : MonoBehaviour
 
 			if(!_isEngineKilled)
 			{
-				if(Vector3.Angle(MyShip.transform.forward, los) < 30)
+				if(Vector3.Angle(MyShip.transform.forward, los) < 30 || isStopping)
 				{
 					RB.AddForce(los.normalized * force);
 				}
@@ -260,7 +262,7 @@ public class AI : MonoBehaviour
 	{
 		float angle = Vector3.Angle(direction, transform.forward);
 		Vector3 cross = Vector3.Cross(transform.forward, direction).normalized;
-		RB.AddTorque(cross * angle * 1f);
+		RB.AddTorque(cross * angle * 0.2f);
 		//get the angle between transform.right and direction projected on plane with up normal
 		Vector3 proj = Vector3.ProjectOnPlane(direction, transform.up);
 		float horizontalAngle = Vector3.Angle(transform.right, proj);
@@ -320,10 +322,10 @@ public class AI : MonoBehaviour
 					}
 					else
 					{
-						otherFaction = ship.GetComponent<AI>().myFaction;
+						otherFaction = ship.GetComponent<AI>().MyFaction;
 					}
 
-					float relationship = GameManager.Inst.NPCManager.GetFactionRelationship(myFaction, otherFaction);
+					float relationship = GameManager.Inst.NPCManager.GetFactionRelationship(MyFaction, otherFaction);
 					if(relationship < 0.4f)
 					{
 						Whiteboard.Parameters["TargetEnemy"] = ship;

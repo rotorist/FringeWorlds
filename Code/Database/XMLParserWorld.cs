@@ -14,18 +14,20 @@ public class XMLParserWorld
 	public StarSystem GenerateSystemScene(string id)
 	{
 		string path = Application.dataPath + "/GameData/StarSystem/" + id + ".xml";
-		StarSystemData system = LoadStarSystemData(path);
+		StarSystemData system = LoadStarSystemData(path, true);
 
 		StarSystem starSystem = new StarSystem(system.ID, system.DisplayName);
 		RenderSettings.skybox = Resources.Load<Material>(system.SkyboxName);
 		RenderSettings.ambientLight = system.AmbientColor;
+
+
 
 		foreach(SunData sunData in system.Suns)
 		{
 			GameObject sunObject = GameObject.Instantiate(Resources.Load(sunData.ID)) as GameObject;
 			sunObject.name = sunData.ID;
 			Sun sun = sunObject.GetComponent<Sun>();
-			sun.transform.position = sunData.Location;
+			sun.transform.position = sunData.Location.RealPos;
 			sun.transform.localScale = sunData.Scale;
 			sun.Sunlight.color = sunData.Color;
 			sun.Sunlight.intensity = sunData.Intensity;
@@ -37,7 +39,7 @@ public class XMLParserWorld
 			GameObject planetObject = GameObject.Instantiate(Resources.Load(planetData.ID)) as GameObject;
 			planetObject.name = planetData.ID;
 			Planet planet = planetObject.GetComponent<Planet>();
-			planet.transform.position = planetData.Location;
+			planet.transform.position = planetData.Location.RealPos;
 			planet.transform.localScale = planetData.OriginalScale;
 			planet.OriginalScale = planetData.OriginalScale;
 			starSystem.Planets.Add(planet);
@@ -48,7 +50,7 @@ public class XMLParserWorld
 			GameObject stationObject = GameObject.Instantiate(Resources.Load(stationData.ID)) as GameObject;
 			stationObject.name = stationData.ID;
 			StationBase station = stationObject.GetComponent<StationBase>();
-			station.transform.position = stationData.Location;
+			station.transform.position = stationData.Location.RealPos;
 			station.transform.eulerAngles = stationData.EulerAngles;
 			starSystem.Stations.Add(station);
 		}
@@ -58,7 +60,7 @@ public class XMLParserWorld
 			GameObject stationObject = GameObject.Instantiate(Resources.Load("JumpGate")) as GameObject;
 			stationObject.name = jumpGateData.ID;
 			JumpGate gate = stationObject.GetComponent<JumpGate>();
-			gate.transform.position = jumpGateData.Location;
+			gate.transform.position = jumpGateData.Location.RealPos;
 			gate.transform.eulerAngles = jumpGateData.EulerAngles;
 			gate.TargetSystem = jumpGateData.TargetSystem;
 			gate.ExitGateID = jumpGateData.ExitGateID;
@@ -70,7 +72,7 @@ public class XMLParserWorld
 			GameObject tlObject = GameObject.Instantiate(Resources.Load("Tradelane")) as GameObject;
 			tlObject.name = tradelaneData.ID;
 			Tradelane tl = tlObject.transform.Find("TradelaneBody").GetComponent<Tradelane>();
-			tlObject.transform.position = tradelaneData.Location;
+			tlObject.transform.position = tradelaneData.Location.RealPos;
 			tlObject.transform.eulerAngles = tradelaneData.EulerAngles;
 			tl.ID = tradelaneData.ID;
 			tl.DisplayName = tradelaneData.DisplayName;
@@ -112,14 +114,24 @@ public class XMLParserWorld
 		foreach(FileInfo fileInfo in files)
 		{
 			string path = Application.dataPath + "/GameData/StarSystem/" + fileInfo.Name;
-			StarSystemData systemData = LoadStarSystemData(path);
-			allSystems.Add(systemData.ID, systemData);
+			string [] tokens = fileInfo.Name.Split('.');
+			if(tokens[0] == GameManager.Inst.WorldManager.CurrentSystem.ID)
+			{
+				StarSystemData systemData = LoadStarSystemData(path, true);
+				allSystems.Add(systemData.ID, systemData);
+			}
+			else
+			{
+				StarSystemData systemData = LoadStarSystemData(path, false);
+				allSystems.Add(systemData.ID, systemData);
+			}
+
 		}
 
 		return allSystems;
 	}
 
-	public StarSystemData LoadStarSystemData(string path)
+	public StarSystemData LoadStarSystemData(string path, bool isScene)
 	{
 		//
 
@@ -139,6 +151,11 @@ public class XMLParserWorld
 		XmlAttributeCollection systemAttrs = systemNode.Attributes;
 		string systemID = systemAttrs["id"].Value.ToString();
 		string systemName = systemAttrs["displayname"].Value.ToString();
+		Transform origin = GameObject.Find("Origin").transform;
+		if(!isScene)
+		{
+			origin = null;
+		}
 
 		StarSystemData systemData = new StarSystemData(systemID, systemName);
 		systemData.SystemID = systemID;
@@ -151,7 +168,7 @@ public class XMLParserWorld
 			{
 				Vector3 location = location = DBManager.ParseXmlVector3(node.FirstChild);
 
-				systemData.Location = location;
+				systemData.Location = new RelLoc(Vector3.zero, location, null);
 			}
 
 			if(node.Name == "ambience")
@@ -175,6 +192,16 @@ public class XMLParserWorld
 
 
 					}
+				}
+			}
+
+			if(node.Name == "origin")
+			{
+				Vector3 originLoc = DBManager.ParseXmlVector3(node.FirstChild);
+				systemData.OriginPosition = originLoc;
+				if(isScene)
+				{
+					origin.position = originLoc;
 				}
 			}
 
@@ -203,7 +230,7 @@ public class XMLParserWorld
 					}
 					if(subnode.Name == "location")
 					{
-						location = DBManager.ParseXmlVector3(subnode.FirstChild);
+						location = systemData.OriginPosition + DBManager.ParseXmlVector3(subnode.FirstChild);
 					}
 					if(subnode.Name == "scale")
 					{
@@ -221,7 +248,7 @@ public class XMLParserWorld
 
 				sunData.ID = sunID;
 				sunData.DisplayName = name;
-				sunData.Location = location;
+				sunData.Location = new RelLoc(systemData.OriginPosition, location, origin);
 				sunData.Scale = scale;
 				sunData.Color = color;
 				sunData.Intensity = intensity;
@@ -253,7 +280,7 @@ public class XMLParserWorld
 					}
 					if(subnode.Name == "location")
 					{
-						location = DBManager.ParseXmlVector3(subnode.FirstChild);
+						location = systemData.OriginPosition + DBManager.ParseXmlVector3(subnode.FirstChild);
 					}
 					if(subnode.Name == "scale")
 					{
@@ -263,7 +290,7 @@ public class XMLParserWorld
 
 				planetData.ID = planetID;
 				planetData.DisplayName = name;
-				planetData.Location = location;
+				planetData.Location = new RelLoc(systemData.OriginPosition, location, origin);
 				planetData.OriginalScale = scale;
 				systemData.Planets.Add(planetData);
 
@@ -301,7 +328,7 @@ public class XMLParserWorld
 					}
 					if(subnode.Name == "location")
 					{
-						location = DBManager.ParseXmlVector3(subnode.FirstChild);
+						location = systemData.OriginPosition + DBManager.ParseXmlVector3(subnode.FirstChild);
 					}
 					if(subnode.Name == "eulerangles")
 					{
@@ -328,7 +355,7 @@ public class XMLParserWorld
 					jumpGateData.DisplayName = name;
 					jumpGateData.TargetSystem = targetSystem;
 					jumpGateData.ExitGateID = exitGateID;
-					jumpGateData.Location = location;
+					jumpGateData.Location = new RelLoc(systemData.OriginPosition, location, origin);
 					jumpGateData.EulerAngles = eulerAngles;
 					jumpGateData.NeighborIDs = neighborIDs;
 					jumpGateData.NavNodeType = NavNodeType.JumpGate;
@@ -343,7 +370,7 @@ public class XMLParserWorld
 					StationData stationData = new StationData();
 					stationData.DisplayName = name;
 					stationData.ID = stationID;
-					stationData.Location = location;
+					stationData.Location = new RelLoc(systemData.OriginPosition, location, origin);
 					stationData.EulerAngles = eulerAngles;
 					stationData.NeighborIDs = neighborIDs;
 					stationData.NavNodeType = NavNodeType.Station;
@@ -377,7 +404,7 @@ public class XMLParserWorld
 					}
 					if(subnode.Name == "location")
 					{
-						location = DBManager.ParseXmlVector3(subnode.FirstChild);
+						location = systemData.OriginPosition + DBManager.ParseXmlVector3(subnode.FirstChild);
 					}
 					if(subnode.Name == "eulerangles")
 					{
@@ -415,7 +442,7 @@ public class XMLParserWorld
 				tradelaneData.IsTerminalAorB = Convert.ToInt32(terminal);
 				tradelaneData.NeighborAID = neighborA;
 				tradelaneData.NeighborBID = neighborB;
-				tradelaneData.Location = location;
+				tradelaneData.Location = new RelLoc(systemData.OriginPosition, location, origin);
 				tradelaneData.EulerAngles = eulerAngles;
 				tradelaneData.NeighborIDs = neighborIDs;
 				tradelaneData.NavNodeType = NavNodeType.Tradelane;
@@ -486,6 +513,16 @@ public class XMLParserWorld
 
 		_xmlWriter.WriteFullEndElement();
 
+		//origin
+		GameObject origin = GameObject.Find("Origin");
+		_xmlWriter.WriteStartElement("origin");
+		_xmlWriter.WriteStartElement("vector3");
+		_xmlWriter.WriteAttributeString("x", origin.transform.position.x.ToString());
+		_xmlWriter.WriteAttributeString("y", origin.transform.position.y.ToString());
+		_xmlWriter.WriteAttributeString("z", origin.transform.position.z.ToString());
+		_xmlWriter.WriteEndElement();
+		_xmlWriter.WriteFullEndElement();
+
 		//suns
 		Sun [] suns = GameObject.FindObjectsOfType<Sun>();
 		foreach(Sun sun in suns)
@@ -502,9 +539,10 @@ public class XMLParserWorld
 
 			_xmlWriter.WriteStartElement("location");
 			_xmlWriter.WriteStartElement("vector3");
-			_xmlWriter.WriteAttributeString("x", sun.transform.position.x.ToString());
-			_xmlWriter.WriteAttributeString("y", sun.transform.position.y.ToString());
-			_xmlWriter.WriteAttributeString("z", sun.transform.position.z.ToString());
+			Vector3 disposition = sun.transform.position - origin.transform.position;
+			_xmlWriter.WriteAttributeString("x", disposition.x.ToString());
+			_xmlWriter.WriteAttributeString("y", disposition.y.ToString());
+			_xmlWriter.WriteAttributeString("z", disposition.z.ToString());
 			_xmlWriter.WriteEndElement();
 			_xmlWriter.WriteFullEndElement();
 
@@ -544,9 +582,10 @@ public class XMLParserWorld
 
 			_xmlWriter.WriteStartElement("location");
 			_xmlWriter.WriteStartElement("vector3");
-			_xmlWriter.WriteAttributeString("x", planet.transform.position.x.ToString());
-			_xmlWriter.WriteAttributeString("y", planet.transform.position.y.ToString());
-			_xmlWriter.WriteAttributeString("z", planet.transform.position.z.ToString());
+			Vector3 disposition = planet.transform.position - origin.transform.position;
+			_xmlWriter.WriteAttributeString("x", disposition.x.ToString());
+			_xmlWriter.WriteAttributeString("y", disposition.y.ToString());
+			_xmlWriter.WriteAttributeString("z", disposition.z.ToString());
 			_xmlWriter.WriteEndElement();
 			_xmlWriter.WriteFullEndElement();
 
@@ -584,9 +623,10 @@ public class XMLParserWorld
 
 			_xmlWriter.WriteStartElement("location");
 			_xmlWriter.WriteStartElement("vector3");
-			_xmlWriter.WriteAttributeString("x", station.transform.position.x.ToString());
-			_xmlWriter.WriteAttributeString("y", station.transform.position.y.ToString());
-			_xmlWriter.WriteAttributeString("z", station.transform.position.z.ToString());
+			Vector3 disposition = station.transform.position - origin.transform.position;
+			_xmlWriter.WriteAttributeString("x", disposition.x.ToString());
+			_xmlWriter.WriteAttributeString("y", disposition.y.ToString());
+			_xmlWriter.WriteAttributeString("z", disposition.z.ToString());
 			_xmlWriter.WriteEndElement();
 			_xmlWriter.WriteFullEndElement();
 
@@ -640,9 +680,10 @@ public class XMLParserWorld
 
 			_xmlWriter.WriteStartElement("location");
 			_xmlWriter.WriteStartElement("vector3");
-			_xmlWriter.WriteAttributeString("x", tl.transform.position.x.ToString());
-			_xmlWriter.WriteAttributeString("y", tl.transform.position.y.ToString());
-			_xmlWriter.WriteAttributeString("z", tl.transform.position.z.ToString());
+			Vector3 disposition = tl.transform.position - origin.transform.position;
+			_xmlWriter.WriteAttributeString("x", disposition.x.ToString());
+			_xmlWriter.WriteAttributeString("y", disposition.y.ToString());
+			_xmlWriter.WriteAttributeString("z", disposition.z.ToString());
 			_xmlWriter.WriteEndElement();
 			_xmlWriter.WriteFullEndElement();
 

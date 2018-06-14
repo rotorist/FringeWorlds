@@ -16,7 +16,7 @@ public class Sun : MonoBehaviour
 
 public class SunData
 {
-	public Vector3 Location;
+	public RelLoc Location;
 	public Vector3 Scale;
 	public string ID;
 	public string DisplayName;

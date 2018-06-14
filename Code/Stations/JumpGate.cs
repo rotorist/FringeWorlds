@@ -89,12 +89,12 @@ public class JumpGate : StationBase
 		return DockRequestResult.Accept;
 	}
 
-	public override DockRequestResult Undock (ShipBase requester)
+	public override DockRequestResult Undock (ShipBase requester, out DockSessionBase session)
 	{
 		Vector3 spawnLoc = DockingTrigger.transform.position + DockingTrigger.transform.up * 20;
 		requester.transform.position = spawnLoc;
 		requester.transform.rotation = Quaternion.LookRotation(DockingTrigger.transform.up, Vector3.up);
-
+		session = null;
 		return DockRequestResult.Accept;
 	}
 

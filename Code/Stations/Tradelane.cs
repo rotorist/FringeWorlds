@@ -68,6 +68,42 @@ public class Tradelane : StationBase
 		SetNormalLightStates();
 	}
 
+	public DockRequestResult MidwayDock(ShipBase requester, out DockSessionBase session, int direction)
+	{
+		Debug.LogError("Midway dock " + ID);
+		if(direction == -1)
+		{
+			if(_dockingStageA > 0 || _sessionA != null)
+			{
+				session = null;
+				return DockRequestResult.Busy;
+			}
+			DockingEffectA.SetStage(2);
+			_dockingStageA = 3;
+			_sessionA = new TLTransitSession(requester, -1, this);
+			session = _sessionA;
+			_sessionA.StartMidwaySession();
+			return DockRequestResult.Accept;
+		}
+		else if(direction == 1)
+		{
+			if(_dockingStageB > 0 || _sessionB != null)
+			{
+				session = null;
+				return DockRequestResult.Busy;
+			}
+			DockingEffectB.SetStage(2);
+			_dockingStageB = 3;
+			_sessionB = new TLTransitSession(requester, 1, this);
+			session = _sessionB;
+			_sessionB.StartMidwaySession();
+			return DockRequestResult.Accept;
+		}
+
+		session = null;
+		return DockRequestResult.Deny;
+	}
+
 	public override DockRequestResult Dock (ShipBase requester, out DockSessionBase session)
 	{
 		//determine direction from requester's location
@@ -130,6 +166,7 @@ public class Tradelane : StationBase
 
 	public void ClearSession(int direction)
 	{
+		Debug.Log("Clearing session, direction " + direction + " I am " + ID);
 		if(direction < 0)
 		{
 			_sessionA = null;

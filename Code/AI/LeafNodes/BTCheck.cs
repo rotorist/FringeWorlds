@@ -122,9 +122,14 @@ public class BTCheck : BTLeaf
 				}
 			}
 			break;
+		case "MAIIsNearEnemyParty":
+			{
+				return BTResult.Fail;
+			}
+			break;
 		case "IspartyLeader":
 			{
-				if(MyAI.MyParty.SpawnedShipsLeader == MyAI.MyShip)
+				if(MyParty.SpawnedShipsLeader == MyAI.MyShip)
 				{
 					result = BTResult.Success;
 				}
@@ -136,12 +141,12 @@ public class BTCheck : BTLeaf
 			break;
 		case "HasDestination":
 			{
-				if(MyAI.MyParty == null || MyAI.MyParty.CurrentTask == null)
+				if(MyParty == null || MyParty.CurrentTask == null)
 				{
 					result = BTResult.Fail;
 				}
 
-				if(MyAI.MyParty.CurrentTask.TaskType == MacroAITaskType.Travel)
+				if(MyParty.CurrentTask.TaskType == MacroAITaskType.Travel)
 				{
 					result = BTResult.Success;
 				}
@@ -153,40 +158,84 @@ public class BTCheck : BTLeaf
 			break;
 		case "HasReachedDestination":
 			{
-				if(!MyAI.MyParty.CurrentTask.IsDestAStation)
-				{
-					if(Vector3.Distance(MyAI.MyShip.transform.position, MyAI.MyParty.CurrentTask.TravelDestCoord) < 5)
-					{
-						result = BTResult.Success;
-					}
-					else
-					{
-						result = BTResult.Fail;
-					}
-				}
-				else
-				{
-					if(MyAI.MyShip.DockedStationID == MyAI.MyParty.CurrentTask.TravelDestNodeID)
-					{
-						MyAI.MyParty.HasReachedDestNode = true;
-						result = BTResult.Success;
-					}
-					else
-					{
-						result = BTResult.Fail;
-					}
-				}
+				result = HasReachedDestination();
+			}
+			break;
+		case "MAIHasReachedDestination":
+			{
+				result = MAIHasReachedDestination();
 			}
 			break;
 		case "HasNextNode":
 			{
-				if(MyAI.MyParty == null || MyAI.MyParty.NextNode == null)
+				if(MyParty == null || MyParty.NextNode == null)
 				{
 					result = BTResult.Fail;
 				}
 				else
 				{
 					result = BTResult.Success;
+				}
+			}
+			break;
+		case  "IsTaskCompleted":
+			{
+				if(MyParty == null)
+				{
+					result = BTResult.Fail;
+				}
+				else if(MyParty.CurrentTask == null || MyParty.CurrentTask.TaskType == MacroAITaskType.None)
+				{
+					result = BTResult.Success;
+				}
+				else
+				{
+					if(MyParty.CurrentTask.TaskType == MacroAITaskType.Stay)
+					{
+						if(MyParty.WaitTimer >= MyParty.CurrentTask.StayDuration)
+						{
+							result = BTResult.Success;
+						}
+						else
+						{
+							result = BTResult.Fail;
+						}
+					}
+					else 
+					{
+						result = HasReachedDestination();
+					}
+				}
+
+			}
+			break;
+		case "MAIIsTaskCompleted":
+			{
+				if(MyParty == null)
+				{
+					result = BTResult.Fail;
+				}
+				else if(MyParty.CurrentTask == null || MyParty.CurrentTask.TaskType == MacroAITaskType.None)
+				{
+					result = BTResult.Success;
+				}
+				else
+				{
+					if(MyParty.CurrentTask.TaskType == MacroAITaskType.Stay)
+					{
+						if(MyParty.WaitTimer >= MyParty.CurrentTask.StayDuration)
+						{
+							result = BTResult.Success;
+						}
+						else
+						{
+							result = BTResult.Fail;
+						}
+					}
+					else 
+					{
+						result = MAIHasReachedDestination();
+					}
 				}
 			}
 			break;
@@ -200,5 +249,67 @@ public class BTCheck : BTLeaf
 	public override BTResult Exit (BTResult result)
 	{
 		return result;
+	}
+
+	private BTResult HasReachedDestination()
+	{
+		if(!MyParty.CurrentTask.IsDestAStation)
+		{
+			if(Vector3.Distance(MyAI.MyShip.transform.position, MyParty.CurrentTask.TravelDestCoord.RealPos) < 30)
+			{
+				return BTResult.Success;
+			}
+			else
+			{
+				return BTResult.Fail;
+			}
+		}
+		else
+		{
+			if(MyAI.MyShip.DockedStationID == MyParty.CurrentTask.TravelDestNodeID)
+			{
+				MyParty.HasReachedDestNode = true;
+				MyParty.NextTwoNodes.Clear();
+				return BTResult.Success;
+			}
+			else
+			{
+				return BTResult.Fail;
+			}
+		}
+	}
+
+	private BTResult MAIHasReachedDestination()
+	{
+		Vector3 destination;
+		if(!MyParty.CurrentTask.IsDestAStation)
+		{
+			destination = MyParty.CurrentTask.TravelDestCoord.RealPos;	
+
+			if(Vector3.Distance(MyParty.Location.RealPos, destination) < 5)
+			{
+				return BTResult.Success;
+			}
+			else
+			{
+				return BTResult.Fail;
+			}
+		}
+		else
+		{
+			destination = GameManager.Inst.WorldManager.AllNavNodes[MyParty.CurrentTask.TravelDestNodeID].Location.RealPos;
+			if(MyParty.DockedStationID == MyParty.CurrentTask.TravelDestNodeID)
+			{
+				MyParty.NextTwoNodes.Clear();
+				MyParty.HasReachedDestNode = true;
+				return BTResult.Success;
+			}
+			else
+			{
+				return BTResult.Fail;
+			}
+		}
+
+
 	}
 }

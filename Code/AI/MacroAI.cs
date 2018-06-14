@@ -20,11 +20,12 @@ public class MacroAI
 		party.SpawnedShips = new List<ShipBase>();
 
 		List<string> keyList = new List<string>(GameManager.Inst.WorldManager.AllSystems.Keys);
-		StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems["washington_system"];
+		StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems["carolina_system"];
 		party.CurrentSystemID = currentSystem.ID;
-		StationData currentStation = null;//currentSystem.GetStationByID("planet_columbia_landing");
-		party.DockedStationID = "";
-		party.Location = new Vector3(-100, 0.1f, 34);//Vector3.zero;//currentStation.Location;
+		StationData currentStation = currentSystem.GetStationByID("wilmington_station");
+		party.DockedStationID = "wilmington_station";
+		Transform origin = GameObject.Find("Origin").transform;
+		party.Location = new RelLoc(origin.position, currentStation.Location.RealPos, origin);//Vector3.zero;//new Vector3(-100, 0.1f, 34);//
 		party.PartyNumber = _lastUsedPartyNumber + 1;
 		_lastUsedPartyNumber = party.PartyNumber;
 
@@ -36,6 +37,8 @@ public class MacroAI
 		party.MoveSpeed = 10f;
 		party.NextTwoNodes = new List<NavNode>();
 		party.PrevNode = null;//CreateTempNode(party.Location, "tempstart", GameManager.Inst.WorldManager.AllSystems[party.CurrentSystemID]);
+
+		LoadPartyTreeset(party);
 
 		GameManager.Inst.NPCManager.AllParties.Add(party);
 	}
@@ -51,7 +54,14 @@ public class MacroAI
 		party.CurrentSystemID = currentSystem.ID;
 		StationData currentStation = currentSystem.Stations[UnityEngine.Random.Range(0, currentSystem.Stations.Count)];
 		party.DockedStationID = currentStation.ID;
-		party.Location = currentStation.Location;
+		if(currentSystem.ID == GameManager.Inst.WorldManager.CurrentSystem.ID)
+		{
+			party.Location = new RelLoc(currentSystem.OriginPosition, currentStation.Location.RealPos, GameObject.Find("Origin").transform);
+		}
+		else
+		{
+			party.Location = new RelLoc(currentSystem.OriginPosition, currentStation.Location.RealPos, null);
+		}
 		party.PartyNumber = _lastUsedPartyNumber + 1;
 		_lastUsedPartyNumber = party.PartyNumber;
 
@@ -67,6 +77,8 @@ public class MacroAI
 		party.MoveSpeed = 10f;
 		party.NextTwoNodes = new List<NavNode>();
 		party.PrevNode = null;//CreateTempNode(party.Location, "tempstart", GameManager.Inst.WorldManager.AllSystems[party.CurrentSystemID]);
+
+		LoadPartyTreeset(party);
 
 		GameManager.Inst.NPCManager.AllParties.Add(party);
 	}
@@ -89,27 +101,29 @@ public class MacroAI
 				if(party.SpawnedShipsLeader == null)
 				{
 					
-					party.SpawnedShipsLeader = GameManager.Inst.NPCManager.SpawnAIShip("LightFighter", ShipType.Fighter, party.FactionID);
-					party.SpawnedShipsLeader.transform.position = party.Location;
+					party.SpawnedShipsLeader = GameManager.Inst.NPCManager.SpawnAIShip("LightFighter", ShipType.Fighter, party.FactionID, party);
+					party.SpawnedShipsLeader.transform.position = party.Location.RealPos;
 					party.SpawnedShips.Add(party.SpawnedShipsLeader);
 					AI ai = party.SpawnedShipsLeader.GetComponent<AI>();
 					ai.MyParty = party;
 					ai.Deactivate();
 					if(party.DockedStationID != "")
 					{
+						Debug.LogError("docked!");
 						party.SpawnedShipsLeader.Hide();
 						ai.IsDocked = true;
+						ai.MyShip.DockedStationID = party.DockedStationID;
 					}
 					GameManager.Inst.NPCManager.AddExistingShip(ai.MyShip);
 				}
 
 				if(!party.ShouldEnableAI)
 				{
-					party.SpawnedShipsLeader.transform.position = party.Location;
+					party.SpawnedShipsLeader.transform.position = party.Location.RealPos;
 				}
 				else
 				{
-					party.Location = party.SpawnedShipsLeader.transform.position;
+					party.Location.RealPos = party.SpawnedShipsLeader.transform.position;
 				}
 
 
@@ -169,6 +183,21 @@ public class MacroAI
 				continue;
 			}
 
+			float deltaTime = Time.time - party.LastUpdateTime;
+			party.WaitTimer += deltaTime;
+
+			if(party.Destination != Vector3.zero)
+			{
+				float speed = party.IsInTradelane ? 100 : party.MoveSpeed;
+				party.Location.RealPos = party.Location.RealPos + (party.Destination - party.Location.RealPos).normalized * deltaTime * speed;
+			}
+
+			if(!party.ShouldEnableAI)
+			{
+				party.TreeSet["MAIBaseBehavior"].Run();
+			}
+
+			/***
 			if(party.CurrentTask.TaskType == MacroAITaskType.Travel && !party.ShouldEnableAI)
 			{
 
@@ -179,23 +208,34 @@ public class MacroAI
 				//if there is next node and not near it, fly towards it
 				//if there is next node and prev node, and is near next node, calculate using next node as start
 				//now if reached destnode, fly towards destination coord
-				if(party.HasReachedDestNode && !party.CurrentTask.IsDestAStation)
+				if(!party.CurrentTask.IsDestAStation)
 				{
+					if(Vector3.Distance(party.Location.RealPos, party.CurrentTask.TravelDestCoord.RealPos) < Vector3.Distance(party.Location.RealPos, party.DestNode.Location.RealPos))
+					{
+						party.HasReachedDestNode = true;
+					}
+				}
+
+				if(!party.CurrentTask.IsDestAStation && party.HasReachedDestNode)
+				{
+
 					//move towards dest coord
 					float deltaTime = Time.time - party.LastUpdateTime;
-					party.Location = party.Location + (party.CurrentTask.TravelDestCoord - party.Location).normalized * deltaTime * party.MoveSpeed;
-					if(Vector3.Distance(party.Location, party.CurrentTask.TravelDestCoord) < 5)
+					party.Location.RealPos = party.Location.RealPos + (party.CurrentTask.TravelDestCoord.RealPos - party.Location.RealPos).normalized * deltaTime * party.MoveSpeed;
+					if(Vector3.Distance(party.Location.RealPos, party.CurrentTask.TravelDestCoord.RealPos) < 5)
 					{
 						//done travelling!
 						Debug.Log("Party " + party.PartyNumber + " Done travelling to " + party.CurrentTask.TravelDestCoord.ToString());
 						MacroAITask task = AssignMacroAITask(party.CurrentTask.TaskType, party);
 						Debug.Log("Party " + party.PartyNumber + " new task: " + task.TaskType);
 					}
+
+
 				}
 				else if(party.PrevNode == null && party.NextNode == null)
 				{
 					List<NavNode> nextTwoNodes = new List<NavNode>();
-					NavNode nextNode = GameManager.Inst.NPCManager.MacroAI.GetClosestNodeToLocation(party.Location, GameManager.Inst.WorldManager.AllSystems[party.CurrentSystemID]);
+					NavNode nextNode = GameManager.Inst.NPCManager.MacroAI.GetClosestNodeToLocation(party.Location.RealPos, GameManager.Inst.WorldManager.AllSystems[party.CurrentSystemID]);
 					List<NavNode> nextNextTwoNodes = GameManager.Inst.NPCManager.MacroAI.FindNextNavNode(nextNode, party.DestNode);
 					nextTwoNodes.Add(nextNode);
 					if(nextNextTwoNodes.Count > 0)
@@ -211,12 +251,20 @@ public class MacroAI
 				else if(party.NextNode != null)
 				{
 					
-					if(Vector3.Distance(party.Location, party.NextNode.Location) > 5f)
+					if(Vector3.Distance(party.Location.RealPos, party.NextNode.Location.RealPos) > 5f)
 					{
 						//move towards the next node
 						float deltaTime = Time.time - party.LastUpdateTime;
 						float speed = party.IsInTradelane ? 100 : party.MoveSpeed;
-						party.Location = party.Location + (party.NextNode.Location - party.Location).normalized * deltaTime * speed;
+						party.Location.RealPos = party.Location.RealPos + (party.NextNode.Location.RealPos - party.Location.RealPos).normalized * deltaTime * speed;
+						foreach(ShipBase ship in party.SpawnedShips)
+						{
+							if(ship.MyAI != null)
+							{
+								ship.DockedStationID = "";
+								ship.MyAI.IsDocked = false;
+							}
+						}
 						Debug.Log("moving party to " + party.NextNode.ID + " at speed " + speed);
 						//GameObject.Find("Sphere").transform.position = party.Location;
 						//Debug.Log("Travelling to next node: " + party.NextNode.ID + " Final dest " + (party.CurrentTask.IsDestAStation ? party.CurrentTask.TravelDestNodeID : party.CurrentTask.TravelDestCoord.ToString()));
@@ -227,18 +275,21 @@ public class MacroAI
 						{
 							party.HasReachedDestNode = true;
 
-
-							//done travelling!
-							foreach(ShipBase ship in party.SpawnedShips)
+							if(party.CurrentTask.IsDestAStation)
 							{
-								if(ship.MyAI != null)
+								//done travelling!
+								foreach(ShipBase ship in party.SpawnedShips)
 								{
-									ship.MyAI.IsDocked = true;
+									if(ship.MyAI != null)
+									{
+										ship.MyAI.IsDocked = true;
+										ship.DockedStationID = party.NextNode.ID;
+									}
 								}
+								Debug.Log("Party " + party.PartyNumber + " Done travelling to " + party.CurrentTask.TravelDestNodeID);
+								MacroAITask task = AssignMacroAITask(party.CurrentTask.TaskType, party);
+								Debug.Log("Party " + party.PartyNumber + " new task: " + task.TaskType);
 							}
-							Debug.Log("Party " + party.PartyNumber + " Done travelling to " + party.CurrentTask.TravelDestNodeID);
-							MacroAITask task = AssignMacroAITask(party.CurrentTask.TaskType, party);
-							Debug.Log("Party " + party.PartyNumber + " new task: " + task.TaskType);
 
 						}
 						else
@@ -247,6 +298,7 @@ public class MacroAI
 							{
 								if(ship.MyAI != null)
 								{
+									ship.DockedStationID = "";
 									ship.MyAI.IsDocked = false;
 								}
 							}
@@ -256,7 +308,7 @@ public class MacroAI
 								JumpGateData jg = (JumpGateData)party.NextNode;
 								JumpGateData otherJG = (JumpGateData)GameManager.Inst.WorldManager.AllNavNodes[jg.ExitGateID];
 								party.CurrentSystemID = jg.TargetSystem;
-								party.Location = otherJG.Location;
+								party.Location.RealPos = otherJG.Location.RealPos;
 								party.PrevNode = otherJG;
 								party.NextTwoNodes = new List<NavNode>();
 							}
@@ -265,7 +317,7 @@ public class MacroAI
 
 								party.PrevNode = party.NextNode;
 								party.NextTwoNodes = FindNextNavNode(party.PrevNode, party.DestNode);
-
+								Debug.Log("next node null? " + (party.NextNode == null));
 								if(party.NextNode != null && party.NextNode.NavNodeType == NavNodeType.Tradelane && party.PrevNode.NavNodeType == NavNodeType.Tradelane)
 								{
 									party.IsInTradelane = true;
@@ -293,7 +345,7 @@ public class MacroAI
 					Debug.Log("Party " + party.PartyNumber + " Done waiting... new task: " + task.TaskType);
 				}
 			}
-
+			*/
 			party.LastUpdateTime = Time.time;
 		}
 	}
@@ -370,7 +422,7 @@ public class MacroAI
 		}
 
 		gScores[start] = 0;
-		fScores[start] = Vector3.Distance(start.Location, dest.Location);
+		fScores[start] = Vector3.Distance(start.Location.RealPos, dest.Location.RealPos);
 
 		while(openSet.Count > 0)
 		{
@@ -404,7 +456,7 @@ public class MacroAI
 					openSet.Add(neighbor);
 				}
 
-				float tentativeGScore = gScores[bestNode] + Vector3.Distance(bestNode.Location, neighbor.Location);
+				float tentativeGScore = gScores[bestNode] + Vector3.Distance(bestNode.Location.RealPos, neighbor.Location.RealPos);
 				//Debug.Log("best node " + bestNode.name + " tentative g " + tentativeGScore + " neighbor g " + gScores[neighbor] + " " + neighbor.name);
 				//Debug.Log("neighbor g is " + neighbor.ID);
 				if(tentativeGScore >= gScores[neighbor])
@@ -417,7 +469,7 @@ public class MacroAI
 					result.AddFirst(bestNode);
 				}
 				gScores[neighbor] = tentativeGScore;
-				fScores[neighbor] = gScores[neighbor] + Vector3.Distance(neighbor.Location, dest.Location);
+				fScores[neighbor] = gScores[neighbor] + Vector3.Distance(neighbor.Location.RealPos, dest.Location.RealPos);
 
 			}
 		}
@@ -479,8 +531,10 @@ public class MacroAI
 
 			task.TravelDestSystemID = destSystem.ID;
 			//task.TravelDestNodeID = destSystem.Stations[UnityEngine.Random.Range(0, destSystem.Stations.Count)].ID;
-			task.TravelDestNodeID = "planet_columbia_landing";
-			task.IsDestAStation = true;
+			//task.TravelDestNodeID = "planet_colombia_landing";
+			task.IsDestAStation = false;
+			task.TravelDestCoord = new RelLoc(destSystem.OriginPosition, new Vector3(-28.3f, 5f, 418.8f), null);
+			party.WaitTimer = 0;
 			Debug.Log("Party " + party.PartyNumber + " Task has been assigned to party: " + task.TaskType + " to " + (task.IsDestAStation ? task.TravelDestNodeID : task.TravelDestCoord.ToString()));
 		}
 
@@ -496,7 +550,7 @@ public class MacroAI
 			else
 			{
 				//party.DestNode = CreateTempNode(party.CurrentTask.TravelDestCoord, "tempdest", GameManager.Inst.WorldManager.AllSystems[party.CurrentTask.TravelDestSystemID]);
-				party.DestNode = GetClosestNodeToLocation(party.CurrentTask.TravelDestCoord, GameManager.Inst.WorldManager.AllSystems[party.CurrentTask.TravelDestSystemID]);
+				party.DestNode = GetClosestNodeToLocation(party.CurrentTask.TravelDestCoord.RealPos, GameManager.Inst.WorldManager.AllSystems[party.CurrentTask.TravelDestSystemID]);
 			}
 		}
 
@@ -512,7 +566,7 @@ public class MacroAI
 		NavNode nearestNode = null;
 		foreach(NavNode childNode in systemData.ChildNodes)
 		{
-			float dist = Vector3.Distance(childNode.Location, location);
+			float dist = Vector3.Distance(childNode.Location.RealPos, location);
 			if(dist < lowDist)
 			{
 				lowDist = dist;
@@ -523,31 +577,7 @@ public class MacroAI
 		return nearestNode;
 	}
 
-	private TempNode CreateTempNode(Vector3 location, string id, StarSystemData systemData)
-	{
-		TempNode tempNode = new TempNode();
-		tempNode.ID = id;
-		tempNode.Location = location;
-		tempNode.SystemID = systemData.ID;
 
-		//find the nearest navnode
-		float lowDist = Mathf.Infinity;
-		NavNode nearestNode = null;
-		foreach(NavNode childNode in systemData.ChildNodes)
-		{
-			float dist = Vector3.Distance(childNode.Location, location);
-			if(dist < lowDist)
-			{
-				lowDist = dist;
-				nearestNode = childNode;
-			}
-		}
-
-		tempNode.NeighborIDs.Add(nearestNode.ID);
-		tempNode.Neighbors.Add(nearestNode);
-
-		return tempNode;
-	}
 
 	private void DespawnParty(MacroAIParty party)
 	{
@@ -558,20 +588,26 @@ public class MacroAI
 		party.SpawnedShipsLeader = null;
 		party.ShouldEnableAI = false;
 	}
+
+	private void LoadPartyTreeset(MacroAIParty party)
+	{
+		party.TreeSet = new Dictionary<string, BehaviorTree>();
+		party.TreeSet.Add("MAIBaseBehavior", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("MAIBaseBehavior", null, party));
+		party.TreeSet.Add("MAITravel", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("MAITravel", null, party));
+		party.TreeSet.Add("MAICombat", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("MAICombat", null, party));
+	}
 }
 
 public class MacroAIParty
 {
+	public Vector3 Destination;
 	public int PartyNumber;
 	public string FactionID;
-	public Vector3 Location;
+	public RelLoc Location;
 	public string DockedStationID;
 	public string CurrentSystemID;
 	public float MoveSpeed;
-	//public bool IsDestinationAStation;
-	//public string DestinationSystemID;
-	//public Vector3 DestinationCoord;
-	//public string DestinationStationID;
+
 	public bool IsInTradelane;
 	public List<NavNode> NextTwoNodes;
 	public NavNode NextNode 
@@ -604,7 +640,7 @@ public class MacroAIParty
 	}
 	public NavNode PrevNode;
 	public NavNode DestNode;
-	public NavNode HasReachedDestNode;
+	public bool HasReachedDestNode;
 	public float WaitTimer;
 	public MacroAITask CurrentTask;
 
@@ -614,13 +650,15 @@ public class MacroAIParty
 	public List<ShipBase> SpawnedShips;
 	public ShipBase SpawnedShipsLeader;
 	public bool ShouldEnableAI;
+
+	public Dictionary<string,BehaviorTree> TreeSet;
 }
 
 public class MacroAITask
 {
 	public MacroAITaskType TaskType;
 	public float StayDuration;
-	public Vector3 TravelDestCoord;
+	public RelLoc TravelDestCoord;
 	public string TravelDestSystemID;
 	public string TravelDestNodeID;
 	public bool IsDestAStation;

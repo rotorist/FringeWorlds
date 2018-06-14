@@ -11,7 +11,7 @@ public class XMLParserBT
 	
 	private XmlDocument _currentXML; 
 
-	public BehaviorTree LoadBehaviorTree(string treeName, AI owner)
+	public BehaviorTree LoadBehaviorTree(string treeName, AI owner, MacroAIParty party)
 	{
 		XmlDocument xmlDoc = new XmlDocument();
 		string path = Application.dataPath + "/GameData/BehaviorTree/";
@@ -28,12 +28,12 @@ public class XMLParserBT
 		XmlNodeList root = _currentXML.GetElementsByTagName("behavior");
 		BehaviorTree tree = new BehaviorTree();
 		tree.Name = treeName;
-		tree.RootNode = LoadBTNode(root[0], owner);
+		tree.RootNode = LoadBTNode(root[0], owner, party);
 		//Debug.Log("Is Root null " + (tree.RootNode == null));
 		return tree;
 	}
 
-	private BTNode LoadBTNode(XmlNode currentNode, AI owner)
+	private BTNode LoadBTNode(XmlNode currentNode, AI owner, MacroAIParty party)
 	{
 		XmlNodeList nodeContent = currentNode.ChildNodes;
 
@@ -41,7 +41,7 @@ public class XMLParserBT
 		BTNode node = null;
 		if(currentNode.Name == "behavior")
 		{
-			node = LoadBTNode(nodeContent[0], owner);
+			node = LoadBTNode(nodeContent[0], owner, party);
 		}
 		else if(currentNode.Name == "composite")
 		{
@@ -87,7 +87,7 @@ public class XMLParserBT
 
 			foreach(XmlNode nodeItem in nodeContent)
 			{
-				compNode.Children.Add(LoadBTNode(nodeItem, owner));
+				compNode.Children.Add(LoadBTNode(nodeItem, owner, party));
 			}
 
 			node = compNode;
@@ -112,7 +112,7 @@ public class XMLParserBT
 			}
 			foreach(XmlNode nodeItem in nodeContent)
 			{
-				decNode.Child = LoadBTNode(nodeItem, owner);
+				decNode.Child = LoadBTNode(nodeItem, owner, party);
 			}
 
 			node = decNode;
@@ -136,6 +136,7 @@ public class XMLParserBT
 					checkNode.Action = actionName;
 					checkNode.Parameters = parameters;
 					checkNode.MyAI = owner;
+					checkNode.MyParty = party;
 					node = checkNode;
 				}
 			}
@@ -146,6 +147,7 @@ public class XMLParserBT
 					BTLeaf leafNode = (BTLeaf)System.Activator.CreateInstance(System.Type.GetType("BT" + nodeAttributes["name"].Value));
 					leafNode.Parameters = parameters;
 					leafNode.MyAI = owner;
+					leafNode.MyParty = party;
 					node = leafNode;
 				}
 			}

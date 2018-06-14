@@ -124,7 +124,7 @@ public class NPCManager
 		MacroAI.GenerateTestParty();
 	}
 
-	public ShipBase SpawnAIShip(string shipModelID, ShipType shipType, string factionID)
+	public ShipBase SpawnAIShip(string shipModelID, ShipType shipType, string factionID, MacroAIParty party)
 	{
 		ShipBase ship = (GameObject.Instantiate(Resources.Load("AIShip")) as GameObject).GetComponent<ShipBase>();
 
@@ -145,8 +145,7 @@ public class NPCManager
 		ship.Scanner = shipModel.GetComponent<Scanner>();
 
 		AI ai = ship.GetComponent<AI>();
-		ai.Initialize();
-		ai.myFaction = _allFactions[factionID];
+		ai.Initialize(party, _allFactions[factionID]);
 
 		//load weapons
 		foreach(WeaponJoint joint in ship.MyReference.WeaponJoints)
@@ -160,6 +159,11 @@ public class NPCManager
 
 	public void PerFrameUpdate()
 	{
+		if(GameManager.Inst.SceneType == SceneType.SpaceTest)
+		{
+			return;
+		}
+
 		MacroAI.PerFrameUpdate();
 	}
 

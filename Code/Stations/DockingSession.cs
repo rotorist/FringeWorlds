@@ -54,6 +54,10 @@ public class DockingSession : DockSessionBase
 				GameManager.Inst.PlayerControl.PlayerShip.IsInPortal = true;
 
 			}
+			else
+			{
+				requester.Show();
+			}
 
 			_waitTimer = 0;
 		}
@@ -96,6 +100,8 @@ public class DockingSession : DockSessionBase
 				Gate.Close();
 				Gate.SetRedLight();
 				ParentStation.OnDockingSessionComplete(this);
+				Requester.MyAI.IsDocked = false;
+				Requester.DockedStationID = "";
 			}
 		}
 

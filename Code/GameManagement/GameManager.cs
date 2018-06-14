@@ -155,7 +155,7 @@ public class GameManager : MonoBehaviour
 			WorldManager = new WorldManager();
 
 
-
+			/*
 			GameObject [] npcs = GameObject.FindGameObjectsWithTag("NPC");
 			foreach(GameObject o in npcs)
 			{
@@ -163,6 +163,7 @@ public class GameManager : MonoBehaviour
 				ai.Initialize();
 				NPCManager.AddExistingShip(ai.MyShip);
 			}
+			*/
 
 			//temporarily spawn player at a station to undock
 			//StationBase station = GameObject.Find("PlanetColombiaLanding").GetComponent<StationBase>();
@@ -187,9 +188,9 @@ public class GameManager : MonoBehaviour
 			}
 
 
-
-			WorldManager.Initialize();
 			WorldManager.CurrentSystem = system;
+			WorldManager.Initialize();
+
 			UIManager.Initialize();
 
 			if(LevelAnchor != null && LevelAnchor.Save != null)
@@ -216,6 +217,7 @@ public class GameManager : MonoBehaviour
 			WorldManager = new WorldManager();
 			WorldManager.Initialize();
 
+			/*
 			GameObject [] npcs = GameObject.FindGameObjectsWithTag("NPC");
 			foreach(GameObject o in npcs)
 			{
@@ -223,7 +225,7 @@ public class GameManager : MonoBehaviour
 				ai.Initialize();
 				NPCManager.AddExistingShip(ai.MyShip);
 			}
-
+			*/
 			//temporarily spawn player at a station to undock
 			//StationBase station = GameObject.Find("PlanetColombiaLanding").GetComponent<StationBase>();
 			//station.Undock(PlayerControl.PlayerShip);

@@ -68,6 +68,7 @@ public class StarSystemData : NavNode
 	public List<JumpGateData> JumpGates;
 	public List<TradelaneData> Tradelanes;
 	public List<NavNode> ChildNodes;
+	public Vector3 OriginPosition;
 
 	public List<MacroAIParty> Parties; //this is used for spawning NPC ships
 

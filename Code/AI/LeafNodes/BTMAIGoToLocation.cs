@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BTGoToLocation : BTLeaf
+public class BTMAIGoToLocation : BTLeaf
 {
 
 	public override void Initialize ()
@@ -12,7 +12,7 @@ public class BTGoToLocation : BTLeaf
 
 	public override BTResult Process ()
 	{
-		if(MyAI.IsDocked)
+		if(MyParty.DockedStationID != "")
 		{
 			return Exit(BTResult.Fail);
 		}
@@ -25,22 +25,22 @@ public class BTGoToLocation : BTLeaf
 				return Exit(BTResult.Fail);
 			}
 
-			if(Vector3.Distance(MyAI.MyShip.transform.position, MyParty.NextNode.Location.RealPos) < 30)
+			if(Vector3.Distance(MyParty.Location.RealPos, MyParty.NextNode.Location.RealPos) < 10)
 			{
 				MyParty.PrevNode = MyParty.NextNode;
 				if(!MyParty.CurrentTask.IsDestAStation && MyParty.DestNode.ID == MyParty.NextNode.ID)
 				{
 					//has reached dest node, but hasn't reached dest coord yet
-					MyParty.HasReachedDestNode = true;
 					MyParty.NextTwoNodes.Clear();
+					MyParty.HasReachedDestNode = true;
 					return Exit(BTResult.Fail);
 				}
 				return Exit(BTResult.Success);
 			}
 			else
 			{
-				MyAI.Whiteboard.Parameters["Destination"] = MyParty.NextNode.Location.RealPos;
-				Debug.Log("BTGoToLocation: running, going to next node");
+				MyParty.Destination = MyParty.NextNode.Location.RealPos;
+				Debug.Log("BTGoToLocation: running, going to next node " + MyParty.NextNode.ID);
 				return BTResult.Running;
 			}
 		}
@@ -53,21 +53,20 @@ public class BTGoToLocation : BTLeaf
 
 			if(Vector3.Distance(MyParty.Location.RealPos, MyParty.CurrentTask.TravelDestCoord.RealPos) < Vector3.Distance(MyParty.Location.RealPos, MyParty.DestNode.Location.RealPos))
 			{
-				MyParty.HasReachedDestNode = true;
 				MyParty.NextTwoNodes.Clear();
+				MyParty.HasReachedDestNode = true;
 			}
 
 			if(MyParty.HasReachedDestNode)
 			{
 				Vector3 destCoord = MyParty.CurrentTask.TravelDestCoord.RealPos;
-				if(Vector3.Distance(MyAI.MyShip.transform.position, destCoord) < 30)
+				if(Vector3.Distance(MyParty.Location.RealPos, destCoord) < 30)
 				{
-					Debug.LogError("Complated goto location DestCoord");
 					return Exit(BTResult.Success);
 				}
 				else
 				{
-					MyAI.Whiteboard.Parameters["Destination"] = destCoord;
+					MyParty.Destination = destCoord;
 					Debug.Log("BTGoToLocation: running, going to dest coord");
 					return BTResult.Running;
 				}
@@ -84,7 +83,11 @@ public class BTGoToLocation : BTLeaf
 
 	public override BTResult Exit (BTResult result)
 	{
-		Debug.Log("BTGoToLocation: " + result);
+		Debug.Log("MAIBTGoToLocation: " + result);
+		if(MyParty != null)
+		{
+			MyParty.Destination = Vector3.zero;
+		}
 		return result;
 	}
 }

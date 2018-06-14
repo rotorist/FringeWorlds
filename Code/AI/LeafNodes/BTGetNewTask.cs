@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BTGetDestination : BTLeaf
+public class BTGetNewTask : BTLeaf
 {
 
 	public override void Initialize ()
 	{
-		
+
 	}
 
 	public override BTResult Process ()
@@ -17,21 +17,13 @@ public class BTGetDestination : BTLeaf
 			return Exit(BTResult.Fail);
 		}
 
+		MacroAITaskType prevType = MacroAITaskType.None;
 		if(MyParty.CurrentTask != null)
 		{
-			if(MyParty.CurrentTask.TaskType == MacroAITaskType.Travel)
-			{
-				return Exit(BTResult.Success);
-			}
-			else
-			{
-				return Exit(BTResult.Fail);
-			}
+			prevType = MyParty.CurrentTask.TaskType;
 		}
-		else
-		{
-			return Exit(BTResult.Fail);
-		}
+		GameManager.Inst.NPCManager.MacroAI.AssignMacroAITask(prevType, MyParty);
+
 
 		return Exit(BTResult.Success);
 	}
