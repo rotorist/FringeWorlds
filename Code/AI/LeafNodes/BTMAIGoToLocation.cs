@@ -25,6 +25,11 @@ public class BTMAIGoToLocation : BTLeaf
 				return Exit(BTResult.Fail);
 			}
 
+			if(!MyParty.CurrentTask.IsDestAStation && MyParty.DestNode == MyParty.NextNode)
+			{
+				return Exit(BTResult.Fail);
+			}
+
 			if(Vector3.Distance(MyParty.Location.RealPos, MyParty.NextNode.Location.RealPos) < 10)
 			{
 				MyParty.PrevNode = MyParty.NextNode;
@@ -40,21 +45,31 @@ public class BTMAIGoToLocation : BTLeaf
 			else
 			{
 				MyParty.Destination = MyParty.NextNode.Location.RealPos;
-				Debug.Log("BTGoToLocation: running, going to next node " + MyParty.NextNode.ID);
+				Debug.Log("BTMAIGoToLocation: running, going to next node " + MyParty.NextNode.ID);
 				return BTResult.Running;
 			}
 		}
 		else if(Parameters[0] == "DestCoord")
 		{
-			if(MyParty == null || MyParty.CurrentTask == null || MyParty.CurrentTask.TaskType != MacroAITaskType.Travel || MyParty.CurrentTask.IsDestAStation)
+			if(MyParty == null || MyParty.CurrentTask == null || MyParty.CurrentTask.TaskType != MacroAITaskType.Travel || MyParty.CurrentTask.IsDestAStation || MyParty.IsInTradelane || MyParty.DockedStationID != "")
 			{
 				return Exit(BTResult.Fail);
 			}
 
-			if(Vector3.Distance(MyParty.Location.RealPos, MyParty.CurrentTask.TravelDestCoord.RealPos) < Vector3.Distance(MyParty.Location.RealPos, MyParty.DestNode.Location.RealPos))
+			if(MyParty.NextNode != null && MyParty.NextNode != MyParty.DestNode)
+			{
+				return Exit(BTResult.Fail);
+			}
+
+			if(Vector3.Distance(MyParty.Location.RealPos, MyParty.CurrentTask.TravelDestCoord.RealPos) < 
+				(Vector3.Distance(MyParty.Location.RealPos, MyParty.DestNode.Location.RealPos) + Vector3.Distance(MyParty.DestNode.Location.RealPos, MyParty.CurrentTask.TravelDestCoord.RealPos)))
 			{
 				MyParty.NextTwoNodes.Clear();
 				MyParty.HasReachedDestNode = true;
+			}
+			else
+			{
+				return Exit(BTResult.Fail);
 			}
 
 			if(MyParty.HasReachedDestNode)
@@ -67,7 +82,7 @@ public class BTMAIGoToLocation : BTLeaf
 				else
 				{
 					MyParty.Destination = destCoord;
-					Debug.Log("BTGoToLocation: running, going to dest coord");
+					Debug.Log("BTMAIGoToLocation: running, going to dest coord");
 					return BTResult.Running;
 				}
 			}

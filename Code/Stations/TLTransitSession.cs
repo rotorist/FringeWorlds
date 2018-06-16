@@ -174,6 +174,10 @@ public class TLTransitSession : DockSessionBase
 				{
 					GameManager.Inst.PlayerControl.CurrentTradelaneSession = null;
 				}
+				else
+				{
+					LeaderPassenger.MyAI.MyParty.CurrentTLSession = null;
+				}
 			}
 		}
 		else if(Stage == TLSessionStage.Cancelling)
@@ -183,7 +187,7 @@ public class TLTransitSession : DockSessionBase
 			_currentSpeed = Mathf.Clamp(_currentSpeed + acceleration * Time.fixedDeltaTime, 0, 100);
 			LeaderPassenger.transform.position = LeaderPassenger.transform.position + direction.normalized * _currentSpeed * Time.fixedDeltaTime;
 			LeaderPassenger.InPortalSpeed = _currentSpeed;
-			Debug.LogError(_currentSpeed);
+			//Debug.LogError(_currentSpeed);
 			if(_currentSpeed <= 0)
 			{
 				LeaderPassenger.InPortalSpeed = 0;
@@ -198,6 +202,10 @@ public class TLTransitSession : DockSessionBase
 				if(LeaderPassenger == GameManager.Inst.PlayerControl.PlayerShip)
 				{
 					GameManager.Inst.PlayerControl.CurrentTradelaneSession = null;
+				}
+				else
+				{
+					LeaderPassenger.MyAI.MyParty.CurrentTLSession = null;
 				}
 			}
 		}

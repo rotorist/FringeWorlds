@@ -211,6 +211,7 @@ public class BTCheck : BTLeaf
 			break;
 		case "MAIIsTaskCompleted":
 			{
+				Debug.Log("Current task type " + MyParty.CurrentTask.TaskType);
 				if(MyParty == null)
 				{
 					result = BTResult.Fail;
@@ -286,7 +287,7 @@ public class BTCheck : BTLeaf
 		{
 			destination = MyParty.CurrentTask.TravelDestCoord.RealPos;	
 
-			if(Vector3.Distance(MyParty.Location.RealPos, destination) < 5)
+			if(Vector3.Distance(MyParty.Location.RealPos, destination) < 30)
 			{
 				return BTResult.Success;
 			}

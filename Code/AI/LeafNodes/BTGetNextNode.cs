@@ -39,7 +39,7 @@ public class BTGetNextNode : BTLeaf
 
 			}
 
-			if(MyParty.NextNode != null && MyParty.NextNode.NavNodeType == NavNodeType.Tradelane && MyParty.PrevNode.NavNodeType == NavNodeType.Tradelane)
+			if(MyParty.NextNode != null && MyParty.PrevNode != null && MyParty.NextNode.NavNodeType == NavNodeType.Tradelane && MyParty.PrevNode.NavNodeType == NavNodeType.Tradelane)
 			{
 				MyParty.IsInTradelane = true;
 			}
@@ -50,7 +50,7 @@ public class BTGetNextNode : BTLeaf
 
 			if(MyParty.NextNode != null)
 			{
-				Debug.Log("BTGetNextNode: " + MyParty.NextNode.ID);
+				Debug.LogError("BTGetNextNode: " + MyParty.NextNode.ID);
 			}
 			else
 			{

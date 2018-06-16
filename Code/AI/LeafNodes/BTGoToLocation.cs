@@ -25,6 +25,11 @@ public class BTGoToLocation : BTLeaf
 				return Exit(BTResult.Fail);
 			}
 
+			if(!MyParty.CurrentTask.IsDestAStation && MyParty.DestNode == MyParty.NextNode)
+			{
+				return Exit(BTResult.Fail);
+			}
+
 			if(Vector3.Distance(MyAI.MyShip.transform.position, MyParty.NextNode.Location.RealPos) < 30)
 			{
 				MyParty.PrevNode = MyParty.NextNode;
@@ -46,15 +51,26 @@ public class BTGoToLocation : BTLeaf
 		}
 		else if(Parameters[0] == "DestCoord")
 		{
-			if(MyParty == null || MyParty.CurrentTask == null || MyParty.CurrentTask.TaskType != MacroAITaskType.Travel || MyParty.CurrentTask.IsDestAStation)
+			if(MyParty == null || MyParty.CurrentTask == null || MyParty.CurrentTask.TaskType != MacroAITaskType.Travel 
+				|| MyParty.CurrentTask.IsDestAStation || MyAI.MyShip.IsInPortal || MyAI.MyShip.DockedStationID != "")
 			{
 				return Exit(BTResult.Fail);
 			}
 
-			if(Vector3.Distance(MyParty.Location.RealPos, MyParty.CurrentTask.TravelDestCoord.RealPos) < Vector3.Distance(MyParty.Location.RealPos, MyParty.DestNode.Location.RealPos))
+			if(MyParty.NextNode != null && MyParty.NextNode != MyParty.DestNode)
+			{
+				return Exit(BTResult.Fail);
+			}
+
+			if(Vector3.Distance(MyParty.Location.RealPos, MyParty.CurrentTask.TravelDestCoord.RealPos) 
+				< (Vector3.Distance(MyParty.Location.RealPos, MyParty.DestNode.Location.RealPos) + Vector3.Distance(MyParty.DestNode.Location.RealPos, MyParty.CurrentTask.TravelDestCoord.RealPos)))
 			{
 				MyParty.HasReachedDestNode = true;
 				MyParty.NextTwoNodes.Clear();
+			}
+			else
+			{
+				return Exit(BTResult.Fail);
 			}
 
 			if(MyParty.HasReachedDestNode)
@@ -62,7 +78,7 @@ public class BTGoToLocation : BTLeaf
 				Vector3 destCoord = MyParty.CurrentTask.TravelDestCoord.RealPos;
 				if(Vector3.Distance(MyAI.MyShip.transform.position, destCoord) < 30)
 				{
-					Debug.LogError("Complated goto location DestCoord");
+					Debug.LogError("Completed goto location DestCoord");
 					return Exit(BTResult.Success);
 				}
 				else

@@ -132,7 +132,7 @@ public class MacroAI
 				party.ShouldEnableAI = false;
 				foreach(ShipBase ship in party.SpawnedShips)
 				{
-					if(Vector3.Distance(ship.transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position) < 200)
+					if(Vector3.Distance(ship.transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position) < 1000)
 					{
 						party.ShouldEnableAI = true;
 					}
@@ -512,9 +512,14 @@ public class MacroAI
 			}
 		}
 
+		party.PrevNode = null;
+		if(party.NextTwoNodes != null)
+		{
+			party.NextTwoNodes.Clear();
+		}
 		if(prevTaskType == MacroAITaskType.Travel)
 		{
-			
+
 			task.TaskType = MacroAITaskType.Stay;
 			task.StayDuration = UnityEngine.Random.Range(30f, 60f);
 			party.WaitTimer = 0;
@@ -525,15 +530,29 @@ public class MacroAI
 		{
 			task.TaskType = MacroAITaskType.Travel;
 			List<string> keyList = new List<string>(GameManager.Inst.WorldManager.AllSystems.Keys);
+			if(Time.time < 5)
+			{
+				//StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems[keyList[UnityEngine.Random.Range(0, keyList.Count)]];
+				StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems["washington_system"];
 
-			//StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems[keyList[UnityEngine.Random.Range(0, keyList.Count)]];
-			StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems["washington_system"];
+				task.TravelDestSystemID = destSystem.ID;
+				//task.TravelDestNodeID = destSystem.Stations[UnityEngine.Random.Range(0, destSystem.Stations.Count)].ID;
+				//task.TravelDestNodeID = "planet_colombia_landing";
+				task.IsDestAStation = false;
+				task.TravelDestCoord = new RelLoc(destSystem.OriginPosition, new Vector3(-28.3f, 5f, 418.8f), null);
+			}
+			else
+			{
+				StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems[keyList[UnityEngine.Random.Range(0, keyList.Count)]];
+				//StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems["washington_system"];
 
-			task.TravelDestSystemID = destSystem.ID;
-			//task.TravelDestNodeID = destSystem.Stations[UnityEngine.Random.Range(0, destSystem.Stations.Count)].ID;
-			//task.TravelDestNodeID = "planet_colombia_landing";
-			task.IsDestAStation = false;
-			task.TravelDestCoord = new RelLoc(destSystem.OriginPosition, new Vector3(-28.3f, 5f, 418.8f), null);
+				task.TravelDestSystemID = destSystem.ID;
+				task.TravelDestNodeID = destSystem.Stations[UnityEngine.Random.Range(0, destSystem.Stations.Count)].ID;
+				//task.TravelDestNodeID = "planet_colombia_landing";
+				task.IsDestAStation = true;
+				//task.TravelDestCoord = new RelLoc(destSystem.OriginPosition, new Vector3(-28.3f, 5f, 418.8f), null);
+			}
+
 			party.WaitTimer = 0;
 			Debug.Log("Party " + party.PartyNumber + " Task has been assigned to party: " + task.TaskType + " to " + (task.IsDestAStation ? task.TravelDestNodeID : task.TravelDestCoord.ToString()));
 		}
@@ -609,6 +628,7 @@ public class MacroAIParty
 	public float MoveSpeed;
 
 	public bool IsInTradelane;
+	public TLTransitSession CurrentTLSession;
 	public List<NavNode> NextTwoNodes;
 	public NavNode NextNode 
 	{ 

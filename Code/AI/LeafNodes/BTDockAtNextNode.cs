@@ -96,7 +96,7 @@ public class BTDockAtNextNode : BTLeaf
 		else if(MyParty.NextNode.NavNodeType == NavNodeType.Tradelane)
 		{
 			//if already in tradelane then do a midway dock on prevNode tradelane
-			if(MyParty.PrevNode.NavNodeType == NavNodeType.Tradelane && MyParty.NextNode.NavNodeType == NavNodeType.Tradelane && !MyAI.MyShip.IsInPortal && _currentSession == null)
+			if(MyParty.PrevNode != null && MyParty.PrevNode.NavNodeType == NavNodeType.Tradelane && MyParty.NextNode.NavNodeType == NavNodeType.Tradelane && !MyAI.MyShip.IsInPortal && MyParty.CurrentTLSession == null)
 			{
 				int direction = 0;
 				TradelaneData prevTL = (TradelaneData)MyParty.PrevNode;
@@ -113,7 +113,9 @@ public class BTDockAtNextNode : BTLeaf
 				if(direction != 0)
 				{
 					Tradelane currentLane = GameManager.Inst.WorldManager.CurrentSystem.GetTradelaneByID(prevTL.ID);
-					DockRequestResult result = currentLane.MidwayDock(MyAI.MyShip, out _currentSession, direction);
+					DockSessionBase s;
+					DockRequestResult result = currentLane.MidwayDock(MyAI.MyShip, out s, direction);
+
 					if(result == DockRequestResult.Busy)
 					{
 						return BTResult.Running;
@@ -124,7 +126,8 @@ public class BTDockAtNextNode : BTLeaf
 					}
 					else
 					{
-						Debug.Log("BTDockAtNextNode: running");
+						Debug.Log("BTDockAtNextNode: midway dock granted, running");
+						MyParty.CurrentTLSession = (TLTransitSession)s;
 						_dockingStage = 2;
 						return BTResult.Running;
 					}
@@ -132,7 +135,7 @@ public class BTDockAtNextNode : BTLeaf
 
 			}
 
-			if(_currentSession == null)
+			if(MyParty.CurrentTLSession == null)
 			{
 				//if too far away from station then go to
 				if(Vector3.Distance(MyAI.MyShip.transform.position, MyParty.NextNode.Location.RealPos) > 40)
@@ -140,7 +143,7 @@ public class BTDockAtNextNode : BTLeaf
 					_dockingStage = 0;
 					MyAI.Whiteboard.Parameters["Destination"] = MyParty.NextNode.Location.RealPos;
 					Debug.Log("BTDockAtNextNode: running next node " + MyParty.NextNode.ID);
-					return BTResult.Running;
+					return Exit(BTResult.Fail);
 				}
 				else if(_dockingStage == 0)
 				{
@@ -198,16 +201,20 @@ public class BTDockAtNextNode : BTLeaf
 
 			MyAI.Whiteboard.Parameters["IgnoreAvoidance"] = true;
 
-			if(MyAI.MyShip.IsInPortal)
+			if(MyParty.CurrentTLSession != null && MyAI.MyShip.IsInPortal)
 			{
-				if(Vector3.Distance(MyAI.MyShip.transform.position, MyParty.NextNode.Location.RealPos) < 10)
+				float distToNextNode = Vector3.Distance(MyAI.MyShip.transform.position, MyParty.NextNode.Location.RealPos);
+				Debug.Log(distToNextNode + " next node " + MyParty.NextNode.ID);
+				if(distToNextNode < 10)
 				{
+					
 					if(MyParty.NextNextNode == null || MyParty.NextNextNode.NavNodeType != NavNodeType.Tradelane)
 					{
-						((TLTransitSession)_currentSession).Stage = TLSessionStage.Cancelling;
+						MyParty.CurrentTLSession.Stage = TLSessionStage.Cancelling;
+						Debug.LogError("BTDockAtNextNode tradelane: cancel sent");
 					}
 					MyParty.PrevNode = MyParty.NextNode;
-					Debug.LogError("BTDockAtNextNode tradelane: Successful");
+					Debug.LogError("BTDockAtNextNode tradelane: Successful " + MyParty.NextNode.ID);
 					return Exit(BTResult.Success);
 				}
 				else
@@ -217,10 +224,12 @@ public class BTDockAtNextNode : BTLeaf
 				}
 			}
 
-			if(_currentSession == null)
+			if(MyParty.CurrentTLSession == null)
 			{
 				Tradelane currentLane = GameManager.Inst.WorldManager.CurrentSystem.GetTradelaneByID(MyParty.NextNode.ID);
-				DockRequestResult result = currentLane.Dock(MyAI.MyShip, out _currentSession);
+				DockSessionBase s;
+				DockRequestResult result = currentLane.Dock(MyAI.MyShip, out s);
+
 				if(result == DockRequestResult.Busy)
 				{
 					return BTResult.Running;
@@ -231,7 +240,8 @@ public class BTDockAtNextNode : BTLeaf
 				}
 				else
 				{
-					Debug.Log("BTDockAtNextNode: running");
+					Debug.Log("BTDockAtNextNode: dock request granted, running");
+					MyParty.CurrentTLSession = (TLTransitSession)s;
 					return BTResult.Running;
 				}
 			}
@@ -242,8 +252,7 @@ public class BTDockAtNextNode : BTLeaf
 					if(MyAI.MyShip.RB.velocity.magnitude < 0.1f || _dockingStage == 3)
 					{
 						//fly towards docking trigger
-						TLTransitSession session = (TLTransitSession)_currentSession;
-						Vector3 dockingTrigger = session.CurrentTrigger.transform.position;
+						Vector3 dockingTrigger = MyParty.CurrentTLSession.CurrentTrigger.transform.position;
 						MyAI.Whiteboard.Parameters["Destination"] = dockingTrigger;
 						_dockingStage = 3;
 					}
@@ -356,7 +365,7 @@ public class BTDockAtNextNode : BTLeaf
 
 	public override BTResult Exit (BTResult result)
 	{
-		Debug.Log("BTDockAtNextNode: " + result);
+		Debug.LogError("BTDockAtNextNode: " + result);
 		MyAI.Whiteboard.Parameters["IgnoreAvoidance"] = false;
 		_currentSession = null;
 		_waitDistance = 0;
