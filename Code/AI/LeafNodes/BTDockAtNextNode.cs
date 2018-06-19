@@ -95,8 +95,15 @@ public class BTDockAtNextNode : BTLeaf
 		}
 		else if(MyParty.NextNode.NavNodeType == NavNodeType.Tradelane)
 		{
+			if(MyParty.DestNode.ID == MyParty.NextNode.ID && MyParty.CurrentTLSession == null)
+			{
+				return Exit(BTResult.Fail);
+			}
+
+
 			//if already in tradelane then do a midway dock on prevNode tradelane
-			if(MyParty.PrevNode != null && MyParty.PrevNode.NavNodeType == NavNodeType.Tradelane && MyParty.NextNode.NavNodeType == NavNodeType.Tradelane && !MyAI.MyShip.IsInPortal && MyParty.CurrentTLSession == null)
+			if(Vector3.Distance(MyAI.MyShip.transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position) > 500 && MyParty.PrevNode != null 
+				&& MyParty.PrevNode.NavNodeType == NavNodeType.Tradelane && MyParty.NextNode.NavNodeType == NavNodeType.Tradelane && !MyAI.MyShip.IsInPortal && MyParty.CurrentTLSession == null)
 			{
 				int direction = 0;
 				TradelaneData prevTL = (TradelaneData)MyParty.PrevNode;
@@ -143,7 +150,7 @@ public class BTDockAtNextNode : BTLeaf
 					_dockingStage = 0;
 					MyAI.Whiteboard.Parameters["Destination"] = MyParty.NextNode.Location.RealPos;
 					Debug.Log("BTDockAtNextNode: running next node " + MyParty.NextNode.ID);
-					return Exit(BTResult.Fail);
+					return BTResult.Running;
 				}
 				else if(_dockingStage == 0)
 				{
@@ -267,18 +274,10 @@ public class BTDockAtNextNode : BTLeaf
 		}
 		else if(MyParty.NextNode.NavNodeType == NavNodeType.JumpGate)
 		{
-			//if only 1 node in path or if next next node is in same system then don't dock
-			if(MyParty.NextTwoNodes.Count <= 1)
+			//if destination is in same system then don't dock
+			if(MyParty.CurrentTask.TravelDestSystemID == GameManager.Inst.WorldManager.CurrentSystem.ID)
 			{
 				return Exit(BTResult.Fail);
-			}
-			else
-			{
-				NavNode nextNextNode = MyParty.NextTwoNodes[1];
-				if(nextNextNode.SystemID == MyParty.CurrentSystemID)
-				{
-					return Exit(BTResult.Fail);
-				}
 			}
 
 			Debug.Log("Trying to dock at jump gate");

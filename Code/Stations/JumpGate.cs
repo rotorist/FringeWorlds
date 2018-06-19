@@ -6,6 +6,7 @@ public class JumpGate : StationBase
 {
 	public string TargetSystem;
 	public string ExitGateID;
+	public Vector3 SpawnDisposition;
 
 	public Transform Spinner;
 	public ParticleSystem GateRing;
@@ -53,6 +54,7 @@ public class JumpGate : StationBase
 		if(_activeTimer >= InactivityTimeout)
 		{
 			IsGateActive = false;
+			DisablePortal();
 			_ringEmission.enabled = false;
 			SetHorizonAlpha(Mathf.Clamp(_horizonMatInst.color.a - Time.deltaTime * 1, 0.1f, 0.4f));
 		}
@@ -83,6 +85,7 @@ public class JumpGate : StationBase
 
 	public override DockRequestResult Dock (ShipBase requester, out DockSessionBase session)
 	{
+		Debug.Log("Begin docking at jumpgate " + this.ID);
 		IsGateActive = true;
 		_activeTimer = 0;
 		session = null;
@@ -91,7 +94,7 @@ public class JumpGate : StationBase
 
 	public override DockRequestResult Undock (ShipBase requester, out DockSessionBase session)
 	{
-		Vector3 spawnLoc = DockingTrigger.transform.position + DockingTrigger.transform.up * 20;
+		Vector3 spawnLoc = DockingTrigger.transform.position + SpawnDisposition;
 		requester.transform.position = spawnLoc;
 		requester.transform.rotation = Quaternion.LookRotation(DockingTrigger.transform.up, Vector3.up);
 		session = null;
@@ -112,7 +115,9 @@ public class JumpGate : StationBase
 		{
 			AI npcAI = requester.GetComponent<AI>();
 			npcAI.MyParty.CurrentSystemID = TargetSystem;
+
 		}
+
 
 	}
 
@@ -143,4 +148,5 @@ public class JumpGateData : NavNode
 	public string ExitGateID;
 	public string DisplayName;
 	public Vector3 EulerAngles;
+	public Vector3 SpawnDisposition;
 }

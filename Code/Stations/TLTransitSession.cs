@@ -144,7 +144,7 @@ public class TLTransitSession : DockSessionBase
 			float acceleration = -40f;
 			float slowAcceleration = -25f;
 			Vector3 direction = (NextTrigger.transform.position - LeaderPassenger.transform.position);
-			float distToTrigger = Vector3.Distance(NextTrigger.transform.position, LeaderPassenger.transform.position);
+			//float distToTrigger = Vector3.Distance(NextTrigger.transform.position, LeaderPassenger.transform.position);
 
 			if(direction.magnitude < 50)
 			{
@@ -182,8 +182,13 @@ public class TLTransitSession : DockSessionBase
 		}
 		else if(Stage == TLSessionStage.Cancelling)
 		{
-			float acceleration = -40f;
+			float acceleration = -60f;
 			Vector3 direction = (NextTrigger.transform.position - LeaderPassenger.transform.position);
+			if(Vector3.Angle((LeaderPassenger.transform.position - NextTrigger.transform.position), NextTrigger.transform.up) < 90)
+			{
+				direction = NextTrigger.transform.up;
+			}
+
 			_currentSpeed = Mathf.Clamp(_currentSpeed + acceleration * Time.fixedDeltaTime, 0, 100);
 			LeaderPassenger.transform.position = LeaderPassenger.transform.position + direction.normalized * _currentSpeed * Time.fixedDeltaTime;
 			LeaderPassenger.InPortalSpeed = _currentSpeed;

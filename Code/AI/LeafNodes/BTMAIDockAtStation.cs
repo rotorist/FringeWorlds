@@ -47,7 +47,7 @@ public class BTMAIDockAtStation : BTLeaf
 			JumpGateData jg = (JumpGateData)MyParty.NextNode;
 			JumpGateData otherJG = (JumpGateData)GameManager.Inst.WorldManager.AllNavNodes[jg.ExitGateID];
 			MyParty.CurrentSystemID = jg.TargetSystem;
-			MyParty.Location.RealPos = otherJG.Location.RealPos;
+			MyParty.Location.RealPos = otherJG.Location.RealPos + otherJG.SpawnDisposition;
 			MyParty.PrevNode = otherJG;
 			MyParty.NextTwoNodes = new List<NavNode>();
 

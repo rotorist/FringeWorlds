@@ -211,7 +211,7 @@ public class BTCheck : BTLeaf
 			break;
 		case "MAIIsTaskCompleted":
 			{
-				Debug.Log("Current task type " + MyParty.CurrentTask.TaskType);
+				
 				if(MyParty == null)
 				{
 					result = BTResult.Fail;
@@ -242,7 +242,7 @@ public class BTCheck : BTLeaf
 			break;
 		}
 
-		Debug.Log("Checking " + Action + " result " + result);
+		//Debug.Log("Checking " + Action + " result " + result);
 
 		return result;
 	}

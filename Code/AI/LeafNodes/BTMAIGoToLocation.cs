@@ -45,7 +45,7 @@ public class BTMAIGoToLocation : BTLeaf
 			else
 			{
 				MyParty.Destination = MyParty.NextNode.Location.RealPos;
-				Debug.Log("BTMAIGoToLocation: running, going to next node " + MyParty.NextNode.ID);
+				//Debug.Log("BTMAIGoToLocation: running, going to next node " + MyParty.NextNode.ID);
 				return BTResult.Running;
 			}
 		}

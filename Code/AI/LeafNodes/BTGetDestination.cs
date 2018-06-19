@@ -38,7 +38,8 @@ public class BTGetDestination : BTLeaf
 
 	public override BTResult Exit (BTResult result)
 	{
-		Debug.Log("BTGetDestination: " + result);
+		if(result != BTResult.Fail)
+			Debug.Log("BTGetDestination: " + result);
 		return result;
 	}
 }

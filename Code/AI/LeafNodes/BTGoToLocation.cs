@@ -40,12 +40,17 @@ public class BTGoToLocation : BTLeaf
 					MyParty.NextTwoNodes.Clear();
 					return Exit(BTResult.Fail);
 				}
-				return Exit(BTResult.Success);
+				else
+				{
+					MyParty.PrevNode = MyParty.NextNode;
+					MyParty.NextTwoNodes.Clear();
+					return Exit(BTResult.Success);
+				}
 			}
 			else
 			{
 				MyAI.Whiteboard.Parameters["Destination"] = MyParty.NextNode.Location.RealPos;
-				Debug.Log("BTGoToLocation: running, going to next node");
+				//Debug.Log("BTGoToLocation: running, going to next node");
 				return BTResult.Running;
 			}
 		}

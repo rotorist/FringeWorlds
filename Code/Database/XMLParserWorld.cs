@@ -309,7 +309,7 @@ public class XMLParserWorld
 				string targetSystem = "";
 				string exitGateID = "";
 				List<string> neighborIDs = new List<string>();
-
+				Vector3 spawnDisposition = Vector3.zero;
 
 				foreach(XmlNode subnode in content)
 				{
@@ -346,6 +346,10 @@ public class XMLParserWorld
 					{
 						neighborIDs.Add(subnode.InnerText);
 					}
+					if(subnode.Name == "spawndisposition")
+					{
+						spawnDisposition = DBManager.ParseXmlVector3(subnode.FirstChild);
+					}
 				}
 
 				if(stationType == "JumpGate")
@@ -360,6 +364,7 @@ public class XMLParserWorld
 					jumpGateData.NeighborIDs = neighborIDs;
 					jumpGateData.NavNodeType = NavNodeType.JumpGate;
 					jumpGateData.SystemID = systemID;
+					jumpGateData.SpawnDisposition = spawnDisposition;
 					systemData.JumpGates.Add(jumpGateData);
 					systemData.ChildNodes.Add(jumpGateData);
 					systemData.NeighborIDs.Add(targetSystem);
@@ -653,6 +658,15 @@ public class XMLParserWorld
 				_xmlWriter.WriteFullEndElement();
 				_xmlWriter.WriteStartElement("exitgateid");
 				_xmlWriter.WriteString(gate.ExitGateID);
+				_xmlWriter.WriteFullEndElement();
+
+				Vector3 spawnDisposition = gate.transform.forward * 15;
+				_xmlWriter.WriteStartElement("spawndisposition");
+				_xmlWriter.WriteStartElement("vector3");
+				_xmlWriter.WriteAttributeString("x", spawnDisposition.x.ToString());
+				_xmlWriter.WriteAttributeString("y", spawnDisposition.y.ToString());
+				_xmlWriter.WriteAttributeString("z", spawnDisposition.z.ToString());
+				_xmlWriter.WriteEndElement();
 				_xmlWriter.WriteFullEndElement();
 			}
 

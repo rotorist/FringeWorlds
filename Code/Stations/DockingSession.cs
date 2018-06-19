@@ -174,6 +174,10 @@ public class DockingSession : DockSessionBase
 				{
 					GameManager.Inst.PlayerControl.DockComplete(ParentStation, StationType.Station);
 				}
+				else
+				{
+					Requester.MyAI.IsDocked = true;
+				}
 
 				ParentStation.OnDockingSessionComplete(this);
 			}
