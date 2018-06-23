@@ -98,7 +98,7 @@ public class BTMAIGoToLocation : BTLeaf
 
 	public override BTResult Exit (BTResult result)
 	{
-		Debug.Log("MAIBTGoToLocation: " + result);
+		Debug.Log("MAIBTGoToLocation: " + result + " party " + MyParty.PartyNumber);
 		if(MyParty != null)
 		{
 			MyParty.Destination = Vector3.zero;

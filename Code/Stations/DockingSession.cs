@@ -56,6 +56,7 @@ public class DockingSession : DockSessionBase
 			}
 			else
 			{
+				
 				requester.Show();
 			}
 

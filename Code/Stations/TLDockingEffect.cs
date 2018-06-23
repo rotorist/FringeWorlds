@@ -23,7 +23,7 @@ public class TLDockingEffect : MonoBehaviour
 		//0 = nothing shows
 		//1 = only outer ring
 		//2 = everything
-
+		//Debug.Log("Setting stage " + stage);
 		ParticleSystem.EmissionModule outerRingEm = OuterRing.emission;
 		ParticleSystem.EmissionModule innerRingEm = InnerRing.emission;
 		ParticleSystem.EmissionModule centerDustEm = CenterDust.emission;

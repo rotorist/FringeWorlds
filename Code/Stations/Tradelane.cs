@@ -19,6 +19,8 @@ public class Tradelane : StationBase
 	public string NeighborAID;
 	public string NeighborBID;
 
+
+
 	private int _dockingStageA;//0 docking not initiated; 1 only ring; 2 all ready; 3 transporting
 	private int _dockingStageB;
 	private float _dockingTimerA;
@@ -166,7 +168,7 @@ public class Tradelane : StationBase
 
 	public void ClearSession(int direction)
 	{
-		Debug.Log("Clearing session, direction " + direction + " I am " + ID);
+		//Debug.Log("Clearing session, direction " + direction + " I am " + ID);
 		if(direction < 0)
 		{
 			_sessionA = null;
@@ -201,6 +203,31 @@ public class Tradelane : StationBase
 		}
 	}
 
+	public bool IsSessionOnMe(TLTransitSession session)
+	{
+		if(_sessionA == session)
+		{
+			return true;
+		}
+		if(_sessionB == session)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public int GetTLSessionDockingStage(TLTransitSession session)
+	{
+		if(_sessionA == session)
+		{
+			return _dockingStageA;
+		}
+		if(_sessionB == session)
+		{
+			return _dockingStageB;
+		}
+		return -1;
+	}
 
 	private void SetNormalLightStates()
 	{

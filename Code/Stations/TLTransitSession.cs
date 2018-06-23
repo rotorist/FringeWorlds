@@ -44,7 +44,7 @@ public class TLTransitSession : DockSessionBase
 
 	public void UpdateTransit()
 	{
-		Debug.Log("TLTransit stage " + Stage + " parent lane " + CurrentTradelane.ID);
+		//Debug.Log("TLTransit stage " + Stage + " parent lane " + CurrentTradelane.ID);
 		if(Stage == TLSessionStage.Initializing)
 		{
 			
@@ -129,7 +129,10 @@ public class TLTransitSession : DockSessionBase
 
 			if(myDist / totalDist < 0.66f && myDist / totalDist > 0.2f)
 			{
-				CurrentTradelane.ClearSession(Direction);
+				if(CurrentTradelane.IsSessionOnMe(this))
+				{
+					CurrentTradelane.ClearSession(Direction);
+				}
 				((Tradelane)NextTrigger.ParentStation).AssignLiveSession(Direction, this);
 			}
 			//if 4/5 way in, go back to FindingDest

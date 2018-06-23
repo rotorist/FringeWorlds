@@ -20,10 +20,10 @@ public class MacroAI
 		party.SpawnedShips = new List<ShipBase>();
 
 		List<string> keyList = new List<string>(GameManager.Inst.WorldManager.AllSystems.Keys);
-		StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems["carolina_system"];
+		StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems["washington_system"];
 		party.CurrentSystemID = currentSystem.ID;
-		StationData currentStation = currentSystem.GetStationByID("wilmington_station");
-		party.DockedStationID = "wilmington_station";
+		StationData currentStation = currentSystem.GetStationByID("planet_colombia_landing");
+		party.DockedStationID = "planet_colombia_landing";
 		Transform origin = GameObject.Find("Origin").transform;
 		party.Location = new RelLoc(origin.position, currentStation.Location.RealPos, origin);//Vector3.zero;//new Vector3(-100, 0.1f, 34);//
 		party.PartyNumber = _lastUsedPartyNumber + 1;
@@ -93,14 +93,14 @@ public class MacroAI
 			if(party.CurrentSystemID == GameManager.Inst.WorldManager.CurrentSystem.ID)
 			{	
 				
-				if(party.NextNode != null)
-					Debug.Log("next node : " + party.NextNode.ID);
+				//if(party.NextNode != null)
+					//Debug.Log("next node : " + party.NextNode.ID);
 
 
 
 				if(party.SpawnedShipsLeader == null)
 				{
-					Debug.LogError("Spawning leader!");
+					
 					party.SpawnedShipsLeader = GameManager.Inst.NPCManager.SpawnAIShip("LightFighter", ShipType.Fighter, party.FactionID, party);
 					party.SpawnedShipsLeader.transform.position = party.Location.RealPos;
 					party.SpawnedShips.Add(party.SpawnedShipsLeader);
@@ -109,11 +109,13 @@ public class MacroAI
 					ai.Deactivate();
 					if(party.DockedStationID != "")
 					{
-						Debug.LogError("docked!");
+						Debug.LogError("docked! at " + party.DockedStationID);
 						party.SpawnedShipsLeader.Hide();
 						ai.IsDocked = true;
 						ai.MyShip.DockedStationID = party.DockedStationID;
 					}
+					ai.MyShip.name = "AIShip-" + (GameManager.Inst.NPCManager.AllShips.Count+1);
+					Debug.LogError("Spawning leader! " + ai.MyShip.name + " party " + party.PartyNumber);
 					GameManager.Inst.NPCManager.AddExistingShip(ai.MyShip);
 				}
 
@@ -502,7 +504,7 @@ public class MacroAI
 
 		if(prevTaskType == MacroAITaskType.None)
 		{
-			if(UnityEngine.Random.value > 0.1f)
+			if(UnityEngine.Random.value > 0.3f)
 			{
 				prevTaskType = MacroAITaskType.Stay;
 			}
@@ -530,7 +532,7 @@ public class MacroAI
 		{
 			task.TaskType = MacroAITaskType.Travel;
 			List<string> keyList = new List<string>(GameManager.Inst.WorldManager.AllSystems.Keys);
-			if(Time.time < 5)
+			if(false)
 			{
 				Debug.LogError("new task for initial test");
 				//StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems[keyList[UnityEngine.Random.Range(0, keyList.Count)]];
@@ -538,7 +540,7 @@ public class MacroAI
 
 				task.TravelDestSystemID = destSystem.ID;
 				//task.TravelDestNodeID = destSystem.Stations[UnityEngine.Random.Range(0, destSystem.Stations.Count)].ID;
-				task.TravelDestNodeID = "planet_colombia_landing";
+				task.TravelDestNodeID = "annandale_station";
 				task.IsDestAStation = true;
 				//task.TravelDestCoord = new RelLoc(destSystem.OriginPosition, new Vector3(-28.3f, 5f, 418.8f), null);
 			}

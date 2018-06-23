@@ -39,13 +39,13 @@ public class BTUndockStation : BTLeaf
 			}
 			else
 			{
-				Debug.Log("BTUndock: running");
+				//Debug.Log("BTUndock: running");
 				return BTResult.Running;
 			}
 		}
 		else
 		{
-			Debug.Log("BTUndock: running");
+			//Debug.Log("BTUndock: running");
 			return BTResult.Running;
 		}
 

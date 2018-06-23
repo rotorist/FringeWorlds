@@ -36,7 +36,7 @@ public class BTDockAtNextNode : BTLeaf
 			{
 				_dockingStage = 0;
 				MyAI.Whiteboard.Parameters["Destination"] = MyParty.NextNode.Location.RealPos;
-				Debug.Log("BTDockAtNextNode: running, going towards station position " + MyParty.NextNode.Location.RealPos);
+				//Debug.Log("BTDockAtNextNode: running, going towards station position " + MyParty.NextNode.Location.RealPos);
 				return BTResult.Running;
 			}
 			else if(_dockingStage == 0)
@@ -65,7 +65,7 @@ public class BTDockAtNextNode : BTLeaf
 				}
 				else
 				{
-					Debug.Log("BTDockAtNextNode: running");
+					//Debug.Log("BTDockAtNextNode: running");
 					return BTResult.Running;
 				}
 			}
@@ -88,7 +88,7 @@ public class BTDockAtNextNode : BTLeaf
 
 					}
 				}
-				Debug.Log("BTDockAtNextNode: running");
+				//Debug.Log("BTDockAtNextNode: running");
 				return BTResult.Running;
 			}
 
@@ -125,6 +125,7 @@ public class BTDockAtNextNode : BTLeaf
 
 					if(result == DockRequestResult.Busy)
 					{
+						MyAI.Whiteboard.Parameters["Destination"] = Vector3.zero;
 						return BTResult.Running;
 					}
 					else if(result == DockRequestResult.Deny)
@@ -149,7 +150,7 @@ public class BTDockAtNextNode : BTLeaf
 				{
 					_dockingStage = 0;
 					MyAI.Whiteboard.Parameters["Destination"] = MyParty.NextNode.Location.RealPos;
-					Debug.Log("BTDockAtNextNode: running next node " + MyParty.NextNode.ID);
+					//Debug.Log("BTDockAtNextNode: running next node " + MyParty.NextNode.ID);
 					return BTResult.Running;
 				}
 				else if(_dockingStage == 0)
@@ -170,11 +171,13 @@ public class BTDockAtNextNode : BTLeaf
 					{
 						if(nextNextNode.ID == currentLane.NeighborAID)
 						{
-							_dockStart = currentLane.TriggerA.transform.position - currentLane.TriggerA.transform.up * 10;
+							_dockStart = currentLane.TriggerA.transform.position - (currentLane.TriggerA.transform.up 
+								+ new Vector3(UnityEngine.Random.Range(-0.3f, 0.3f), UnityEngine.Random.Range(-0.3f, 0.3f), UnityEngine.Random.Range(-0.3f, 0.3f))).normalized * UnityEngine.Random.Range(10f, 30f);
 						}
 						else if(nextNextNode.ID == currentLane.NeighborBID)
 						{
-							_dockStart = currentLane.TriggerB.transform.position - currentLane.TriggerB.transform.up * 10;
+							_dockStart = currentLane.TriggerB.transform.position - (currentLane.TriggerB.transform.up 
+								+ new Vector3(UnityEngine.Random.Range(-0.3f, 0.3f), UnityEngine.Random.Range(-0.3f, 0.3f), UnityEngine.Random.Range(-0.3f, 0.3f))).normalized * UnityEngine.Random.Range(10f, 30f);
 						}
 						else
 						{
@@ -188,14 +191,14 @@ public class BTDockAtNextNode : BTLeaf
 					}
 				}
 
-				GameObject.Find("Sphere").transform.position = _dockStart;
+				//GameObject.Find("Sphere").transform.position = _dockStart;
 
 				if(_dockingStage == 1)
 				{
 					if(Vector3.Distance(_dockStart, MyAI.MyShip.transform.position) > 5)
 					{
 						MyAI.Whiteboard.Parameters["Destination"] = _dockStart;
-						Debug.Log("BTDockAtNextNode: going to dock start " + Vector3.Distance(_dockStart, MyAI.MyShip.transform.position));
+						//Debug.Log("BTDockAtNextNode: going to dock start " + Vector3.Distance(_dockStart, MyAI.MyShip.transform.position));
 						return BTResult.Running;
 					}
 					else
@@ -211,14 +214,14 @@ public class BTDockAtNextNode : BTLeaf
 			if(MyParty.CurrentTLSession != null && MyAI.MyShip.IsInPortal)
 			{
 				float distToNextNode = Vector3.Distance(MyAI.MyShip.transform.position, MyParty.NextNode.Location.RealPos);
-				Debug.Log(distToNextNode + " next node " + MyParty.NextNode.ID);
+				//Debug.Log(distToNextNode + " next node " + MyParty.NextNode.ID);
 				if(distToNextNode < 10)
 				{
 					
 					if(MyParty.NextNextNode == null || MyParty.NextNextNode.NavNodeType != NavNodeType.Tradelane)
 					{
 						MyParty.CurrentTLSession.Stage = TLSessionStage.Cancelling;
-						Debug.LogError("BTDockAtNextNode tradelane: cancel sent");
+						//Debug.LogError("BTDockAtNextNode tradelane: cancel sent");
 					}
 					MyParty.PrevNode = MyParty.NextNode;
 					Debug.LogError("BTDockAtNextNode tradelane: Successful " + MyParty.NextNode.ID);
@@ -226,7 +229,6 @@ public class BTDockAtNextNode : BTLeaf
 				}
 				else
 				{
-					Debug.Log("BTDockAtNextNode: running");
 					return BTResult.Running;
 				}
 			}
@@ -239,6 +241,8 @@ public class BTDockAtNextNode : BTLeaf
 
 				if(result == DockRequestResult.Busy)
 				{
+					Debug.Log("tradelane is busy");
+					MyAI.Whiteboard.Parameters["Destination"] = Vector3.zero;
 					return BTResult.Running;
 				}
 				else if(result == DockRequestResult.Deny)
@@ -258,17 +262,21 @@ public class BTDockAtNextNode : BTLeaf
 				{
 					if(MyAI.MyShip.RB.velocity.magnitude < 0.1f || _dockingStage == 3)
 					{
-						//fly towards docking trigger
-						Vector3 dockingTrigger = MyParty.CurrentTLSession.CurrentTrigger.transform.position;
-						MyAI.Whiteboard.Parameters["Destination"] = dockingTrigger;
-						_dockingStage = 3;
+						Tradelane currentLane = GameManager.Inst.WorldManager.CurrentSystem.GetTradelaneByID(MyParty.NextNode.ID);
+						if(currentLane.GetTLSessionDockingStage(MyParty.CurrentTLSession) >= 2)
+						{
+							//fly towards docking trigger
+							Vector3 dockingTrigger = MyParty.CurrentTLSession.CurrentTrigger.transform.position;
+							MyAI.Whiteboard.Parameters["Destination"] = dockingTrigger;
+							_dockingStage = 3;
+						}
 					}
 					else if(_dockingStage == 2)
 					{
 						MyAI.Whiteboard.Parameters["Destination"] = Vector3.zero;
 					}
 				}
-				Debug.Log("BTDockAtNextNode: running");
+				//Debug.Log("BTDockAtNextNode: running");
 				return BTResult.Running;
 			}
 		}
@@ -280,7 +288,7 @@ public class BTDockAtNextNode : BTLeaf
 				return Exit(BTResult.Fail);
 			}
 
-			Debug.Log("Trying to dock at jump gate");
+			//Debug.Log("Trying to dock at jump gate");
 			JumpGate jg = (JumpGate)GameManager.Inst.WorldManager.CurrentSystem.GetStationByID(MyParty.NextNode.ID);
 			if(_waitDistance == 0)
 			{
@@ -292,7 +300,7 @@ public class BTDockAtNextNode : BTLeaf
 			if(Vector3.Distance(MyAI.MyShip.transform.position, MyParty.NextNode.Location.RealPos) > _waitDistance)
 			{
 				MyAI.Whiteboard.Parameters["Destination"] = _dockStart;
-				Debug.Log("BTDockAtNextNode: running " + _waitDistance);
+				//Debug.Log("BTDockAtNextNode: running " + _waitDistance);
 				return BTResult.Running;
 			}
 
@@ -318,7 +326,7 @@ public class BTDockAtNextNode : BTLeaf
 					{
 						_dockingStage = 1;
 					}
-					Debug.Log("Going to dockstart");
+					//Debug.Log("Going to dockstart");
 				}
 				else if(_dockingStage == 1)
 				{
@@ -336,10 +344,10 @@ public class BTDockAtNextNode : BTLeaf
 				{
 					MyAI.Whiteboard.Parameters["IgnoreAvoidance"] = true;
 					MyAI.Whiteboard.Parameters["Destination"] = jg.DockingTrigger.transform.position;
-					Debug.Log("Going to dock trigger");
+					//Debug.Log("Going to dock trigger");
 				}
 				//GameObject.Find("Sphere").transform.position = (Vector3)MyAI.Whiteboard.Parameters["Destination"];
-				Debug.Log("BTDockAtNextNode: running");
+				//Debug.Log("BTDockAtNextNode: running");
 				return BTResult.Running;
 			}
 			else
@@ -352,7 +360,7 @@ public class BTDockAtNextNode : BTLeaf
 				{
 					MyAI.Whiteboard.Parameters["Destination"] = _dockStart;
 				}
-				Debug.Log("BTDOckAtNextNode: waiting for jumpgate to start");
+				//Debug.Log("BTDOckAtNextNode: waiting for jumpgate to start");
 				return BTResult.Running;
 			}
 

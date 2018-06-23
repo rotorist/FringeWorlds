@@ -120,8 +120,11 @@ public class NPCManager
 	public void TestSpawn()
 	{
 		//spawn 1 party
-		//MacroAI.GenerateParties();
-		MacroAI.GenerateTestParty();
+		for(int i=0; i< 10; i++)
+		{
+			MacroAI.GenerateParties();
+		}
+		//MacroAI.GenerateTestParty();
 	}
 
 	public ShipBase SpawnAIShip(string shipModelID, ShipType shipType, string factionID, MacroAIParty party)

@@ -84,7 +84,7 @@ public class AI : MonoBehaviour
 	{
 		_isActive = true;
 		Collider collider = MyShip.ShipModel.GetComponent<Collider>();
-		collider.isTrigger = true;
+		collider.isTrigger = false;
 	}
 
 	public void Deactivate()

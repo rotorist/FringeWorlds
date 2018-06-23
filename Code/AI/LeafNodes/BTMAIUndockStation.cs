@@ -23,9 +23,10 @@ public class BTMAIUndockStation : BTLeaf
 		{
 			if(ship.MyAI != null)
 			{
-				Debug.LogError("MAI undocked from station");
+				Debug.LogError("MAI undocked from station " + MyParty.DockedStationID + " I am party " + MyParty.PartyNumber);
 				ship.DockedStationID = "";
 				ship.MyAI.IsDocked = false;
+				ship.Show();
 			}
 		}
 

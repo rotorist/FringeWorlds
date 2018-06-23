@@ -50,7 +50,7 @@ public class BTGetNextNode : BTLeaf
 
 			if(MyParty.NextNode != null)
 			{
-				Debug.LogError("BTGetNextNode: " + MyParty.NextNode.ID);
+				Debug.LogError("BTGetNextNode: " + MyParty.NextNode.ID + " for party " + MyParty.PartyNumber);
 			}
 			else
 			{
@@ -68,7 +68,7 @@ public class BTGetNextNode : BTLeaf
 
 	public override BTResult Exit (BTResult result)
 	{
-		Debug.Log("BTGetNextNode: " + result);
+		Debug.Log("BTGetNextNode: " + result + " for party " + MyParty.PartyNumber);
 		return result;
 	}
 }
