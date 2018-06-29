@@ -16,26 +16,56 @@ public class BTDockAtNextNode : BTLeaf
 
 	public override BTResult Process ()
 	{
-
-		if(MyAI.IsDocked || MyParty == null || MyParty.NextNode == null)
+		if(MyParty == null)
 		{
 			return Exit(BTResult.Fail);
 		}
 
-		if(MyParty.NextNode.NavNodeType == NavNodeType.Station)
+		bool isFollowerDock = false;
+		if(Parameters.Count > 0 && Parameters[0] == "LeaderDockedStation")
 		{
-			//if not destination then don't dock, just get close enough and move on to next node in GoTo
-			if(MyParty.CurrentTask.TravelDestNodeID != MyParty.NextNode.ID)
+			isFollowerDock = true;
+		}
+
+		if(!isFollowerDock)
+		{
+			if(MyParty.NextNode == null)
 			{
+				//Debug.Log("isdocked " + MyAI.IsDocked + " my party null? " + (MyParty == null) + " next node null? " + (MyParty.NextNode == null));
 				return Exit(BTResult.Fail);
 			}
+		}
+
+		if(isFollowerDock || MyParty.NextNode.NavNodeType == NavNodeType.Station)
+		{
+			NavNode dockNode;
+			if(isFollowerDock)
+			{
+				Debug.Log(MyParty.DockedStationID + " I am " + MyAI.MyShip.name);
+				dockNode = GameManager.Inst.WorldManager.AllNavNodes[MyParty.DockedStationID];
+				if(MyParty.SpawnedShipsLeader.DockedStationID == "")
+				{
+					return Exit(BTResult.Fail);
+				}
+			}
+			else
+			{
+				dockNode = MyParty.NextNode;
+				//if not destination then don't dock, just get close enough and move on to next node in GoTo
+				if(MyParty.CurrentTask.TravelDestNodeID != dockNode.ID)
+				{
+					return Exit(BTResult.Fail);
+				}
+			}
+
+
 
 			//GameObject.Find("Sphere").transform.position = (Vector3)MyAI.Whiteboard.Parameters["Destination"];
 			//if too far away from station then go to node
-			if(Vector3.Distance(MyAI.MyShip.transform.position, MyParty.NextNode.Location.RealPos) > 40)
+			if(Vector3.Distance(MyAI.MyShip.transform.position, dockNode.Location.RealPos) > 40)
 			{
 				_dockingStage = 0;
-				MyAI.Whiteboard.Parameters["Destination"] = MyParty.NextNode.Location.RealPos;
+				MyAI.Whiteboard.Parameters["Destination"] = dockNode.Location.RealPos;
 				//Debug.Log("BTDockAtNextNode: running, going towards station position " + MyParty.NextNode.Location.RealPos);
 				return BTResult.Running;
 			}
@@ -46,17 +76,45 @@ public class BTDockAtNextNode : BTLeaf
 			}
 				
 
-			if(MyAI.MyShip.DockedStationID == MyParty.NextNode.ID)
+			if(MyAI.MyShip.DockedStationID == dockNode.ID)
 			{
 				MyAI.MyShip.Hide();
-				return Exit(BTResult.Success);
+				MyParty.DockedStationID = dockNode.ID;
+
+				Debug.Log("Finished docking, " + MyParty.DockedStationID);
+
+				if(MyAI.MyShip == MyParty.SpawnedShipsLeader)
+				{
+					bool allDocked = true;
+					foreach(ShipBase member in MyAI.MyParty.SpawnedShips)
+					{
+						if(member != MyAI.MyShip && member.DockedStationID == "")
+						{
+							allDocked = false;
+						}
+					}
+					if(allDocked)
+					{
+						Debug.LogError("Everyone has docked! " + MyParty.DockedStationID);
+						return Exit(BTResult.Success);
+					}
+					else
+					{
+						return BTResult.Running;
+					}
+				}
+				else
+				{
+					return Exit(BTResult.Success);
+				}
 			}
 
 			if(_currentSession == null)
 			{
-				DockRequestResult result = GameManager.Inst.WorldManager.CurrentSystem.GetStationByID(MyParty.NextNode.ID).Dock(MyAI.MyShip, out _currentSession);
+				DockRequestResult result = GameManager.Inst.WorldManager.CurrentSystem.GetStationByID(dockNode.ID).Dock(MyAI.MyShip, out _currentSession);
 				if(result == DockRequestResult.Busy)
 				{
+					MyAI.Whiteboard.Parameters["Destination"] = Vector3.zero;
 					return BTResult.Running;
 				}
 				else if(result == DockRequestResult.Deny)
@@ -96,6 +154,11 @@ public class BTDockAtNextNode : BTLeaf
 		else if(MyParty.NextNode.NavNodeType == NavNodeType.Tradelane)
 		{
 			if(MyParty.DestNode.ID == MyParty.NextNode.ID && MyParty.CurrentTLSession == null)
+			{
+				return Exit(BTResult.Fail);
+			}
+
+			if(MyAI.IsDocked)
 			{
 				return Exit(BTResult.Fail);
 			}
@@ -283,7 +346,7 @@ public class BTDockAtNextNode : BTLeaf
 		else if(MyParty.NextNode.NavNodeType == NavNodeType.JumpGate)
 		{
 			//if destination is in same system then don't dock
-			if(MyParty.CurrentTask.TravelDestSystemID == GameManager.Inst.WorldManager.CurrentSystem.ID)
+			if(MyParty.CurrentTask.TravelDestSystemID == GameManager.Inst.WorldManager.CurrentSystem.ID || MyAI.IsDocked)
 			{
 				return Exit(BTResult.Fail);
 			}
@@ -372,7 +435,7 @@ public class BTDockAtNextNode : BTLeaf
 
 	public override BTResult Exit (BTResult result)
 	{
-		Debug.LogError("BTDockAtNextNode: " + result);
+		Debug.LogError("BTDockAtNextNode: " + result + " " + MyAI.MyShip.name);
 		MyAI.Whiteboard.Parameters["IgnoreAvoidance"] = false;
 		_currentSession = null;
 		_waitDistance = 0;

@@ -25,7 +25,7 @@ public class MacroAI
 		StationData currentStation = currentSystem.GetStationByID("planet_colombia_landing");
 		party.DockedStationID = "planet_colombia_landing";
 		Transform origin = GameObject.Find("Origin").transform;
-		party.Location = new RelLoc(origin.position, currentStation.Location.RealPos, origin);//Vector3.zero;//new Vector3(-100, 0.1f, 34);//
+		party.Location = new RelLoc(origin.position, currentStation.Location.RealPos, origin);
 		party.PartyNumber = _lastUsedPartyNumber + 1;
 		_lastUsedPartyNumber = party.PartyNumber;
 
@@ -101,27 +101,28 @@ public class MacroAI
 				if(party.SpawnedShipsLeader == null)
 				{
 					
-					party.SpawnedShipsLeader = GameManager.Inst.NPCManager.SpawnAIShip("LightFighter", ShipType.Fighter, party.FactionID, party);
-					party.SpawnedShipsLeader.transform.position = party.Location.RealPos;
-					party.SpawnedShips.Add(party.SpawnedShipsLeader);
-					AI ai = party.SpawnedShipsLeader.GetComponent<AI>();
-					ai.MyParty = party;
-					ai.Deactivate();
-					if(party.DockedStationID != "")
-					{
-						Debug.LogError("docked! at " + party.DockedStationID);
-						party.SpawnedShipsLeader.Hide();
-						ai.IsDocked = true;
-						ai.MyShip.DockedStationID = party.DockedStationID;
-					}
-					ai.MyShip.name = "AIShip-" + (GameManager.Inst.NPCManager.AllShips.Count+1);
-					Debug.LogError("Spawning leader! " + ai.MyShip.name + " party " + party.PartyNumber);
-					GameManager.Inst.NPCManager.AddExistingShip(ai.MyShip);
+					party.SpawnedShipsLeader = SpawnPartyMember(party);
+					SpawnPartyMember(party);
+					SpawnPartyMember(party);
+					SpawnPartyMember(party);
+					GenerateFormationForParty(party);
 				}
 
 				if(!party.ShouldEnableAI)
 				{
-					party.SpawnedShipsLeader.transform.position = party.Location.RealPos;
+					foreach(ShipBase ship in party.SpawnedShips)
+					{
+						if(party.SpawnedShipsLeader == ship)
+						{
+							ship.transform.position = party.Location.RealPos;
+							ship.transform.LookAt(party.Destination);
+						}
+						else
+						{
+							ship.transform.position = party.SpawnedShipsLeader.transform.TransformPoint(party.Formation[ship]);
+							ship.transform.LookAt(party.Destination);
+						}
+					}
 				}
 				else
 				{
@@ -151,6 +152,8 @@ public class MacroAI
 						{
 							Debug.Log("Activating AI");
 							ai.Activate();
+							//here we need to place all members in formation
+
 						}
 					}
 					else 
@@ -504,7 +507,7 @@ public class MacroAI
 
 		if(prevTaskType == MacroAITaskType.None)
 		{
-			if(UnityEngine.Random.value > 0.3f)
+			if(UnityEngine.Random.value > 0.0f)
 			{
 				prevTaskType = MacroAITaskType.Stay;
 			}
@@ -532,7 +535,7 @@ public class MacroAI
 		{
 			task.TaskType = MacroAITaskType.Travel;
 			List<string> keyList = new List<string>(GameManager.Inst.WorldManager.AllSystems.Keys);
-			if(false)
+			if(Time.time < 10f)
 			{
 				Debug.LogError("new task for initial test");
 				//StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems[keyList[UnityEngine.Random.Range(0, keyList.Count)]];
@@ -601,6 +604,36 @@ public class MacroAI
 
 
 
+
+
+
+	private ShipBase SpawnPartyMember(MacroAIParty party)
+	{
+		ShipBase ship = GameManager.Inst.NPCManager.SpawnAIShip("LightFighter", ShipType.Fighter, party.FactionID, party);
+		ship.transform.position = party.Location.RealPos;
+		party.SpawnedShips.Add(ship);
+		AI ai = ship.GetComponent<AI>();
+		ai.MyParty = party;
+		if(party.SpawnedShipsLeader != null)
+		{
+			ai.Whiteboard.Parameters["FriendlyTarget"] = party.SpawnedShipsLeader;
+		}
+		ai.Deactivate();
+		if(party.DockedStationID != "")
+		{
+			Debug.LogError("docked! at " + party.DockedStationID);
+			ship.Hide();
+			ai.IsDocked = true;
+			ship.DockedStationID = party.DockedStationID;
+		}
+		ship.name = "AIShip-" + (GameManager.Inst.NPCManager.AllShips.Count+1);
+
+		Debug.LogError("Spawning ship! " + ai.MyShip.name + " party " + party.PartyNumber);
+		GameManager.Inst.NPCManager.AddExistingShip(ship);
+
+		return ship;
+	}
+
 	private void DespawnParty(MacroAIParty party)
 	{
 		Debug.Log("Despawning party!");
@@ -619,6 +652,42 @@ public class MacroAI
 		party.TreeSet.Add("MAITravel", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("MAITravel", null, party));
 		party.TreeSet.Add("MAICombat", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("MAICombat", null, party));
 	}
+
+	private void GenerateFormationForParty(MacroAIParty party)
+	{
+		party.Formation = new Dictionary<ShipBase, Vector3>();
+		int currentTier = 1;
+		int i = 0;
+		foreach(ShipBase ship in party.SpawnedShips)
+		{
+			if(party.SpawnedShipsLeader == ship)
+			{
+				continue;
+			}
+			Vector3 disp = Vector3.zero + currentTier * new Vector3(0, 0, -7f);
+			float width = 3f;
+			if(i == 0)
+			{
+				disp.y = 1 * width;
+			}
+			else if(i == 1)
+			{
+				disp.x = -1 * width;
+			}
+			else if(i == 2)
+			{
+				disp.y = -1 * width;
+			}
+			else if(i == 3)
+			{
+				disp.x = 1 * width;
+				i = 0;
+				currentTier ++;
+			}
+			i++;
+			party.Formation.Add(ship, disp);
+		}
+	}
 }
 
 public class MacroAIParty
@@ -630,6 +699,7 @@ public class MacroAIParty
 	public string DockedStationID;
 	public string CurrentSystemID;
 	public float MoveSpeed;
+	public Dictionary<ShipBase, Vector3> Formation;
 
 	public bool IsInTradelane;
 	public TLTransitSession CurrentTLSession;

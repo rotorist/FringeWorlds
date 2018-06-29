@@ -171,12 +171,14 @@ public class DockingSession : DockSessionBase
 				Gate.Close();
 				Gate.SetRedLight();
 				Requester.DockedStationID = ParentStation.ID;
+				Requester.MyAI.MyParty.DockedStationID = ParentStation.ID;
 				if(Requester == GameManager.Inst.PlayerControl.PlayerShip)
 				{
 					GameManager.Inst.PlayerControl.DockComplete(ParentStation, StationType.Station);
 				}
 				else
 				{
+					Debug.Log("Docking completed; requester " + Requester.name);
 					Requester.MyAI.IsDocked = true;
 				}
 

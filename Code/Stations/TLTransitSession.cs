@@ -22,7 +22,18 @@ public class TLTransitSession : DockSessionBase
 		PassengerTargetRotations = new Dictionary<ShipBase, Quaternion>();
 		PassengerTargetPositions = new Dictionary<ShipBase, Vector3>();
 		LeaderPassenger = leader;
-		Passengers.Add(leader);
+		if(leader.MyAI != null && leader.MyAI.MyParty != null)
+		{
+			foreach(ShipBase ship in leader.MyAI.MyParty.SpawnedShips)
+			{
+				Passengers.Add(ship);
+			}
+		}
+		else
+		{
+			Passengers.Add(leader);
+		}
+
 		Direction = direction;
 		Stage = TLSessionStage.None;
 		CurrentTradelane = currentTradelane;
@@ -47,16 +58,23 @@ public class TLTransitSession : DockSessionBase
 		//Debug.Log("TLTransit stage " + Stage + " parent lane " + CurrentTradelane.ID);
 		if(Stage == TLSessionStage.Initializing)
 		{
-			
-
-
-			if(!PassengerTargetRotations.ContainsKey(LeaderPassenger))
+			foreach(ShipBase ship in Passengers)
 			{
-				PassengerTargetRotations.Add(LeaderPassenger, Quaternion.LookRotation(CurrentTrigger.transform.up, Vector3.up));
-			}
-			if(!PassengerTargetPositions.ContainsKey(LeaderPassenger))
-			{
-				PassengerTargetPositions.Add(LeaderPassenger, CurrentTrigger.transform.position);
+				if(!PassengerTargetRotations.ContainsKey(ship))
+				{
+					PassengerTargetRotations.Add(ship, Quaternion.LookRotation(CurrentTrigger.transform.up, Vector3.up));
+				}
+				if(!PassengerTargetPositions.ContainsKey(ship))
+				{
+					if(ship == LeaderPassenger)
+					{
+						PassengerTargetPositions.Add(LeaderPassenger, CurrentTrigger.transform.position);
+					}
+					else
+					{
+						PassengerTargetPositions.Add(ship, CurrentTrigger.transform.TransformPoint(ship.MyAI.MyParty.Formation[ship]));
+					}
+				}
 			}
 
 			Stage = TLSessionStage.Entering;
@@ -73,6 +91,10 @@ public class TLTransitSession : DockSessionBase
 			//check if all passengers are in place
 			if(CheckPassengersInPosition())
 			{
+				foreach(ShipBase passenger in Passengers)
+				{
+					passenger.IsInPortal = true;
+				}
 				Stage = TLSessionStage.FindingDest;
 			}
 		}
@@ -123,6 +145,7 @@ public class TLTransitSession : DockSessionBase
 			Vector3 direction = (NextTrigger.transform.position - LeaderPassenger.transform.position).normalized;
 			LeaderPassenger.transform.position = LeaderPassenger.transform.position + direction * _currentSpeed * Time.fixedDeltaTime;
 			LeaderPassenger.transform.LookAt(NextTrigger.transform);
+			UpdatePassengersPositionRotation();
 			LeaderPassenger.InPortalSpeed = _currentSpeed;
 			//unbusy the current lane
 			float myDist = Vector3.Distance(LeaderPassenger.transform.position, NextTrigger.transform.position);
@@ -164,12 +187,17 @@ public class TLTransitSession : DockSessionBase
 			}
 
 			LeaderPassenger.transform.position = LeaderPassenger.transform.position + direction.normalized * _currentSpeed * Time.fixedDeltaTime;
+			UpdatePassengersPositionRotation();
 			LeaderPassenger.InPortalSpeed = _currentSpeed;
 
 			if(_currentSpeed <= 0)
 			{
 				LeaderPassenger.InPortalSpeed = 0;
 				LeaderPassenger.IsInPortal = false;
+				foreach(ShipBase passenger in Passengers)
+				{
+					passenger.IsInPortal = false;
+				}
 				CurrentTradelane.ClearSession(Direction);
 				Stage = TLSessionStage.None;
 
@@ -194,12 +222,17 @@ public class TLTransitSession : DockSessionBase
 
 			_currentSpeed = Mathf.Clamp(_currentSpeed + acceleration * Time.fixedDeltaTime, 0, 100);
 			LeaderPassenger.transform.position = LeaderPassenger.transform.position + direction.normalized * _currentSpeed * Time.fixedDeltaTime;
+			UpdatePassengersPositionRotation();
 			LeaderPassenger.InPortalSpeed = _currentSpeed;
 			//Debug.LogError(_currentSpeed);
 			if(_currentSpeed <= 0)
 			{
 				LeaderPassenger.InPortalSpeed = 0;
 				LeaderPassenger.IsInPortal = false;
+				foreach(ShipBase passenger in Passengers)
+				{
+					passenger.IsInPortal = false;
+				}
 				CurrentTradelane.ClearSession(Direction);
 				if(NextTrigger != null)
 				{
@@ -226,6 +259,7 @@ public class TLTransitSession : DockSessionBase
 		Debug.Log("Starting tradelane session " + CurrentTradelane.ID);
 		Stage = TLSessionStage.Initializing;
 		LeaderPassenger.IsInPortal = true;
+
 	}
 
 	public void StartMidwaySession()
@@ -250,20 +284,34 @@ public class TLTransitSession : DockSessionBase
 
 	private bool CheckPassengersInPosition()
 	{
+		float angle = Quaternion.Angle(LeaderPassenger.transform.rotation, PassengerTargetRotations[LeaderPassenger]);
+		if(angle > 3)
+		{
+			return false;
+		}
 		foreach(ShipBase passenger in Passengers)
 		{
-			float angle = Quaternion.Angle(passenger.transform.rotation, PassengerTargetRotations[passenger]);
-			if(angle > 3)
-			{
-				return false;
-			}
-			if(Vector3.Distance(passenger.transform.position, PassengerTargetPositions[passenger]) > 0.2f)
+			float dist = Vector3.Distance(passenger.transform.position, PassengerTargetPositions[passenger]);
+			Debug.Log(dist + " " + passenger.name);
+			if(dist > 2f)
 			{
 				return false;
 			}
 		}
 
 		return true;
+	}
+
+	private void UpdatePassengersPositionRotation()
+	{
+		foreach(ShipBase passenger in Passengers)
+		{
+			if(passenger != LeaderPassenger)
+			{
+				passenger.transform.position = LeaderPassenger.transform.TransformPoint(LeaderPassenger.MyAI.MyParty.Formation[passenger]);
+				passenger.transform.rotation = LeaderPassenger.transform.rotation;
+			}
+		}
 	}
 }
 

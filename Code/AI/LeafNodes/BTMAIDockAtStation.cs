@@ -38,6 +38,7 @@ public class BTMAIDockAtStation : BTLeaf
 				}
 			}
 			Debug.Log("MAI Docked at " + MyParty.NextNode.ID);
+
 			return Exit(BTResult.Success);
 		}
 		else if(MyParty.NextNode.NavNodeType == NavNodeType.JumpGate)

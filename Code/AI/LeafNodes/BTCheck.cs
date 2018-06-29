@@ -127,18 +127,21 @@ public class BTCheck : BTLeaf
 				return BTResult.Fail;
 			}
 			break;
-		case "IspartyLeader":
+		case "IsPartyLeader":
 			{
 				if(MyParty.SpawnedShipsLeader == MyAI.MyShip)
 				{
+					//Debug.Log("I'm leader " + MyAI.MyShip.name);
 					result = BTResult.Success;
 				}
 				else
 				{
+					//Debug.Log("I'm follower " + MyAI.MyShip.name);
 					result = BTResult.Fail;
 				}
 			}
 			break;
+		
 		case "HasDestination":
 			{
 				if(MyParty == null || MyParty.CurrentTask == null)
@@ -267,8 +270,18 @@ public class BTCheck : BTLeaf
 		}
 		else
 		{
-			if(MyAI.MyShip.DockedStationID == MyParty.CurrentTask.TravelDestNodeID)
+			bool allDocked = true;
+			foreach(ShipBase ship in MyParty.SpawnedShips)
 			{
+				if(ship.DockedStationID != MyParty.CurrentTask.TravelDestNodeID)
+				{
+					//Debug.Log("BT Check Has Reached Dest: " + ship.name + " " + ship.DockedStationID + " " + " dest: " + MyParty.CurrentTask.TravelDestNodeID);
+					allDocked = false;
+				}
+			}
+			if(allDocked)
+			{
+				Debug.LogError("BT Check Has Reached Dest: All docked");
 				MyParty.HasReachedDestNode = true;
 				MyParty.NextTwoNodes.Clear();
 				return BTResult.Success;

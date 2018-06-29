@@ -22,8 +22,33 @@ public class BTUndockStation : BTLeaf
 			}
 			else
 			{
-				Debug.Log("BTUndock: success!");
-				return Exit(BTResult.Success);
+				Debug.Log("BTUndock: success! " + MyAI.MyShip.name);
+				//check if all members of the party have undocked
+				if(MyAI.MyShip == MyParty.SpawnedShipsLeader)
+				{
+					bool allUndocked = true;
+					foreach(ShipBase ship in MyParty.SpawnedShips)
+					{
+						Debug.Log("docked station id " + ship.DockedStationID + " ship = " + ship.name);
+						if(ship != MyAI.MyShip && ship.DockedStationID != "")
+						{
+							allUndocked = false;
+						}
+					}
+					if(allUndocked)
+					{
+						Debug.LogError("All party has undocked! " + MyAI.MyShip.name);
+						return Exit(BTResult.Success);
+					}
+					else
+					{
+						return BTResult.Running;
+					}
+				}
+				else
+				{
+					return Exit(BTResult.Success);
+				}
 			}
 		}
 

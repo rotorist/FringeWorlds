@@ -31,5 +31,6 @@ public class Whiteboard
 		Parameters.Add("SpeedLimit", 0f);
 		Parameters.Add("StrafeForce", 0f);
 		Parameters.Add("IgnoreAvoidance", false);
+
 	}
 }

@@ -110,7 +110,7 @@ public class AI : MonoBehaviour
 			Vector3 interceptDest = StaticUtility.FirstOrderIntercept(MyShip.transform.position, MyShip.RB.velocity, 0, dest, Vector3.zero);
 			Whiteboard.Parameters["InterceptDest"] = interceptDest;
 			Vector3 los = interceptDest - transform.position;
-			if(isStopping)
+			if(isStopping || los.magnitude < 5f)
 			{
 				los = RB.velocity * -1;
 			}
@@ -122,11 +122,13 @@ public class AI : MonoBehaviour
 
 			}
 
+			//adjust force based on how close is to destination
+			force *= Mathf.Lerp(0.1f, 1f, Mathf.Clamp01(los.magnitude / 10));
 
 
 			if(!_isEngineKilled)
 			{
-				if(Vector3.Angle(MyShip.transform.forward, los) < 30 || isStopping)
+				if(Vector3.Angle(MyShip.transform.forward, los) < 30 || los.magnitude < 10f || isStopping)
 				{
 					RB.AddForce(los.normalized * force);
 				}
@@ -158,8 +160,7 @@ public class AI : MonoBehaviour
 				maxSpeed = speedLimit;
 			}
 
-			//adjust max speed bASED on how close is to destination
-			maxSpeed *= Mathf.Lerp(0.2f, 1f, Mathf.Clamp01(los.magnitude / 10));
+
 
 
 			if(velocity.magnitude > maxSpeed)

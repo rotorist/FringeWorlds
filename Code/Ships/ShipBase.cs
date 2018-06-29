@@ -51,7 +51,10 @@ public class ShipBase : MonoBehaviour
 			shipRenderer.enabled = true;
 			foreach(Renderer r in ShipModel.GetComponentsInChildren<Renderer>())
 			{
-				r.enabled = true;
+				if(r.tag != "Shield")
+				{
+					r.enabled = true;
+				}
 			}
 			EnableColliders();
 		}
