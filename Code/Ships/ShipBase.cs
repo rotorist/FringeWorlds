@@ -31,7 +31,7 @@ public class ShipBase : MonoBehaviour
 	{
 		if(ShipModel != null)
 		{
-			Debug.Log("HIDE SHIP " + this.name);
+			//Debug.Log("HIDE SHIP " + this.name);
 			Renderer shipRenderer = ShipModel.GetComponent<Renderer>();
 			shipRenderer.enabled = false;
 			foreach(Renderer r in ShipModel.GetComponentsInChildren<Renderer>())
@@ -46,7 +46,7 @@ public class ShipBase : MonoBehaviour
 	{
 		if(ShipModel != null)
 		{
-			Debug.Log("SHOW SHIP " + this.name);
+			//Debug.Log("SHOW SHIP " + this.name);
 			Renderer shipRenderer = ShipModel.GetComponent<Renderer>();
 			shipRenderer.enabled = true;
 			foreach(Renderer r in ShipModel.GetComponentsInChildren<Renderer>())

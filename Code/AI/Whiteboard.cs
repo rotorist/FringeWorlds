@@ -12,7 +12,7 @@ public class Whiteboard
 		Parameters = new Dictionary<string, object>();
 
 		//static variables
-		Parameters.Add("FriendlyFollowDist", 15f);
+		Parameters.Add("FriendlyFollowDist", 10f);
 		Parameters.Add("EnemyCloseRange", 40f);
 		Parameters.Add("MinEnemyRange", 10f);
 		Parameters.Add("FiringRange", 60f);

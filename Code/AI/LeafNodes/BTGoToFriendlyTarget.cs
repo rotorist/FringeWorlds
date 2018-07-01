@@ -16,20 +16,21 @@ public class BTGoToFriendlyTarget : BTLeaf
 		ShipBase target = (ShipBase)MyAI.Whiteboard.Parameters[Parameters[0]];
 		if(target != null)
 		{
+			
 			if(MyParty.SpawnedShipsLeader == null || target.MyAI.IsDocked || MyAI.IsDocked)
 			{
-				Debug.LogError("leader is docked in station, or I'm docked in station, can't follow ");
+				//Debug.LogError("leader is docked in station, or I'm docked in station, can't follow ");
 				return Exit(BTResult.Fail);
 			}
 
 			if(MyParty.SpawnedShipsLeader.IsInPortal && MyParty.NextNode.NavNodeType == NavNodeType.Station)
 			{
-				Debug.Log("leader is docking on a station, stop following ");
+				//Debug.Log("leader is docking on a station, stop following ");
 				return BTResult.Running;
 			}
 
 			Vector3 dest = target.transform.position;
-			if(MyParty.Formation.ContainsKey(MyAI.MyShip))
+			if(MyParty.Formation.ContainsKey(MyAI.MyShip) && (MyParty.SpawnedShipsLeader.RB.velocity.magnitude > 6f || MyParty.SpawnedShipsLeader.IsInPortal))
 			{
 				dest = MyParty.SpawnedShipsLeader.transform.TransformPoint(MyParty.Formation[MyAI.MyShip]);
 				MyAI.Whiteboard.Parameters["Destination"] = dest;
@@ -42,6 +43,7 @@ public class BTGoToFriendlyTarget : BTLeaf
 				float dist = Vector3.Distance(MyAI.MyShip.transform.position, dest);
 				if(dist <= (float)MyAI.Whiteboard.Parameters["FriendlyFollowDist"])
 				{
+					MyAI.Whiteboard.Parameters["Destination"] = Vector3.zero;
 					return Exit(BTResult.Success);
 				}
 				else
@@ -61,7 +63,7 @@ public class BTGoToFriendlyTarget : BTLeaf
 
 	public override BTResult Exit (BTResult result)
 	{
-		Debug.Log("Go to friendly " + result + " " + MyAI.MyShip.name);
+		//Debug.Log("Go to friendly " + result + " " + MyAI.MyShip.name);
 		return result;
 	}
 }

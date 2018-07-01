@@ -103,6 +103,10 @@ public class DockingSession : DockSessionBase
 				ParentStation.OnDockingSessionComplete(this);
 				Requester.MyAI.IsDocked = false;
 				Requester.DockedStationID = "";
+				if(Requester == Requester.MyAI.MyParty.SpawnedShipsLeader)
+				{
+					Requester.MyAI.Whiteboard.Parameters["Destination"] = Requester.transform.position + Requester.transform.forward * 15;
+				}
 			}
 		}
 

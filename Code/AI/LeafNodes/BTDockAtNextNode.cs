@@ -41,7 +41,7 @@ public class BTDockAtNextNode : BTLeaf
 			NavNode dockNode;
 			if(isFollowerDock)
 			{
-				Debug.Log(MyParty.DockedStationID + " I am " + MyAI.MyShip.name);
+				//Debug.Log(MyParty.DockedStationID + " I am " + MyAI.MyShip.name);
 				dockNode = GameManager.Inst.WorldManager.AllNavNodes[MyParty.DockedStationID];
 				if(MyParty.SpawnedShipsLeader.DockedStationID == "")
 				{
@@ -81,7 +81,7 @@ public class BTDockAtNextNode : BTLeaf
 				MyAI.MyShip.Hide();
 				MyParty.DockedStationID = dockNode.ID;
 
-				Debug.Log("Finished docking, " + MyParty.DockedStationID);
+				//Debug.Log("Finished docking, " + MyParty.DockedStationID);
 
 				if(MyAI.MyShip == MyParty.SpawnedShipsLeader)
 				{
@@ -234,12 +234,12 @@ public class BTDockAtNextNode : BTLeaf
 					{
 						if(nextNextNode.ID == currentLane.NeighborAID)
 						{
-							_dockStart = currentLane.TriggerA.transform.position - (currentLane.TriggerA.transform.up 
+							_dockStart = currentLane.TriggerA.transform.position - (currentLane.TriggerA.transform.forward 
 								+ new Vector3(UnityEngine.Random.Range(-0.3f, 0.3f), UnityEngine.Random.Range(-0.3f, 0.3f), UnityEngine.Random.Range(-0.3f, 0.3f))).normalized * UnityEngine.Random.Range(10f, 30f);
 						}
 						else if(nextNextNode.ID == currentLane.NeighborBID)
 						{
-							_dockStart = currentLane.TriggerB.transform.position - (currentLane.TriggerB.transform.up 
+							_dockStart = currentLane.TriggerB.transform.position - (currentLane.TriggerB.transform.forward 
 								+ new Vector3(UnityEngine.Random.Range(-0.3f, 0.3f), UnityEngine.Random.Range(-0.3f, 0.3f), UnityEngine.Random.Range(-0.3f, 0.3f))).normalized * UnityEngine.Random.Range(10f, 30f);
 						}
 						else
@@ -435,7 +435,7 @@ public class BTDockAtNextNode : BTLeaf
 
 	public override BTResult Exit (BTResult result)
 	{
-		Debug.LogError("BTDockAtNextNode: " + result + " " + MyAI.MyShip.name);
+		//Debug.LogError("BTDockAtNextNode: " + result + " " + MyAI.MyShip.name);
 		MyAI.Whiteboard.Parameters["IgnoreAvoidance"] = false;
 		_currentSession = null;
 		_waitDistance = 0;

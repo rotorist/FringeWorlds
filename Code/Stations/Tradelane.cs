@@ -109,8 +109,8 @@ public class Tradelane : StationBase
 	public override DockRequestResult Dock (ShipBase requester, out DockSessionBase session)
 	{
 		//determine direction from requester's location
-		float angleA = Vector3.Angle(TriggerA.transform.up, TriggerA.transform.position - requester.transform.position);
-		float angleB = Vector3.Angle(TriggerB.transform.up, TriggerB.transform.position - requester.transform.position);
+		float angleA = Vector3.Angle(TriggerA.transform.forward, TriggerA.transform.position - requester.transform.position);
+		float angleB = Vector3.Angle(TriggerB.transform.forward, TriggerB.transform.position - requester.transform.position);
 
 
 

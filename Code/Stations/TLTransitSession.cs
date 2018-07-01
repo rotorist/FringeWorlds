@@ -62,7 +62,7 @@ public class TLTransitSession : DockSessionBase
 			{
 				if(!PassengerTargetRotations.ContainsKey(ship))
 				{
-					PassengerTargetRotations.Add(ship, Quaternion.LookRotation(CurrentTrigger.transform.up, Vector3.up));
+					PassengerTargetRotations.Add(ship, Quaternion.LookRotation(CurrentTrigger.transform.forward, Vector3.up));
 				}
 				if(!PassengerTargetPositions.ContainsKey(ship))
 				{
@@ -72,7 +72,9 @@ public class TLTransitSession : DockSessionBase
 					}
 					else
 					{
-						PassengerTargetPositions.Add(ship, CurrentTrigger.transform.TransformPoint(ship.MyAI.MyParty.Formation[ship]));
+						Vector3 pos = CurrentTrigger.transform.TransformPoint(ship.MyAI.MyParty.Formation[ship]);
+						Debug.LogError(pos);
+						PassengerTargetPositions.Add(ship, pos);
 					}
 				}
 			}
@@ -174,10 +176,10 @@ public class TLTransitSession : DockSessionBase
 
 			if(direction.magnitude < 50)
 			{
-				direction = NextTrigger.transform.up;
+				direction = NextTrigger.transform.forward;
 			}
 			
-			if(Vector3.Angle((LeaderPassenger.transform.position - NextTrigger.transform.position), NextTrigger.transform.up) < 90)
+			if(Vector3.Angle((LeaderPassenger.transform.position - NextTrigger.transform.position), NextTrigger.transform.forward) < 90)
 			{
 				_currentSpeed = Mathf.Clamp(_currentSpeed + acceleration * Time.fixedDeltaTime, 0, 100);
 			}
@@ -215,9 +217,9 @@ public class TLTransitSession : DockSessionBase
 		{
 			float acceleration = -60f;
 			Vector3 direction = (NextTrigger.transform.position - LeaderPassenger.transform.position);
-			if(Vector3.Angle((LeaderPassenger.transform.position - NextTrigger.transform.position), NextTrigger.transform.up) < 90)
+			if(Vector3.Angle((LeaderPassenger.transform.position - NextTrigger.transform.position), NextTrigger.transform.forward) < 90)
 			{
-				direction = NextTrigger.transform.up;
+				direction = NextTrigger.transform.forward;
 			}
 
 			_currentSpeed = Mathf.Clamp(_currentSpeed + acceleration * Time.fixedDeltaTime, 0, 100);
@@ -293,7 +295,7 @@ public class TLTransitSession : DockSessionBase
 		{
 			float dist = Vector3.Distance(passenger.transform.position, PassengerTargetPositions[passenger]);
 			Debug.Log(dist + " " + passenger.name);
-			if(dist > 2f)
+			if(dist > 3f)
 			{
 				return false;
 			}

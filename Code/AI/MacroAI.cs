@@ -637,10 +637,15 @@ public class MacroAI
 	private void DespawnParty(MacroAIParty party)
 	{
 		Debug.Log("Despawning party!");
-		GameManager.Inst.NPCManager.RemoveExistingShip(party.SpawnedShipsLeader);
-		party.SpawnedShips.Remove(party.SpawnedShipsLeader);
-		party.SpawnedShipsLeader.GetComponent<AI>().Deactivate();
-		GameObject.Destroy(party.SpawnedShipsLeader.gameObject);
+		List<ShipBase> spawnedShipsCopy = new List<ShipBase>(party.SpawnedShips);
+		foreach(ShipBase ship in spawnedShipsCopy)
+		{
+			GameManager.Inst.NPCManager.RemoveExistingShip(ship);
+			party.SpawnedShips.Remove(ship);
+			ship.GetComponent<AI>().Deactivate();
+			GameObject.Destroy(ship.gameObject);
+		}
+
 		party.SpawnedShipsLeader = null;
 		party.ShouldEnableAI = false;
 	}

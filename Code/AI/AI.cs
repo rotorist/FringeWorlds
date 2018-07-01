@@ -210,10 +210,17 @@ public class AI : MonoBehaviour
 		}
 		else
 		{
-			aimPoint = (Vector3)Whiteboard.Parameters["InterceptDest"];
+			
+			if(RB.velocity.magnitude > 3f)
+			{
+				aimPoint = (Vector3)Whiteboard.Parameters["InterceptDest"];
+			}
 		}
 
+
 		Whiteboard.Parameters["AimPoint"] = aimPoint;
+		//Debug.Log("aimpoint " + aimPoint + " " + MyShip.name + " dest " + dest);
+		Vector3 distToDest = dest - MyShip.transform.position;
 
 		if(aimPoint != Vector3.zero)
 		{
@@ -226,11 +233,12 @@ public class AI : MonoBehaviour
 				aimDir = aimPoint - MyShip.transform.position;
 			}
 		}
-		else if(dest != Vector3.zero)
+		else if(dest != Vector3.zero && distToDest.magnitude > 5)
 		{
 			//Quaternion rotation = Quaternion.LookRotation(dest - MyShip.transform.position);
 			//transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * turnRate);
-			AddLookTorque(dest - MyShip.transform.position);
+
+			AddLookTorque(distToDest);
 		}
 		else
 		{
@@ -240,6 +248,10 @@ public class AI : MonoBehaviour
 				//Quaternion rotation = Quaternion.LookRotation(velocity);
 				//transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * 2f);
 				AddLookTorque(velocity);
+			}
+			else
+			{
+				AddLookTorque(MyParty.SpawnedShipsLeader.transform.forward);
 			}
 		}
 
@@ -265,9 +277,9 @@ public class AI : MonoBehaviour
 		Vector3 cross = Vector3.Cross(transform.forward, direction).normalized;
 		RB.AddTorque(cross * angle * 0.2f);
 		//get the angle between transform.right and direction projected on plane with up normal
-		Vector3 proj = Vector3.ProjectOnPlane(direction, transform.up);
-		float horizontalAngle = Vector3.Angle(transform.right, proj);
-		RB.AddTorque(transform.forward * (horizontalAngle - 90) * 0.01f);
+		//Vector3 proj = Vector3.ProjectOnPlane(direction, transform.up);
+		float horizontalAngle = Vector3.Angle(transform.right, Vector3.up);
+		RB.AddTorque(transform.forward * (horizontalAngle - 90) * 0.02f);
 	}
 
 	private void UpdateAvoidance()

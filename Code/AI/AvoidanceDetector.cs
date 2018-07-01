@@ -15,7 +15,7 @@ public class AvoidanceDetector : MonoBehaviour
 	
 	public void AvoidanceUpdate()
 	{
-		
+		Avoidance = Vector3.zero;
 		if(ParentShip.MyReference.ShipType == ShipType.Fighter)
 		{
 			Vector3 velocity = ParentShip.RB.velocity;
@@ -66,6 +66,20 @@ public class AvoidanceDetector : MonoBehaviour
 			else
 			{
 				Avoidance.z = Mathf.Clamp01(Avoidance.z - 2);
+			}
+
+			//check if any ships are too close to me
+			foreach(ShipBase ship in GameManager.Inst.NPCManager.AllShips)
+			{
+				if(ship.MyAI.IsActive)
+				{
+					Vector3 dist = ship.transform.position - ParentShip.transform.position;
+
+					if(dist.magnitude < 3)
+					{
+						Avoidance += Vector3.Lerp(dist.normalized, Vector3.zero, (dist.magnitude / 3)) * -0.5f;
+					}
+				}
 			}
 		}
 	}
