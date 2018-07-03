@@ -110,9 +110,13 @@ public class AI : MonoBehaviour
 			Vector3 interceptDest = StaticUtility.FirstOrderIntercept(MyShip.transform.position, MyShip.RB.velocity, 0, dest, Vector3.zero);
 			Whiteboard.Parameters["InterceptDest"] = interceptDest;
 			Vector3 los = interceptDest - transform.position;
-			if(isStopping || los.magnitude < 5f)
+			if(isStopping)
 			{
-				los = RB.velocity * -1;
+				los = RB.velocity * -1f;
+			}
+			else if(los.magnitude < 5f)
+			{
+				los = RB.velocity * -1f * Mathf.Clamp01(los.magnitude / 5f);
 			}
 
 			float force = 5;
@@ -123,7 +127,7 @@ public class AI : MonoBehaviour
 			}
 
 			//adjust force based on how close is to destination
-			force *= Mathf.Lerp(0.1f, 1f, Mathf.Clamp01(los.magnitude / 10));
+			force *= Mathf.Lerp(0.2f, 1f, Mathf.Clamp01(los.magnitude / 10));
 
 
 			if(!_isEngineKilled)
@@ -226,6 +230,7 @@ public class AI : MonoBehaviour
 		{
 			//Quaternion rotation = Quaternion.LookRotation(aimPoint - MyShip.transform.position);
 			//transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * turnRate);
+			Debug.Log("AI Turn state 1 " + MyShip.name);
 			AddLookTorque(aimPoint - MyShip.transform.position);
 
 			if(Vector3.Angle(aimPoint - MyShip.transform.position, MyShip.transform.forward) < 20)
@@ -237,20 +242,22 @@ public class AI : MonoBehaviour
 		{
 			//Quaternion rotation = Quaternion.LookRotation(dest - MyShip.transform.position);
 			//transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * turnRate);
-
+			Debug.Log("AI Turn state 2 " + MyShip.name);
 			AddLookTorque(distToDest);
 		}
 		else
 		{
 			Vector3 velocity = RB.velocity;
-			if(RB.velocity.magnitude > 0)
+			if(RB.velocity.magnitude > 1)
 			{
 				//Quaternion rotation = Quaternion.LookRotation(velocity);
 				//transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * 2f);
+				Debug.Log("AI Turn state 3 " + MyShip.name);
 				AddLookTorque(velocity);
 			}
 			else
 			{
+				Debug.Log("AI Turn state 4 " + MyShip.name);
 				AddLookTorque(MyParty.SpawnedShipsLeader.transform.forward);
 			}
 		}

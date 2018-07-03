@@ -20,10 +20,10 @@ public class MacroAI
 		party.SpawnedShips = new List<ShipBase>();
 
 		List<string> keyList = new List<string>(GameManager.Inst.WorldManager.AllSystems.Keys);
-		StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems["washington_system"];
+		StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems["new_england_system"];
 		party.CurrentSystemID = currentSystem.ID;
-		StationData currentStation = currentSystem.GetStationByID("planet_colombia_landing");
-		party.DockedStationID = "planet_colombia_landing";
+		StationData currentStation = currentSystem.GetStationByID("bethesda_station");
+		party.DockedStationID = "bethesda_station";
 		Transform origin = GameObject.Find("Origin").transform;
 		party.Location = new RelLoc(origin.position, currentStation.Location.RealPos, origin);
 		party.PartyNumber = _lastUsedPartyNumber + 1;
@@ -535,15 +535,15 @@ public class MacroAI
 		{
 			task.TaskType = MacroAITaskType.Travel;
 			List<string> keyList = new List<string>(GameManager.Inst.WorldManager.AllSystems.Keys);
-			if(Time.time < 10f)
+			if(Time.time < 5)
 			{
 				Debug.LogError("new task for initial test");
 				//StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems[keyList[UnityEngine.Random.Range(0, keyList.Count)]];
 				StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems["washington_system"];
-
+				//StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems["new_england_system"];
 				task.TravelDestSystemID = destSystem.ID;
 				//task.TravelDestNodeID = destSystem.Stations[UnityEngine.Random.Range(0, destSystem.Stations.Count)].ID;
-				task.TravelDestNodeID = "annandale_station";
+				task.TravelDestNodeID = "planet_colombia_landing";//"bethesda_station";
 				task.IsDestAStation = true;
 				//task.TravelDestCoord = new RelLoc(destSystem.OriginPosition, new Vector3(-28.3f, 5f, 418.8f), null);
 			}

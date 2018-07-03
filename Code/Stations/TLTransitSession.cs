@@ -294,9 +294,13 @@ public class TLTransitSession : DockSessionBase
 		foreach(ShipBase passenger in Passengers)
 		{
 			float dist = Vector3.Distance(passenger.transform.position, PassengerTargetPositions[passenger]);
-			Debug.Log(dist + " " + passenger.name);
-			if(dist > 3f)
+			//Debug.Log(dist + " " + passenger.name);
+			if(dist > 1f)
 			{
+				if(dist < 8)
+				{
+					passenger.transform.position = Vector3.Lerp(passenger.transform.position, PassengerTargetPositions[passenger], Time.deltaTime * 0.5f);
+				}
 				return false;
 			}
 		}
