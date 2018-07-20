@@ -49,15 +49,18 @@ public class BTSequence : BTComposite
 			if(result == BTResult.Success)
 			{
 				//done with this node
+				//Debug.Log("Done with child " + i);
 				_currentRunningChild = null;
 			}
 			else if(result == BTResult.Fail)
 			{
+				//Debug.Log("Failed child " + i);
 				return BTResult.Fail;
 				this.IsRunning = false;
 			}
 			else if(result == BTResult.Running)
 			{
+				//Debug.Log("Running child " + i);
 				_currentRunningChild = Children[i];
 				return BTResult.Running;
 			}

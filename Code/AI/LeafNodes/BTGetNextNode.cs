@@ -35,8 +35,15 @@ public class BTGetNextNode : BTLeaf
 			}
 			else if(MyParty.PrevNode != null)
 			{
-				MyParty.NextTwoNodes = GameManager.Inst.NPCManager.MacroAI.FindNextNavNode(MyParty.PrevNode, MyParty.DestNode);
-
+				if(!MyParty.HasReachedDestNode)
+				{
+					MyParty.NextTwoNodes = GameManager.Inst.NPCManager.MacroAI.FindNextNavNode(MyParty.PrevNode, MyParty.DestNode);
+				}
+				else
+				{
+					MyParty.NextTwoNodes.Clear();
+					return BTResult.Success;
+				}
 			}
 
 			if(MyParty.NextNode != null && MyParty.PrevNode != null && MyParty.NextNode.NavNodeType == NavNodeType.Tradelane && MyParty.PrevNode.NavNodeType == NavNodeType.Tradelane)

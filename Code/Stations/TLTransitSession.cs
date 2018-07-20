@@ -11,7 +11,7 @@ public class TLTransitSession : DockSessionBase
 	public DockingTrigger CurrentTrigger;
 	public List<ShipBase> Passengers;
 	public Dictionary<ShipBase, Quaternion> PassengerTargetRotations;
-	public Dictionary<ShipBase, Vector3> PassengerTargetPositions;
+	public Dictionary<ShipBase, RelLoc> PassengerTargetPositions;
 	public ShipBase LeaderPassenger;
 
 	private float _currentSpeed;
@@ -20,7 +20,7 @@ public class TLTransitSession : DockSessionBase
 	{
 		Passengers = new List<ShipBase>();
 		PassengerTargetRotations = new Dictionary<ShipBase, Quaternion>();
-		PassengerTargetPositions = new Dictionary<ShipBase, Vector3>();
+		PassengerTargetPositions = new Dictionary<ShipBase, RelLoc>();
 		LeaderPassenger = leader;
 		if(leader.MyAI != null && leader.MyAI.MyParty != null)
 		{
@@ -58,8 +58,10 @@ public class TLTransitSession : DockSessionBase
 		//Debug.Log("TLTransit stage " + Stage + " parent lane " + CurrentTradelane.ID);
 		if(Stage == TLSessionStage.Initializing)
 		{
+			Transform origin = GameObject.Find("Origin").transform;
 			foreach(ShipBase ship in Passengers)
 			{
+				
 				if(!PassengerTargetRotations.ContainsKey(ship))
 				{
 					PassengerTargetRotations.Add(ship, Quaternion.LookRotation(CurrentTrigger.transform.forward, Vector3.up));
@@ -68,13 +70,13 @@ public class TLTransitSession : DockSessionBase
 				{
 					if(ship == LeaderPassenger)
 					{
-						PassengerTargetPositions.Add(LeaderPassenger, CurrentTrigger.transform.position);
+						PassengerTargetPositions.Add(LeaderPassenger, new RelLoc(origin.position, CurrentTrigger.transform.position, origin));
 					}
 					else
 					{
 						Vector3 pos = CurrentTrigger.transform.TransformPoint(ship.MyAI.MyParty.Formation[ship]);
 						Debug.LogError(pos);
-						PassengerTargetPositions.Add(ship, pos);
+						PassengerTargetPositions.Add(ship, new RelLoc(origin.position, pos, origin));
 					}
 				}
 			}
@@ -84,7 +86,7 @@ public class TLTransitSession : DockSessionBase
 		else if(Stage == TLSessionStage.Entering)
 		{
 			//move leader to current lane's detector's position
-			LeaderPassenger.transform.position = Vector3.Lerp(LeaderPassenger.transform.position, PassengerTargetPositions[LeaderPassenger], Time.fixedDeltaTime * 1);
+			LeaderPassenger.transform.position = Vector3.Lerp(LeaderPassenger.transform.position, PassengerTargetPositions[LeaderPassenger].RealPos, Time.fixedDeltaTime * 1);
 			//make leader look towards trigger's up
 			LeaderPassenger.transform.rotation = Quaternion.Lerp(LeaderPassenger.transform.rotation, PassengerTargetRotations[LeaderPassenger], Time.fixedDeltaTime * 1);
 
@@ -171,22 +173,32 @@ public class TLTransitSession : DockSessionBase
 		{
 			float acceleration = -40f;
 			float slowAcceleration = -25f;
-			Vector3 direction = (NextTrigger.transform.position - LeaderPassenger.transform.position);
-			//float distToTrigger = Vector3.Distance(NextTrigger.transform.position, LeaderPassenger.transform.position);
+			Vector3 direction = CurrentTrigger.transform.forward;
 
-			if(direction.magnitude < 50)
+			if(NextTrigger != null)
 			{
-				direction = NextTrigger.transform.forward;
+				direction = (NextTrigger.transform.position - LeaderPassenger.transform.position);
+				//float distToTrigger = Vector3.Distance(NextTrigger.transform.position, LeaderPassenger.transform.position);
+
+				if(direction.magnitude < 50)
+				{
+					direction = NextTrigger.transform.forward;
+				}
+
+				if(Vector3.Angle((LeaderPassenger.transform.position - NextTrigger.transform.position), NextTrigger.transform.forward) < 90)
+				{
+					_currentSpeed = Mathf.Clamp(_currentSpeed + acceleration * Time.fixedDeltaTime, 0, 100);
+				}
+				else
+				{
+					_currentSpeed = Mathf.Clamp(_currentSpeed + slowAcceleration * Time.fixedDeltaTime, 20, 100);
+				}
+
 			}
-			
-			if(Vector3.Angle((LeaderPassenger.transform.position - NextTrigger.transform.position), NextTrigger.transform.forward) < 90)
-			{
-				_currentSpeed = Mathf.Clamp(_currentSpeed + acceleration * Time.fixedDeltaTime, 0, 100);
-			}
-			else
-			{
-				_currentSpeed = Mathf.Clamp(_currentSpeed + slowAcceleration * Time.fixedDeltaTime, 20, 100);
-			}
+
+
+
+
 
 			LeaderPassenger.transform.position = LeaderPassenger.transform.position + direction.normalized * _currentSpeed * Time.fixedDeltaTime;
 			UpdatePassengersPositionRotation();
@@ -216,10 +228,15 @@ public class TLTransitSession : DockSessionBase
 		else if(Stage == TLSessionStage.Cancelling)
 		{
 			float acceleration = -60f;
-			Vector3 direction = (NextTrigger.transform.position - LeaderPassenger.transform.position);
-			if(Vector3.Angle((LeaderPassenger.transform.position - NextTrigger.transform.position), NextTrigger.transform.forward) < 90)
+			Vector3 direction = CurrentTrigger.transform.forward;
+
+			if(NextTrigger != null)
 			{
-				direction = NextTrigger.transform.forward;
+				direction = (NextTrigger.transform.position - LeaderPassenger.transform.position);
+				if(Vector3.Angle((LeaderPassenger.transform.position - NextTrigger.transform.position), NextTrigger.transform.forward) < 90)
+				{
+					direction = NextTrigger.transform.forward;
+				}
 			}
 
 			_currentSpeed = Mathf.Clamp(_currentSpeed + acceleration * Time.fixedDeltaTime, 0, 100);
@@ -293,13 +310,13 @@ public class TLTransitSession : DockSessionBase
 		}
 		foreach(ShipBase passenger in Passengers)
 		{
-			float dist = Vector3.Distance(passenger.transform.position, PassengerTargetPositions[passenger]);
+			float dist = Vector3.Distance(passenger.transform.position, PassengerTargetPositions[passenger].RealPos);
 			//Debug.Log(dist + " " + passenger.name);
 			if(dist > 1f)
 			{
 				if(dist < 8)
 				{
-					passenger.transform.position = Vector3.Lerp(passenger.transform.position, PassengerTargetPositions[passenger], Time.deltaTime * 0.5f);
+					passenger.transform.position = Vector3.Lerp(passenger.transform.position, PassengerTargetPositions[passenger].RealPos, Time.deltaTime * 0.5f);
 				}
 				return false;
 			}

@@ -30,7 +30,7 @@ public class BTGoToFriendlyTarget : BTLeaf
 			}
 
 			Vector3 dest = target.transform.position;
-			if(MyParty.Formation.ContainsKey(MyAI.MyShip) && (MyParty.SpawnedShipsLeader.RB.velocity.magnitude > 6f || MyParty.SpawnedShipsLeader.IsInPortal))
+			if(MyParty.Formation.ContainsKey(MyAI.MyShip) && ((MyParty.SpawnedShipsLeader.RB.velocity.magnitude > 6f && Vector3.Distance(dest, MyAI.MyShip.transform.position) > 8) || MyParty.SpawnedShipsLeader.IsInPortal))
 			{
 				dest = MyParty.SpawnedShipsLeader.transform.TransformPoint(MyParty.Formation[MyAI.MyShip]);
 				MyAI.Whiteboard.Parameters["Destination"] = dest;

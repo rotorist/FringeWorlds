@@ -17,6 +17,7 @@ public class ShipBase : MonoBehaviour
 	public Thruster Thruster;
 	public Scanner Scanner;
 
+	public float TorqueModifier = 1;
 	public float HullCapacity;
 	public float HullAmount;
 	public float TotalPowerCapacity;

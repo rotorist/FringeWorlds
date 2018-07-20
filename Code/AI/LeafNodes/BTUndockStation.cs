@@ -13,6 +13,7 @@ public class BTUndockStation : BTLeaf
 
 	public override BTResult Process ()
 	{
+		
 		if(!MyAI.IsDocked || MyAI.MyShip.DockedStationID == "")
 		{
 			if(_undockSession == null)

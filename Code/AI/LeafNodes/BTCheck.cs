@@ -18,6 +18,40 @@ public class BTCheck : BTLeaf
 		BTResult result = BTResult.Success;
 		switch(Action)
 		{
+		case "IsFighter":
+			{
+				if(MyAI.MyShip.MyReference.ShipType == ShipType.Fighter)
+				{
+					result = BTResult.Success;
+				}
+				else
+				{
+					result = BTResult.Fail;
+				}
+			}
+			break;
+		case "IsCombatNearLeader":
+			{
+				if(MyAI.MyShip == MyParty.SpawnedShipsLeader || MyParty.SpawnedShipsLeader == null)
+				{
+					result = BTResult.Success;
+					break;
+				}
+				else
+				{
+					ShipBase target = MyParty.SpawnedShipsLeader;
+					float dist = Vector3.Distance(MyAI.MyShip.transform.position, target.transform.position);
+					if(dist > 60)
+					{
+						result = BTResult.Fail;
+					}
+					else
+					{
+						result = BTResult.Success;
+					}
+				}
+			}
+			break;
 		case "IsNearFriendlyTarget":
 			{
 				ShipBase target = (ShipBase)MyAI.Whiteboard.Parameters[Parameters[0]];
@@ -62,6 +96,10 @@ public class BTCheck : BTLeaf
 			break;
 		case "IsThereDanger":
 			{
+				//if enemy is too close there's danger
+				//if taking too many hits there's danger
+				//if shield is low (< 25%) there's danger
+				bool isThereDanger = false;
 				ShipBase target = (ShipBase)MyAI.Whiteboard.Parameters["TargetEnemy"];
 				if(target != null)
 				{
@@ -69,8 +107,16 @@ public class BTCheck : BTLeaf
 					if(dist < (float)MyAI.Whiteboard.Parameters["MinEnemyRange"])
 					{
 						result = BTResult.Success;
+						break;
 					}
 				}
+
+				if(MyAI.MyShip.Shield != null && MyAI.MyShip.Shield.GetShieldPercentage() < UnityEngine.Random.Range(0.1f, 0.4f))
+				{
+					result = BTResult.Success;
+					break;
+				}
+
 				result = BTResult.Fail;
 			}
 			break;
@@ -189,6 +235,7 @@ public class BTCheck : BTLeaf
 				}
 				else if(MyParty.CurrentTask == null || MyParty.CurrentTask.TaskType == MacroAITaskType.None)
 				{
+					Debug.Log("task completed " + MyParty.CurrentTask.TaskType);
 					result = BTResult.Success;
 				}
 				else
@@ -197,6 +244,7 @@ public class BTCheck : BTLeaf
 					{
 						if(MyParty.WaitTimer >= MyParty.CurrentTask.StayDuration)
 						{
+							Debug.Log("task completed " + MyParty.CurrentTask.TaskType);
 							result = BTResult.Success;
 						}
 						else
@@ -207,6 +255,7 @@ public class BTCheck : BTLeaf
 					else 
 					{
 						result = HasReachedDestination();
+
 					}
 				}
 
@@ -259,6 +308,10 @@ public class BTCheck : BTLeaf
 	{
 		if(!MyParty.CurrentTask.IsDestAStation)
 		{
+			if(Vector3.Distance(MyAI.MyShip.transform.position, MyParty.DestNode.Location.RealPos) < 30)
+			{
+				MyParty.HasReachedDestNode = true;
+			}
 			if(Vector3.Distance(MyAI.MyShip.transform.position, MyParty.CurrentTask.TravelDestCoord.RealPos) < 30)
 			{
 				return BTResult.Success;

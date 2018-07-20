@@ -60,6 +60,7 @@ public class XMLParserWorld
 			GameObject stationObject = GameObject.Instantiate(Resources.Load("JumpGate")) as GameObject;
 			stationObject.name = jumpGateData.ID;
 			JumpGate gate = stationObject.GetComponent<JumpGate>();
+			gate.ID = jumpGateData.ID;
 			gate.transform.position = jumpGateData.Location.RealPos;
 			gate.transform.eulerAngles = jumpGateData.EulerAngles;
 			gate.TargetSystem = jumpGateData.TargetSystem;

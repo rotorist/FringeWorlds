@@ -17,6 +17,7 @@ public class BTGoToLocation : BTLeaf
 			return Exit(BTResult.Fail);
 		}
 
+		//Debug.Log("processing go to location, param " + Parameters[0]);
 		if(Parameters[0] == "NextNode")
 		{
 			//check if we are near next node
@@ -56,6 +57,7 @@ public class BTGoToLocation : BTLeaf
 		}
 		else if(Parameters[0] == "DestCoord")
 		{
+			Debug.Log("curent task " + MyParty.CurrentTask.TaskType + MyParty.CurrentTask.IsDestAStation);
 			if(MyParty == null || MyParty.CurrentTask == null || MyParty.CurrentTask.TaskType != MacroAITaskType.Travel 
 				|| MyParty.CurrentTask.IsDestAStation || MyAI.MyShip.IsInPortal || MyAI.MyShip.DockedStationID != "")
 			{
@@ -84,6 +86,7 @@ public class BTGoToLocation : BTLeaf
 				if(Vector3.Distance(MyAI.MyShip.transform.position, destCoord) < 30)
 				{
 					Debug.LogError("Completed goto location DestCoord");
+
 					return Exit(BTResult.Success);
 				}
 				else

@@ -40,6 +40,7 @@ public class BTSwitch : BTComposite
 		}
 		else
 		{
+			
 			BTResult result = Children[2].Process();
 			if(result != BTResult.Running)
 			{

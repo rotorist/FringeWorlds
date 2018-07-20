@@ -6,6 +6,9 @@ public class Weapon : MonoBehaviour
 {
 	public ShipBase ParentShip;
 	public float FireRate;
+	public float Range;
+	public GameObject TurretBase;
+	public GameObject Barrel;
 
 	public virtual void Rebuild()
 	{

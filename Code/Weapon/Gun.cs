@@ -43,10 +43,10 @@ public class Gun : Weapon
 			projectile.Damage.ShieldAmount = 25;
 			projectile.Damage.HullAmount = 10;
 
-			projectile.transform.position = transform.position + transform.forward * 2;
-			Vector3 target = transform.position + transform.forward * 100;
+			projectile.transform.position = Barrel.transform.position + Barrel.transform.forward * 2;
+			Vector3 target = Barrel.transform.position + Barrel.transform.forward * 100;
 			projectile.transform.LookAt(target);
-			projectile.Fire(projectile.transform.forward * 30 + ParentShip.RB.velocity, 100, this.ParentShip);
+			projectile.Fire(projectile.transform.forward * 30 + ParentShip.RB.velocity, Range, this.ParentShip);
 
 			_isCooledDown = false;
 			_coolDownTimer = 0;

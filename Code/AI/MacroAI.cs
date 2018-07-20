@@ -10,24 +10,46 @@ public class MacroAI
 
 	public void Initialize()
 	{
-		
+		_lastUsedPartyNumber = 1;
 	}
 
-	public void GenerateTestParty()
+	public void GenerateTestParty(string factionID)
 	{
 		MacroAIParty party = new MacroAIParty();
-		party.FactionID = "otu";
+		party.FactionID = factionID;
 		party.SpawnedShips = new List<ShipBase>();
 
 		List<string> keyList = new List<string>(GameManager.Inst.WorldManager.AllSystems.Keys);
-		StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems["new_england_system"];
+		StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems["washington_system"];
 		party.CurrentSystemID = currentSystem.ID;
-		StationData currentStation = currentSystem.GetStationByID("bethesda_station");
-		party.DockedStationID = "bethesda_station";
+		StationData currentStation = currentSystem.GetStationByID("planet_colombia_landing");
+		party.DockedStationID = "planet_colombia_landing";
 		Transform origin = GameObject.Find("Origin").transform;
 		party.Location = new RelLoc(origin.position, currentStation.Location.RealPos, origin);
 		party.PartyNumber = _lastUsedPartyNumber + 1;
 		_lastUsedPartyNumber = party.PartyNumber;
+
+		//generate loadout
+		party.LeaderLoadout = new Loadout("LightTransporter", ShipType.Transporter);
+		party.LeaderLoadout.WeaponJoints = new Dictionary<string, string>()
+		{
+			{ "GimballLeft", "Gun1" },
+			{ "GimballRight", "Gun1" },
+			{ "TurretLeft", "Turret1" },
+			{ "TurretRight", "Turret1" },
+		};
+
+		party.FollowerLoadouts = new List<Loadout>();
+		for(int i=0; i<UnityEngine.Random.Range(1, 5); i++)
+		{
+			Loadout loadout = new Loadout("LightFighter", ShipType.Fighter);
+			party.FollowerLoadouts.Add(loadout);
+			loadout.WeaponJoints = new Dictionary<string, string>()
+			{
+				{ "GimballLeft", "Gun1" },
+				{ "GimballRight", "Gun1" },
+			};
+		}
 
 
 		MacroAITask task = AssignMacroAITask(MacroAITaskType.None, party);
@@ -41,6 +63,59 @@ public class MacroAI
 		LoadPartyTreeset(party);
 
 		GameManager.Inst.NPCManager.AllParties.Add(party);
+	}
+
+	public MacroAIParty GeneratePlayerParty()
+	{
+		MacroAIParty party = new MacroAIParty();
+		party.FactionID = "player";
+		party.SpawnedShips = new List<ShipBase>();
+		party.SpawnedShips.Add(GameManager.Inst.PlayerControl.PlayerShip);
+		party.IsPlayerParty = true;
+
+		StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems["washington_system"];
+		party.CurrentSystemID = currentSystem.ID;
+		StationData currentStation = null;
+		party.DockedStationID = "";
+		Transform origin = GameObject.Find("Origin").transform;
+		party.Location = new RelLoc(origin.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position, origin);
+		party.PartyNumber = 0;
+		party.SpawnedShipsLeader = GameManager.Inst.PlayerControl.PlayerShip;
+
+		//generate loadout
+		party.LeaderLoadout = new Loadout("LightTransporter", ShipType.Transporter);
+		party.LeaderLoadout.WeaponJoints = new Dictionary<string, string>()
+		{
+			{ "GimballLeft", "Gun1" },
+			{ "GimballRight", "Gun1" },
+			{ "TurretLeft", "Turret1" },
+			{ "TurretRight", "Turret1" },
+		};
+
+		party.FollowerLoadouts = new List<Loadout>();
+		for(int i=0; i<UnityEngine.Random.Range(1, 5); i++)
+		{
+			Loadout loadout = new Loadout("LightFighter", ShipType.Fighter);
+			party.FollowerLoadouts.Add(loadout);
+			loadout.WeaponJoints = new Dictionary<string, string>()
+			{
+				{ "GimballLeft", "Gun1" },
+				{ "GimballRight", "Gun1" },
+			};
+		}
+
+		MacroAITask task = null;
+
+		party.IsInTradelane = false;
+		//party.DestinationCoord = GameManager.Inst.WorldManager.AllNavNodes["cambridge_station"].Location;
+		party.MoveSpeed = 10f;
+		party.NextTwoNodes = new List<NavNode>();
+		party.PrevNode = null;//CreateTempNode(party.Location, "tempstart", GameManager.Inst.WorldManager.AllSystems[party.CurrentSystemID]);
+
+		LoadPartyTreeset(party);
+		GenerateFormationForParty(party);
+
+		return party;
 	}
 
 	public void GenerateParties()
@@ -64,6 +139,28 @@ public class MacroAI
 		}
 		party.PartyNumber = _lastUsedPartyNumber + 1;
 		_lastUsedPartyNumber = party.PartyNumber;
+
+		//generate loadout
+		party.LeaderLoadout = new Loadout("LightTransporter", ShipType.Transporter);
+		party.LeaderLoadout.WeaponJoints = new Dictionary<string, string>()
+		{
+			{ "GimballLeft", "Gun1" },
+			{ "GimballRight", "Gun1" },
+			{ "TurretLeft", "Turret1" },
+			{ "TurretRight", "Turret1" },
+		};
+
+		party.FollowerLoadouts = new List<Loadout>();
+		for(int i=0; i<UnityEngine.Random.Range(1, 5); i++)
+		{
+			Loadout loadout = new Loadout("LightFighter", ShipType.Fighter);
+			party.FollowerLoadouts.Add(loadout);
+			loadout.WeaponJoints = new Dictionary<string, string>()
+			{
+				{ "GimballLeft", "Gun1" },
+				{ "GimballRight", "Gun1" },
+			};
+		}
 
 
 		MacroAITask task = AssignMacroAITask(MacroAITaskType.None, party);
@@ -98,13 +195,9 @@ public class MacroAI
 
 
 
-				if(party.SpawnedShipsLeader == null)
+				if(party.SpawnedShips.Count <= 0)
 				{
-					
-					party.SpawnedShipsLeader = SpawnPartyMember(party);
-					SpawnPartyMember(party);
-					SpawnPartyMember(party);
-					SpawnPartyMember(party);
+					SpawnPartyMembers(party);
 					GenerateFormationForParty(party);
 				}
 
@@ -130,14 +223,21 @@ public class MacroAI
 				}
 
 
-				//if one ship near player then turn on AI for all party
-				//if all party are too far from player then turn off ai for all party
-				party.ShouldEnableAI = false;
+				//if one ship near (<1000) player then turn on AI for all party
+				//if all party are too far (>1500) from player then turn off ai for all party
+				//otherwise stay the same
 				foreach(ShipBase ship in party.SpawnedShips)
 				{
-					if(Vector3.Distance(ship.transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position) < 1000)
+					float distFromPlayer = Vector3.Distance(ship.transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position);
+					if(distFromPlayer < 1000)
 					{
 						party.ShouldEnableAI = true;
+						break;
+					}
+					else if(distFromPlayer > 1500)
+					{
+						party.ShouldEnableAI = false;
+
 					}
 				}
 
@@ -503,6 +603,7 @@ public class MacroAI
 
 	public MacroAITask AssignMacroAITask(MacroAITaskType prevTaskType, MacroAIParty party)
 	{
+		
 		MacroAITask task = new MacroAITask();
 
 		if(prevTaskType == MacroAITaskType.None)
@@ -605,11 +706,19 @@ public class MacroAI
 
 
 
-
-
-	private ShipBase SpawnPartyMember(MacroAIParty party)
+	private void SpawnPartyMembers(MacroAIParty party)
 	{
-		ShipBase ship = GameManager.Inst.NPCManager.SpawnAIShip("LightFighter", ShipType.Fighter, party.FactionID, party);
+		party.SpawnedShipsLeader = SpawnPartyMember(party, party.LeaderLoadout);
+		foreach(Loadout loadOut in party.FollowerLoadouts)
+		{
+			SpawnPartyMember(party, loadOut);
+		}
+	}
+
+	private ShipBase SpawnPartyMember(MacroAIParty party, Loadout loadout)
+	{
+		
+		ShipBase ship = GameManager.Inst.NPCManager.SpawnAIShip(loadout, party.FactionID, party);
 		ship.transform.position = party.Location.RealPos;
 		party.SpawnedShips.Add(ship);
 		AI ai = ship.GetComponent<AI>();
@@ -695,77 +804,3 @@ public class MacroAI
 	}
 }
 
-public class MacroAIParty
-{
-	public Vector3 Destination;
-	public int PartyNumber;
-	public string FactionID;
-	public RelLoc Location;
-	public string DockedStationID;
-	public string CurrentSystemID;
-	public float MoveSpeed;
-	public Dictionary<ShipBase, Vector3> Formation;
-
-	public bool IsInTradelane;
-	public TLTransitSession CurrentTLSession;
-	public List<NavNode> NextTwoNodes;
-	public NavNode NextNode 
-	{ 
-		get 
-		{ 
-			if(NextTwoNodes.Count > 0)
-			{
-				return NextTwoNodes[0]; 
-			}
-			else
-			{
-				return null;
-			}
-		} 
-	}
-	public NavNode NextNextNode 
-	{ 
-		get 
-		{ 
-			if(NextTwoNodes.Count > 1)
-			{
-				return NextTwoNodes[1]; 
-			}
-			else
-			{
-				return null;
-			}
-		} 
-	}
-	public NavNode PrevNode;
-	public NavNode DestNode;
-	public bool HasReachedDestNode;
-	public float WaitTimer;
-	public MacroAITask CurrentTask;
-
-	public float LastUpdateTime;
-
-	public GameObject TestSphere;
-	public List<ShipBase> SpawnedShips;
-	public ShipBase SpawnedShipsLeader;
-	public bool ShouldEnableAI;
-
-	public Dictionary<string,BehaviorTree> TreeSet;
-}
-
-public class MacroAITask
-{
-	public MacroAITaskType TaskType;
-	public float StayDuration;
-	public RelLoc TravelDestCoord;
-	public string TravelDestSystemID;
-	public string TravelDestNodeID;
-	public bool IsDestAStation;
-}
-
-public enum MacroAITaskType
-{
-	None,
-	Travel,
-	Stay,
-}

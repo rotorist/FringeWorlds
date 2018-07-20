@@ -69,9 +69,9 @@ public class NPCManager
 
 		fac1.Relationships = new Dictionary<string, float>() 
 		{	
-			{facp.ID, 0.5f},
+			{facp.ID, 1f},
 			{fac2.ID, 1},
-			{fac3.ID, 1},
+			{fac3.ID, 0},
 			{fac4.ID, 1},
 			{fac5.ID, 1}
 		};
@@ -88,7 +88,7 @@ public class NPCManager
 		fac3.Relationships = new Dictionary<string, float>() 
 		{	
 			{facp.ID, 0.5f},
-			{fac1.ID, 1},
+			{fac1.ID, 0},
 			{fac2.ID, 1},
 			{fac4.ID, 1},
 			{fac5.ID, 1}
@@ -120,17 +120,20 @@ public class NPCManager
 	public void TestSpawn()
 	{
 		//spawn 1 party
-		for(int i=0; i< 10; i++)
+		for(int i=0; i< 5; i++)
 		{
 			//MacroAI.GenerateParties();
 		}
-		MacroAI.GenerateTestParty();
+		//MacroAI.GenerateTestParty("otu_civil_defense");
+		//MacroAI.GenerateTestParty("otu");
 	}
 
-	public ShipBase SpawnAIShip(string shipModelID, ShipType shipType, string factionID, MacroAIParty party)
+	public ShipBase SpawnAIShip(Loadout loadout, string factionID, MacroAIParty party)
 	{
 		ShipBase ship = (GameObject.Instantiate(Resources.Load("AIShip")) as GameObject).GetComponent<ShipBase>();
 
+		string shipModelID = loadout.ShipID;
+		ShipType shipType = loadout.ShipType;
 
 		GameObject shipModel = GameObject.Instantiate(Resources.Load(shipModelID)) as GameObject;
 		shipModel.transform.parent = ship.transform;
@@ -143,6 +146,7 @@ public class NPCManager
 		ship.MyReference.ParentShip = ship;
 		ship.Shield = ship.MyReference.Shield.GetComponent<ShieldBase>();
 		ship.RB = ship.GetComponent<Rigidbody>();
+		ship.RB.inertiaTensor = new Vector3(1, 1, 1);
 		ship.Engine = shipModel.GetComponent<Engine>();
 		ship.Thruster = shipModel.GetComponent<Thruster>();
 		ship.Scanner = shipModel.GetComponent<Scanner>();
@@ -154,7 +158,13 @@ public class NPCManager
 		foreach(WeaponJoint joint in ship.MyReference.WeaponJoints)
 		{
 			joint.ParentShip = ship;
-			joint.LoadWeapon("Gun1");
+			foreach(KeyValuePair<string, string> jointSetup in loadout.WeaponJoints)
+			{
+				if(jointSetup.Key == joint.JointID)
+				{
+					joint.LoadWeapon(jointSetup.Value);
+				}
+			}
 		}
 
 		return ship;

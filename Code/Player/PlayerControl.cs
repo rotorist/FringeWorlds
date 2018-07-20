@@ -22,6 +22,10 @@ public class PlayerControl
 
 	public TLTransitSession CurrentTradelaneSession;
 
+	public bool IsAutopilot;
+	public Autopilot PlayerAutopilot;
+	public MacroAIParty PlayerParty;
+
 	public float Throttle { get { return _throttle; } }
 	public bool IsFAKilled { get { return _isFAKilled; } }
 	public bool IsMouseFlight { get { return _isMouseFlight; } }
@@ -76,13 +80,21 @@ public class PlayerControl
 
 		_isMouseFlight = true;
 
-		/*
-		o = GameObject.Find("AIShip");
-		if(o != null)
-		{
-			TargetShip = o.GetComponent<ShipBase>();
-		}
-		*/
+
+
+		GameManager.Inst.NPCManager.AllShips.Add(PlayerShip);
+
+		PlayerShip.RB.inertiaTensor = new Vector3(1, 1, 1);
+
+
+	}
+
+	public void CreatePlayerParty()
+	{
+		//create MacroAIParty for player
+		PlayerParty = GameManager.Inst.NPCManager.MacroAI.GeneratePlayerParty();
+		PlayerAutopilot = PlayerShip.GetComponent<Autopilot>();
+		PlayerAutopilot.Initialize(PlayerParty, GameManager.Inst.NPCManager.AllFactions["player"]);
 	}
 
 	public void PerFrameUpdate()
@@ -92,11 +104,17 @@ public class PlayerControl
 			return;
 		}
 
+		if(IsAutopilot)
+		{
+			PlayerAutopilot.APUpdate();
+		}
+		else
+		{
+			UpdateMovementKeyInput();
+		}
 
-		UpdateKeyInput();
+		UpdateCommandKeyInput();
 		UpdateMouseInput();
-
-
 		UpdateWeaponAim();
 
 	}
@@ -108,8 +126,17 @@ public class PlayerControl
 			return;
 		}
 
-		UpdateShipRotation();
-		UpdateShipMovement();
+		if(IsAutopilot)
+		{
+			PlayerAutopilot.APFixedUpdate();
+		}
+		else
+		{
+			UpdateShipRotation();
+			UpdateShipMovement();
+		}
+
+		UpdateSpaceDust();
 	}
 
 	public void LateFrameUpdate()
@@ -139,9 +166,57 @@ public class PlayerControl
 		station.Undock(PlayerShip, out session);
 	}
 
+	public void CancelAutopilot()
+	{
+		Debug.Log("cancelling autopilot");
+		IsAutopilot = false;
+		PlayerAutopilot.Deactivate();
+		_isMouseFlight = true;
+		if(CurrentTradelaneSession != null)
+		{
+			CurrentTradelaneSession.Stage = TLSessionStage.Cancelling;
 
+		}
+	}
 
-	private void UpdateKeyInput()
+	public void UpdateCommandKeyInput()
+	{
+		//select
+		if(Input.GetKeyDown(KeyCode.F))
+		{
+			SelectObject();
+		}
+
+		//dock
+		if(Input.GetKeyDown(KeyCode.F3) && !PlayerShip.IsInPortal)
+		{
+			Dock();
+		}
+
+		//cancel
+		if(Input.GetKeyDown(KeyCode.Escape))
+		{
+			if(IsAutopilot)
+			{
+				CancelAutopilot();
+			}
+			else
+			{
+				if(CurrentTradelaneSession != null)
+				{
+					CurrentTradelaneSession.Stage = TLSessionStage.Cancelling;
+				}
+			}
+		}
+
+		//autopilot goto
+		if(Input.GetKeyDown(KeyCode.F2))
+		{
+			AutopilotGoTo();
+		}
+	}
+
+	public void UpdateMovementKeyInput()
 	{
 		float rollSpeed = 1;
 		float rollStopSpeed = 4;
@@ -260,26 +335,7 @@ public class PlayerControl
 			_strafeHor = 0;
 		}
 
-		//select
-		if(Input.GetKeyDown(KeyCode.F))
-		{
-			SelectObject();
-		}
 
-		//dock
-		if(Input.GetKeyDown(KeyCode.F3) && !PlayerShip.IsInPortal)
-		{
-			Dock();
-		}
-
-		//cancel
-		if(Input.GetKeyDown(KeyCode.Escape))
-		{
-			if(CurrentTradelaneSession != null)
-			{
-				CurrentTradelaneSession.Stage = TLSessionStage.Cancelling;
-			}
-		}
 	}
 
 	private void UpdateMouseInput()
@@ -336,7 +392,7 @@ public class PlayerControl
 		{
 			foreach(WeaponJoint joint in PlayerShip.MyReference.WeaponJoints)
 			{
-				if(joint.MountedWeapon != null)
+				if(joint.MountedWeapon != null && joint.ControlMode == TurretControlMode.Manual)
 				{
 					joint.MountedWeapon.Fire();
 				}
@@ -363,14 +419,14 @@ public class PlayerControl
 		float maxYawRate = 1.2f;
 		if(Mathf.Abs(angularVelocity.y) < maxYawRate * engineKillBonus)
 		{
-			PlayerShip.RB.AddTorque(PlayerShip.transform.up * _yawForce * 1.2f);
+			PlayerShip.RB.AddTorque(PlayerShip.transform.up * _yawForce * PlayerShip.TorqueModifier, ForceMode.Acceleration);
 		}
 
 		//Pitch
 		float maxPitchRate = 2f;
 		if(Mathf.Abs(angularVelocity.x) < maxPitchRate * engineKillBonus)
 		{
-			PlayerShip.RB.AddTorque(PlayerShip.transform.right * _pitchForce * 1.2f);
+			PlayerShip.RB.AddTorque(PlayerShip.transform.right * _pitchForce * PlayerShip.TorqueModifier);
 		}
 
 		//Roll is based on key press A and D and it lerps to 0
@@ -379,16 +435,16 @@ public class PlayerControl
 		{
 			if(Mathf.Abs(_rollForce) > 0.02f)
 			{
-				PlayerShip.RB.AddTorque(PlayerShip.transform.forward * _rollForce * 1f);
+				PlayerShip.RB.AddTorque(PlayerShip.transform.forward * _rollForce * PlayerShip.TorqueModifier);
 			}
 			else
 			{
-				PlayerShip.RB.AddTorque(PlayerShip.transform.forward * angularVelocity.z * -0.5f);
+				PlayerShip.RB.AddTorque(PlayerShip.transform.forward * angularVelocity.z * -0.5f * PlayerShip.TorqueModifier);
 			}
 		}
 		else
 		{
-			PlayerShip.RB.AddTorque(PlayerShip.transform.forward * angularVelocity.z * -0.5f);
+			PlayerShip.RB.AddTorque(PlayerShip.transform.forward * angularVelocity.z * -0.5f * PlayerShip.TorqueModifier);
 		}
 
 	}
@@ -478,6 +534,14 @@ public class PlayerControl
 
 
 
+
+
+	}
+
+	private void UpdateSpaceDust()
+	{
+		Vector3 velocity = PlayerShip.RB.velocity;
+
 		//space dust
 		//Debug.DrawRay(PlayerShip.transform.position, velocity);
 		if(PlayerShip.IsInPortal)
@@ -531,12 +595,11 @@ public class PlayerControl
 				}
 			}
 		}
-
 	}
 
 	private void UpdateWeaponAim()
 	{
-		float gimbalLimit = 10;
+		
 
 		Camera camera = Camera.main;
 		Vector2 mousePos = new Vector2();
@@ -692,6 +755,47 @@ public class PlayerControl
 		}
 	}
 
+	private void AutopilotGoTo()
+	{
+		if(SelectedObject != null)
+		{
+			Vector3 gotoDest = Vector3.zero;
+			if(SelectedObjectType == SelectedObjectType.Planet)
+			{
+				Planet planet = (Planet)SelectedObject;
+				Vector3 distance = planet.transform.position - PlayerShip.transform.position;
+				gotoDest = planet.transform.position - distance.normalized * (40f + planet.OriginalScale.x / 2f);
+			}
+			else if(SelectedObjectType == SelectedObjectType.Station)
+			{
+				StationBase station = (StationBase)SelectedObject;
+				Vector3 distance = station.transform.position - PlayerShip.transform.position;
+				gotoDest = PlayerShip.transform.position + distance.normalized * (distance.magnitude - 20f);
+			}
+
+			if(gotoDest != Vector3.zero)
+			{
+				MacroAITask task = new MacroAITask();
+				task.TaskType = MacroAITaskType.Travel;
+				task.TravelDestSystemID = GameManager.Inst.WorldManager.CurrentSystem.ID;
+				task.TravelDestNodeID = "";
+				task.IsDestAStation = false;
+				Transform origin = GameObject.Find("Origin").transform;
+				task.TravelDestCoord = new RelLoc(origin.position, gotoDest, origin);
+
+				IsAutopilot = true;
+				PlayerParty.WaitTimer = 0;
+				PlayerParty.CurrentTask = task;
+				PlayerParty.HasReachedDestNode = false;
+				PlayerParty.DestNode = GameManager.Inst.NPCManager.MacroAI.GetClosestNodeToLocation(task.TravelDestCoord.RealPos, GameManager.Inst.WorldManager.AllSystems[task.TravelDestSystemID]);
+				Debug.Log("Autopilot dest node " + PlayerParty.DestNode.ID);
+				PlayerAutopilot.Activate();
+				_isMouseFlight = false;
+			}
+
+
+		}
+	}
 
 
 }
@@ -701,6 +805,7 @@ public enum SelectedObjectType
 	Unknown,
 	Ship,
 	Station,
+	Turret,
 	Pickup,
 	Planet,
 }

@@ -191,6 +191,8 @@ public class GameManager : MonoBehaviour
 			WorldManager.CurrentSystem = system;
 			WorldManager.Initialize();
 
+			PlayerControl.CreatePlayerParty();
+
 			UIManager.Initialize();
 
 			if(LevelAnchor != null && LevelAnchor.Save != null)

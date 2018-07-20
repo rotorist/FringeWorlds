@@ -16,6 +16,14 @@ public class BTGetNewTask : BTLeaf
 		{
 			return Exit(BTResult.Fail);
 		}
+		if(MyParty.IsPlayerParty)
+		{
+			if(MyAI.MyShip == GameManager.Inst.PlayerControl.PlayerShip)
+			{
+				MyAI.OnTravelCompletion();
+			}
+			return Exit(BTResult.Fail);
+		}
 
 		MacroAITaskType prevType = MacroAITaskType.None;
 		if(MyParty.CurrentTask != null)
@@ -30,7 +38,7 @@ public class BTGetNewTask : BTLeaf
 
 	public override BTResult Exit (BTResult result)
 	{
-		Debug.Log("BTGetDestination: " + result);
+		Debug.Log("BTGetNewTask: " + result);
 		return result;
 	}
 }

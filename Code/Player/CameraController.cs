@@ -122,7 +122,6 @@ public class CameraController : MonoBehaviour
 			_yFactor = Mathf.Lerp(_yFactor, 0, deltaTime * 1.5f);
 		}
 			
-
 		playerShip.ShipModel.transform.localEulerAngles = new Vector3(0, 0, _tiltFactor * -20);
 
 

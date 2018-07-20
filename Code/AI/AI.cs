@@ -21,10 +21,11 @@ public class AI : MonoBehaviour
 	private bool _isActive;
 	private bool _isEngineKilled;
 	private Vector3 _avoidanceForce;
+	private float _targetLockTimer;
 
 	
 	// Update is called once per frame
-	void Update () 
+	public virtual void Update () 
 	{
 		if(IsActive)
 		{
@@ -36,11 +37,20 @@ public class AI : MonoBehaviour
 				Turn();
 
 				UpdateSensor();
+				if(Whiteboard.Parameters["TargetEnemy"] != null)
+				{
+					AvoidanceDetector.State = AvoidanceState.Combat;
+				}
+				else
+				{
+					AvoidanceDetector.State = AvoidanceState.Travel;
+				}
+
 			}
 		}
 	}
 
-	void FixedUpdate()
+	public virtual void FixedUpdate()
 	{
 		if(IsActive)
 		{
@@ -54,7 +64,7 @@ public class AI : MonoBehaviour
 	}
 
 	// Use this for initialization
-	public void Initialize(MacroAIParty party, Faction faction) 
+	public virtual void Initialize(MacroAIParty party, Faction faction) 
 	{
 		MyShip = transform.GetComponent<ShipBase>();
 		AvoidanceDetector = MyShip.MyReference.AvoidanceDetector;
@@ -76,7 +86,12 @@ public class AI : MonoBehaviour
 		TreeSet.Add("Travel", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("Travel", this, party));
 		TreeSet.Add("FollowFriendly", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("FollowFriendly", this, party));
 		TreeSet.Add("FighterCombat", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("FighterCombat", this, party));
+		TreeSet.Add("BigShipCombat", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("BigShipCombat", this, party));
 
+	}
+
+	public virtual void OnTravelCompletion()
+	{
 
 	}
 
@@ -95,7 +110,10 @@ public class AI : MonoBehaviour
 	}
 
 
-	private void Move()
+
+
+
+	protected void Move()
 	{
 		if(!MyShip.IsInPortal)
 		{
@@ -114,9 +132,10 @@ public class AI : MonoBehaviour
 			{
 				los = RB.velocity * -1f;
 			}
-			else if(los.magnitude < 5f)
+			else if(los.magnitude < 5f && RB.velocity.magnitude > 0.1f)
 			{
-				los = RB.velocity * -1f * Mathf.Clamp01(los.magnitude / 5f);
+				
+				los = RB.velocity * -1f;
 			}
 
 			float force = 5;
@@ -127,7 +146,7 @@ public class AI : MonoBehaviour
 			}
 
 			//adjust force based on how close is to destination
-			force *= Mathf.Lerp(0.2f, 1f, Mathf.Clamp01(los.magnitude / 10));
+			force *= Mathf.Lerp(0.4f, 1f, Mathf.Clamp01(los.magnitude / 10));
 
 
 			if(!_isEngineKilled)
@@ -192,7 +211,7 @@ public class AI : MonoBehaviour
 
 
 
-	private void Turn()
+	protected void Turn()
 	{
 		if(MyShip.IsInPortal)
 		{
@@ -230,7 +249,7 @@ public class AI : MonoBehaviour
 		{
 			//Quaternion rotation = Quaternion.LookRotation(aimPoint - MyShip.transform.position);
 			//transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * turnRate);
-			Debug.Log("AI Turn state 1 " + MyShip.name);
+			//Debug.Log("AI Turn state 1 " + MyShip.name);
 			AddLookTorque(aimPoint - MyShip.transform.position);
 
 			if(Vector3.Angle(aimPoint - MyShip.transform.position, MyShip.transform.forward) < 20)
@@ -242,7 +261,7 @@ public class AI : MonoBehaviour
 		{
 			//Quaternion rotation = Quaternion.LookRotation(dest - MyShip.transform.position);
 			//transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * turnRate);
-			Debug.Log("AI Turn state 2 " + MyShip.name);
+			//Debug.Log("AI Turn state 2 " + MyShip.name);
 			AddLookTorque(distToDest);
 		}
 		else
@@ -252,12 +271,12 @@ public class AI : MonoBehaviour
 			{
 				//Quaternion rotation = Quaternion.LookRotation(velocity);
 				//transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * 2f);
-				Debug.Log("AI Turn state 3 " + MyShip.name);
+				//Debug.Log("AI Turn state 3 " + MyShip.name);
 				AddLookTorque(velocity);
 			}
 			else
 			{
-				Debug.Log("AI Turn state 4 " + MyShip.name);
+				//Debug.Log("AI Turn state 4 " + MyShip.name);
 				AddLookTorque(MyParty.SpawnedShipsLeader.transform.forward);
 			}
 		}
@@ -278,7 +297,7 @@ public class AI : MonoBehaviour
 		*/
 	}
 
-	private void AddLookTorque(Vector3 direction)
+	protected void AddLookTorque(Vector3 direction)
 	{
 		float angle = Vector3.Angle(direction, transform.forward);
 		Vector3 cross = Vector3.Cross(transform.forward, direction).normalized;
@@ -289,7 +308,7 @@ public class AI : MonoBehaviour
 		RB.AddTorque(transform.forward * (horizontalAngle - 90) * 0.02f);
 	}
 
-	private void UpdateAvoidance()
+	protected void UpdateAvoidance()
 	{
 		AvoidanceDetector.AvoidanceUpdate();
 		if(AvoidanceDetector.Avoidance != Vector3.zero)
@@ -309,14 +328,39 @@ public class AI : MonoBehaviour
 			}
 
 			_avoidanceForce = forceMag * (force1 + force2 + force3 + force4).normalized;
+
+
 		}
 		else
 		{
 			_avoidanceForce = Vector3.zero;
 		}
+
+		//check if any ships are too close to me
+		float thres = 5f;
+		float magnitude = 6f;
+		if(AvoidanceDetector.State == AvoidanceState.Combat)
+		{
+			thres = 10f;
+			magnitude = 15f;
+		}
+
+		foreach(ShipBase ship in GameManager.Inst.NPCManager.AllShips)
+		{
+			if(ship == GameManager.Inst.PlayerControl.PlayerShip || ship.MyAI.IsActive)
+			{
+				Vector3 dist = ship.transform.position - MyShip.transform.position;
+
+				if(dist.magnitude < thres)
+				{
+					_avoidanceForce += Vector3.Lerp(dist.normalized * -1 * magnitude, Vector3.zero, (dist.magnitude / thres));
+				}
+			}
+		}
+		//Debug.DrawRay(MyShip.transform.position, _avoidanceForce, Color.green);
 	}
 
-	private void UpdateSensor()
+	protected void UpdateSensor()
 	{
 		if(MyShip.Scanner != null)
 		{
@@ -324,16 +368,27 @@ public class AI : MonoBehaviour
 			ShipBase currentTarget = (ShipBase)Whiteboard.Parameters["TargetEnemy"];
 			if(currentTarget != null && Vector3.Distance(MyShip.transform.position, currentTarget.transform.position) < MyShip.Scanner.Range)
 			{
-				return;
+				if(_targetLockTimer <= 0)
+				{
+					_targetLockTimer = UnityEngine.Random.Range(3f, 8f);
+					Whiteboard.Parameters["TargetEnemy"] = null;
+				}
+				else
+				{
+					return;
+				}
 			}
 			else
 			{
 				Whiteboard.Parameters["TargetEnemy"] = null;
 			}
 
+			float closestDist = MyShip.Scanner.Range;
+			ShipBase closestTarget = null;
 			foreach(ShipBase ship in GameManager.Inst.NPCManager.AllShips)
 			{
-				if(Vector3.Distance(MyShip.transform.position, ship.transform.position) < MyShip.Scanner.Range)
+				float dist = Vector3.Distance(MyShip.transform.position, ship.transform.position);
+				if(dist < closestDist)
 				{
 					Faction otherFaction;
 					if(ship == GameManager.Inst.PlayerControl.PlayerShip)
@@ -346,13 +401,18 @@ public class AI : MonoBehaviour
 					}
 
 					float relationship = GameManager.Inst.NPCManager.GetFactionRelationship(MyFaction, otherFaction);
+					//Debug.Log("relationship with " + otherFaction.DisplayName + " " + relationship);
 					if(relationship < 0.4f)
 					{
-						Whiteboard.Parameters["TargetEnemy"] = ship;
-						break;
+						closestTarget = ship;
+						closestDist = dist;
 					}
 				}
 			}
+
+			Whiteboard.Parameters["TargetEnemy"] = closestTarget;
 		}
+
+		_targetLockTimer = Mathf.Clamp(_targetLockTimer - Time.deltaTime, 0, 60);
 	}
 }

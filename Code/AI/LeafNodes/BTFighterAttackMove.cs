@@ -116,7 +116,7 @@ public class BTFighterAttackMove : BTLeaf
 			}
 			_timer = 0;
 		}
-
+		MyAI.Whiteboard.Parameters["IsThrusting"] = true;
 		MyAI.Whiteboard.Parameters["AimTarget"] = _target;
 		//set destination to target
 		MyAI.Whiteboard.Parameters["Destination"] = _target.transform.position;
@@ -137,7 +137,7 @@ public class BTFighterAttackMove : BTLeaf
 			return;
 		}
 
-
+		MyAI.Whiteboard.Parameters["IsThrusting"] = true;
 		MyAI.Whiteboard.Parameters["AimTarget"] = _target;
 		//set destination to target
 		MyAI.Whiteboard.Parameters["Destination"] = _target.transform.position;

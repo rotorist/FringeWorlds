@@ -11,7 +11,7 @@ public class AvoidanceDetector : MonoBehaviour
 
 	public Vector3 Avoidance = Vector3.zero;
 
-
+	public AvoidanceState State;
 	
 	public void AvoidanceUpdate()
 	{
@@ -31,7 +31,17 @@ public class AvoidanceDetector : MonoBehaviour
 			RaycastHit hit;
 			//ignore pickups, shields
 			int mask = ~(1<<2 | 1<<8 | 1<<9 | 1<<10);
-			float rayDist = Mathf.Lerp(10, 30, Mathf.Clamp01(velocity.magnitude / 10));
+
+			float rayDist = 0;
+			if(State == AvoidanceState.Travel)
+			{
+				rayDist = Mathf.Lerp(10, 30, Mathf.Clamp01(velocity.magnitude / 10));
+			}
+			else if(State == AvoidanceState.Combat)
+			{
+				rayDist = Mathf.Lerp(20, 40, Mathf.Clamp01(velocity.magnitude / 10));
+			}
+
 			//if there's a hit, add 1 * dist/rayDist to avoidance x
 			//if there's no hit, minus 2 from avoidance x
 			if(Physics.Raycast(RaySource1.position, velocity, out hit, rayDist, mask))
@@ -68,19 +78,13 @@ public class AvoidanceDetector : MonoBehaviour
 				Avoidance.z = Mathf.Clamp01(Avoidance.z - 2);
 			}
 
-			//check if any ships are too close to me
-			foreach(ShipBase ship in GameManager.Inst.NPCManager.AllShips)
-			{
-				if(ship.MyAI.IsActive)
-				{
-					Vector3 dist = ship.transform.position - ParentShip.transform.position;
 
-					if(dist.magnitude < 3)
-					{
-						Avoidance += Vector3.Lerp(dist.normalized, Vector3.zero, (dist.magnitude / 3)) * -0.5f;
-					}
-				}
-			}
 		}
 	}
+}
+
+public enum AvoidanceState
+{
+	Travel,
+	Combat,
 }

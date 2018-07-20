@@ -16,7 +16,7 @@ public class Station : StationBase
 		foreach(DockingSession session in sessionsCopy)
 		{
 			session.UpdateDockingSession();
-			if(session.Stage == DockingSessionStage.Docked)
+			if(session.Stage == DockingSessionStage.Docked || session.Requester == null)
 			{
 				//remove the session, close the gate
 				_dockingSessions.Remove(session);

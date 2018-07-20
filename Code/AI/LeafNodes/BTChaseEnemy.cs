@@ -13,12 +13,13 @@ public class BTChaseEnemy : BTLeaf
 	public override BTResult Process ()
 	{
 		//Debug.Log("Processing Chase Enemy");
+
 		ShipBase target = (ShipBase)MyAI.Whiteboard.Parameters[Parameters[0]];
 		if(target != null)
 		{
 			float dist = Vector3.Distance(MyAI.MyShip.transform.position, target.transform.position);
 			float angle = Vector3.Angle(target.transform.position - MyAI.MyShip.transform.position, MyAI.MyShip.transform.forward);
-			if(dist <= 10)
+			if(dist <= 20)
 			{
 				return Exit(BTResult.Success);
 			}
@@ -29,8 +30,8 @@ public class BTChaseEnemy : BTLeaf
 			else
 			{
 				MyAI.Whiteboard.Parameters["Destination"] = target.transform.position;
-				Vector3 aimPoint = StaticUtility.FirstOrderIntercept(MyAI.MyShip.transform.position, MyAI.MyShip.RB.velocity,
-																	30, target.transform.position, target.RB.velocity);
+				//Vector3 aimPoint = StaticUtility.FirstOrderIntercept(MyAI.MyShip.transform.position, MyAI.MyShip.RB.velocity,
+				//													30, target.transform.position, target.RB.velocity);
 				MyAI.Whiteboard.Parameters["AimPoint"] = Vector3.zero;
 				return BTResult.Running;
 			}

@@ -100,6 +100,7 @@ public class BTDockAtNextNode : BTLeaf
 					}
 					else
 					{
+						//Debug.Log("Dock at station running");
 						return BTResult.Running;
 					}
 				}
@@ -114,6 +115,7 @@ public class BTDockAtNextNode : BTLeaf
 				DockRequestResult result = GameManager.Inst.WorldManager.CurrentSystem.GetStationByID(dockNode.ID).Dock(MyAI.MyShip, out _currentSession);
 				if(result == DockRequestResult.Busy)
 				{
+					//Debug.Log("Dock at station running");
 					MyAI.Whiteboard.Parameters["Destination"] = Vector3.zero;
 					return BTResult.Running;
 				}
@@ -189,6 +191,7 @@ public class BTDockAtNextNode : BTLeaf
 					if(result == DockRequestResult.Busy)
 					{
 						MyAI.Whiteboard.Parameters["Destination"] = Vector3.zero;
+						//Debug.Log("Dock at station running");
 						return BTResult.Running;
 					}
 					else if(result == DockRequestResult.Deny)
@@ -197,7 +200,7 @@ public class BTDockAtNextNode : BTLeaf
 					}
 					else
 					{
-						Debug.Log("BTDockAtNextNode: midway dock granted, running");
+						//Debug.Log("BTDockAtNextNode: midway dock granted, running");
 						MyParty.CurrentTLSession = (TLTransitSession)s;
 						_dockingStage = 2;
 						return BTResult.Running;
@@ -292,6 +295,7 @@ public class BTDockAtNextNode : BTLeaf
 				}
 				else
 				{
+					//Debug.Log("Dock at station running");
 					return BTResult.Running;
 				}
 			}
@@ -304,7 +308,7 @@ public class BTDockAtNextNode : BTLeaf
 
 				if(result == DockRequestResult.Busy)
 				{
-					Debug.Log("tradelane is busy");
+					//Debug.Log("tradelane is busy");
 					MyAI.Whiteboard.Parameters["Destination"] = Vector3.zero;
 					return BTResult.Running;
 				}
@@ -314,7 +318,7 @@ public class BTDockAtNextNode : BTLeaf
 				}
 				else
 				{
-					Debug.Log("BTDockAtNextNode: dock request granted, running");
+					//Debug.Log("BTDockAtNextNode: dock request granted, running");
 					MyParty.CurrentTLSession = (TLTransitSession)s;
 					return BTResult.Running;
 				}
@@ -435,7 +439,7 @@ public class BTDockAtNextNode : BTLeaf
 
 	public override BTResult Exit (BTResult result)
 	{
-		//Debug.LogError("BTDockAtNextNode: " + result + " " + MyAI.MyShip.name);
+		Debug.LogError("BTDockAtNextNode: " + result + " " + MyAI.MyShip.name);
 		MyAI.Whiteboard.Parameters["IgnoreAvoidance"] = false;
 		_currentSession = null;
 		_waitDistance = 0;
