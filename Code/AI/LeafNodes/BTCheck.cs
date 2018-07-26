@@ -187,6 +187,18 @@ public class BTCheck : BTLeaf
 				}
 			}
 			break;
+		case "IsAutopilotEnabled":
+			{
+				if(GameManager.Inst.PlayerControl.IsAutopilot)
+				{
+					result = BTResult.Success;
+				}
+				else
+				{
+					result = BTResult.Fail;
+				}
+			}
+			break;
 		
 		case "HasDestination":
 			{

@@ -11,6 +11,8 @@ public class MacroAI
 	public void Initialize()
 	{
 		_lastUsedPartyNumber = 1;
+		GameEventHandler.OnShipDeath -= OnShipDeath;
+		GameEventHandler.OnShipDeath += OnShipDeath;
 	}
 
 	public void GenerateTestParty(string factionID)
@@ -701,6 +703,54 @@ public class MacroAI
 		}
 
 		return nearestNode;
+	}
+
+	public void OnShipDeath(ShipBase ship)
+	{
+		MacroAIParty party = ship.MyAI.MyParty;
+		if(party.SpawnedShipsLeader == ship)
+		{
+			//elect a new leader
+			party.SpawnedShips.Remove(ship);
+			if(party.Formation.ContainsKey(ship))
+			{
+				party.Formation.Remove(ship);
+			}
+			party.LeaderLoadout = null;
+
+			if(party.SpawnedShips.Count > 0)
+			{
+				//randomly pick one ship
+				ShipBase candidate = party.SpawnedShips[UnityEngine.Random.Range(0, party.SpawnedShips.Count)];
+				party.SpawnedShipsLeader = candidate;
+				party.Formation[candidate] = Vector3.zero;
+				party.LeaderLoadout = candidate.MyLoadout;
+				if(party.FollowerLoadouts.Contains(candidate.MyLoadout))
+				{
+					party.FollowerLoadouts.Remove(candidate.MyLoadout);
+				}
+			}
+			else
+			{
+				//party is gone, remove party
+				GameManager.Inst.NPCManager.AllParties.Remove(party);
+			}
+		}
+		else if(party.SpawnedShips.Contains(ship))
+		{
+			//remove from spawned ships
+			party.SpawnedShips.Remove(ship);
+			//remove from formation
+			if(party.Formation.ContainsKey(ship))
+			{
+				party.Formation.Remove(ship);
+			}
+			//remove from loadouts
+			if(ship.MyLoadout != null && party.FollowerLoadouts.Contains(ship.MyLoadout))
+			{
+				party.FollowerLoadouts.Remove(ship.MyLoadout);
+			}
+		}
 	}
 
 

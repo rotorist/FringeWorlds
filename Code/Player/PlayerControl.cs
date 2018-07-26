@@ -104,15 +104,11 @@ public class PlayerControl
 			return;
 		}
 
-		if(IsAutopilot)
-		{
-			PlayerAutopilot.APUpdate();
-		}
-		else
+		if(!IsAutopilot)
 		{
 			UpdateMovementKeyInput();
 		}
-
+		PlayerAutopilot.APUpdate();
 		UpdateCommandKeyInput();
 		UpdateMouseInput();
 		UpdateWeaponAim();
@@ -172,9 +168,11 @@ public class PlayerControl
 		IsAutopilot = false;
 		PlayerAutopilot.Deactivate();
 		_isMouseFlight = true;
-		if(CurrentTradelaneSession != null)
+		PlayerParty.PrevNode = null;
+		PlayerParty.NextTwoNodes.Clear();
+		if(PlayerParty.CurrentTLSession != null)
 		{
-			CurrentTradelaneSession.Stage = TLSessionStage.Cancelling;
+			PlayerParty.CurrentTLSession.Stage = TLSessionStage.Cancelling;
 
 		}
 	}
@@ -786,6 +784,7 @@ public class PlayerControl
 				IsAutopilot = true;
 				PlayerParty.WaitTimer = 0;
 				PlayerParty.CurrentTask = task;
+
 				PlayerParty.HasReachedDestNode = false;
 				PlayerParty.DestNode = GameManager.Inst.NPCManager.MacroAI.GetClosestNodeToLocation(task.TravelDestCoord.RealPos, GameManager.Inst.WorldManager.AllSystems[task.TravelDestSystemID]);
 				Debug.Log("Autopilot dest node " + PlayerParty.DestNode.ID);

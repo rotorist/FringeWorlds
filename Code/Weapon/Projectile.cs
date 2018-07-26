@@ -83,21 +83,28 @@ public class Projectile : MonoBehaviour
 		//Debug.Log("Hit something " + collision.collider.name);
 
 		ShipReference hitShip = null;
-		//Debug.Log(collision.collider.name);
+		Debug.Log(collision.collider.name);
 
 
 		hitShip = collision.collider.GetComponent<ShipReference>();
 
 
 
-		if(hitShip != null && hitShip.ParentShip == Attacker)
+		if(hitShip != null)
 		{
-			return;
+			if(hitShip.ParentShip == Attacker)
+			{
+				return;
+			}
+			else
+			{
+				hitShip.ParentShip.ProcessHullDamage(Damage);
+
+				GameObject.Destroy(this.gameObject);
+			}
 		}
 
 
-
-		GameObject.Destroy(this.gameObject);
 	}
 
 	public void Fire(Vector3 velocity, float range, ShipBase attacker)

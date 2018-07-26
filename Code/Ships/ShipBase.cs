@@ -28,6 +28,8 @@ public class ShipBase : MonoBehaviour
 	public float InPortalSpeed;
 	public string DockedStationID;
 
+	public Loadout MyLoadout;
+
 	public virtual void Hide()
 	{
 		if(ShipModel != null)
@@ -61,6 +63,8 @@ public class ShipBase : MonoBehaviour
 		}
 	}
 
+
+
 	public virtual void EnableColliders()
 	{
 
@@ -69,6 +73,33 @@ public class ShipBase : MonoBehaviour
 	public virtual void DisableColliders()
 	{
 
+	}
+
+	public virtual void OnDeath(ShipBase attacker)
+	{
+		
+		//process attacker
+
+		//call death event
+		GameEventHandler.Instance.TriggerShipDeath(this);
+
+		//destroy ship
+		GameObject.Destroy(this.gameObject);
+	}
+
+	public void ProcessHullDamage(Damage damage)
+	{
+		if(IsInPortal)
+		{
+			return;
+		}
+
+		HullAmount = Mathf.Clamp(HullAmount - damage.HullAmount, 0, HullCapacity);
+
+		if(HullAmount <= 0 && GameManager.Inst.PlayerControl.PlayerShip != this)
+		{
+			OnDeath(this);
+		}
 	}
 }
 

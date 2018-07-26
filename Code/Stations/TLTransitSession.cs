@@ -13,7 +13,7 @@ public class TLTransitSession : DockSessionBase
 	public Dictionary<ShipBase, Quaternion> PassengerTargetRotations;
 	public Dictionary<ShipBase, RelLoc> PassengerTargetPositions;
 	public ShipBase LeaderPassenger;
-
+	public MacroAIParty Party;
 	private float _currentSpeed;
 
 	public TLTransitSession(ShipBase leader, int direction, Tradelane currentTradelane)
@@ -21,18 +21,8 @@ public class TLTransitSession : DockSessionBase
 		Passengers = new List<ShipBase>();
 		PassengerTargetRotations = new Dictionary<ShipBase, Quaternion>();
 		PassengerTargetPositions = new Dictionary<ShipBase, RelLoc>();
-		LeaderPassenger = leader;
-		if(leader.MyAI != null && leader.MyAI.MyParty != null)
-		{
-			foreach(ShipBase ship in leader.MyAI.MyParty.SpawnedShips)
-			{
-				Passengers.Add(ship);
-			}
-		}
-		else
-		{
-			Passengers.Add(leader);
-		}
+		Party = leader.MyAI.MyParty;
+
 
 		Direction = direction;
 		Stage = TLSessionStage.None;
@@ -55,9 +45,33 @@ public class TLTransitSession : DockSessionBase
 
 	public void UpdateTransit()
 	{
+		if(Party == null || Party.SpawnedShips.Count <= 0)
+		{
+			CurrentTradelane.ClearSession(Direction);
+			if(NextTrigger != null)
+			{
+				((Tradelane)NextTrigger.ParentStation).ClearSession(Direction);
+			}
+			Stage = TLSessionStage.None;
+			return;
+		}
+
 		//Debug.Log("TLTransit stage " + Stage + " parent lane " + CurrentTradelane.ID);
 		if(Stage == TLSessionStage.Initializing)
 		{
+			LeaderPassenger = Party.SpawnedShipsLeader;
+			if(LeaderPassenger.MyAI != null && LeaderPassenger.MyAI.MyParty != null)
+			{
+				foreach(ShipBase ship in LeaderPassenger.MyAI.MyParty.SpawnedShips)
+				{
+					Passengers.Add(ship);
+				}
+			}
+			else
+			{
+				Passengers.Add(LeaderPassenger);
+			}
+
 			Transform origin = GameObject.Find("Origin").transform;
 			foreach(ShipBase ship in Passengers)
 			{
@@ -83,7 +97,8 @@ public class TLTransitSession : DockSessionBase
 
 			Stage = TLSessionStage.Entering;
 		}
-		else if(Stage == TLSessionStage.Entering)
+
+		if(Stage == TLSessionStage.Entering)
 		{
 			//move leader to current lane's detector's position
 			LeaderPassenger.transform.position = Vector3.Lerp(LeaderPassenger.transform.position, PassengerTargetPositions[LeaderPassenger].RealPos, Time.fixedDeltaTime * 1);
@@ -263,10 +278,9 @@ public class TLTransitSession : DockSessionBase
 				{
 					GameManager.Inst.PlayerControl.CurrentTradelaneSession = null;
 				}
-				else
-				{
-					LeaderPassenger.MyAI.MyParty.CurrentTLSession = null;
-				}
+
+				LeaderPassenger.MyAI.MyParty.CurrentTLSession = null;
+
 			}
 		}
 
@@ -298,6 +312,10 @@ public class TLTransitSession : DockSessionBase
 		Stage = TLSessionStage.Sending;
 		LeaderPassenger.IsInPortal = true;
 	}
+
+
+
+
 
 
 

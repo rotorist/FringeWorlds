@@ -70,7 +70,7 @@ public class StarSystemData : NavNode
 	public List<NavNode> ChildNodes;
 	public Vector3 OriginPosition;
 
-	public List<MacroAIParty> Parties; //this is used for spawning NPC ships
+
 
 	public StarSystemData(string id, string displayName)
 	{
@@ -82,7 +82,6 @@ public class StarSystemData : NavNode
 		JumpGates = new List<JumpGateData>();
 		Tradelanes  = new List<TradelaneData>();
 		ChildNodes = new List<NavNode>();
-		Parties = new List<MacroAIParty>();
 		NeighborIDs = new List<string>();
 		Neighbors = new List<NavNode>();
 		NavNodeType = NavNodeType.System;

@@ -23,7 +23,7 @@ public class Autopilot : AI
 
 		TreeSet = new Dictionary<string, BehaviorTree>();
 		TreeSet.Add("BaseBehavior", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("BaseBehavior", this, party));
-		TreeSet.Add("Travel", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("Travel", this, party));
+		TreeSet.Add("APTravel", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("APTravel", this, party));
 		TreeSet.Add("FollowFriendly", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("FollowFriendly", this, party));
 	}
 
@@ -49,7 +49,7 @@ public class Autopilot : AI
 		if(IsActive)
 		{
 
-			TreeSet["Travel"].Run();
+			TreeSet["APTravel"].Run();
 
 			if(!IsDocked)
 			{

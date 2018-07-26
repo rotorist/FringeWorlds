@@ -21,6 +21,9 @@ public class NPCManager
 
 	public void Initialize()
 	{
+		GameEventHandler.OnShipDeath -= OnShipDeath;
+		GameEventHandler.OnShipDeath += OnShipDeath;
+
 		_allShips = new List<ShipBase>();
 		_allFactions = new Dictionary<string, Faction>();
 		_allParties = new List<MacroAIParty>();
@@ -62,7 +65,7 @@ public class NPCManager
 		{	
 			{fac1.ID, 0.5f},
 			{fac2.ID, 0.5f},
-			{fac3.ID, 0.5f},
+			{fac3.ID, 0.0f},
 			{fac4.ID, 0.5f},
 			{fac5.ID, 0.5f}
 		};
@@ -87,7 +90,7 @@ public class NPCManager
 
 		fac3.Relationships = new Dictionary<string, float>() 
 		{	
-			{facp.ID, 0.5f},
+			{facp.ID, 0.0f},
 			{fac1.ID, 0},
 			{fac2.ID, 1},
 			{fac4.ID, 1},
@@ -124,7 +127,7 @@ public class NPCManager
 		{
 			//MacroAI.GenerateParties();
 		}
-		//MacroAI.GenerateTestParty("otu_civil_defense");
+		MacroAI.GenerateTestParty("otu_civil_defense");
 		//MacroAI.GenerateTestParty("otu");
 	}
 
@@ -150,6 +153,7 @@ public class NPCManager
 		ship.Engine = shipModel.GetComponent<Engine>();
 		ship.Thruster = shipModel.GetComponent<Thruster>();
 		ship.Scanner = shipModel.GetComponent<Scanner>();
+		ship.MyLoadout = loadout;
 
 		AI ai = ship.GetComponent<AI>();
 		ai.Initialize(party, _allFactions[factionID]);
@@ -178,6 +182,14 @@ public class NPCManager
 		}
 
 		MacroAI.PerFrameUpdate();
+	}
+
+	public void OnShipDeath(ShipBase ship)
+	{
+		if(_allShips.Contains(ship))
+		{
+			_allShips.Remove(ship);
+		}
 	}
 
 	public void AddExistingShip(ShipBase ship)
@@ -213,6 +225,8 @@ public class NPCManager
 			return 0;
 		}
 	}
+
+
 
 
 }

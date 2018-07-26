@@ -9,6 +9,7 @@ public class HUDPanel : PanelBase
 	public UISprite ShieldIndicatorFront;
 	public UISprite ShieldIndicatorRear;
 	public BarIndicator ShieldAmountIndicator;
+	public BarIndicator HullAmountIndicator;
 
 	public UISprite EngineThrottleBar;
 	public UISprite ThrusterBar;
@@ -49,6 +50,9 @@ public class HUDPanel : PanelBase
 
 	public override void Initialize ()
 	{
+		GameEventHandler.OnShipDeath -= OnShipDeath;
+		GameEventHandler.OnShipDeath += OnShipDeath;
+
 		_unselectedShips = new Dictionary<ShipBase, UISprite>();
 		_allEntries = new List<HUDListEntry>();
 		for(int i=0; i<10; i++)
@@ -64,6 +68,7 @@ public class HUDPanel : PanelBase
 	{
 		UpdatePipPosition();
 		UpdateShieldBalance();
+		UpdateHullAmount();
 		UpdateSelectMarkerPosition();
 		UpdateUnselectedMarkerPosition();
 		UpdateCenterHUD();
@@ -175,6 +180,14 @@ public class HUDPanel : PanelBase
 		}
 	}
 
+	public void OnShipDeath(ShipBase ship)
+	{
+		if(_unselectedShips.ContainsKey(ship))
+		{
+			_unselectedShips.Remove(ship);
+		}
+	}
+
 
 
 
@@ -244,6 +257,14 @@ public class HUDPanel : PanelBase
 
 	}
 
+	private void UpdateHullAmount()
+	{
+		float totalHull = GameManager.Inst.PlayerControl.PlayerShip.HullCapacity;
+		float currentHull = GameManager.Inst.PlayerControl.PlayerShip.HullAmount;
+	
+		HullAmountIndicator.SetFillPercentage(currentHull / totalHull);
+	}
+
 	private void UpdateSelectMarkerPosition()
 	{
 		if(_currentSelectMarker != null && _selectedObject != null)
@@ -271,7 +292,7 @@ public class HUDPanel : PanelBase
 		//show all ships
 		ShipBase playerShip = GameManager.Inst.PlayerControl.PlayerShip;
 
-		//remove despawned ship markers
+		//remove despawned ship or docked ship markers
 		Dictionary<ShipBase, UISprite> _unselectedShipsCopy = new Dictionary<ShipBase, UISprite>(_unselectedShips);
 		foreach(KeyValuePair<ShipBase, UISprite> marker in _unselectedShipsCopy)
 		{
@@ -280,18 +301,27 @@ public class HUDPanel : PanelBase
 				_unselectedShips.Remove(marker.Key);
 				GameObject.Destroy(marker.Value.gameObject);
 			}
+
 		}
 
 
 		foreach(ShipBase ship in GameManager.Inst.NPCManager.AllShips)
 		{
-			
+			if(ship == playerShip)
+			{
+				continue;
+			}
 
 		
 			bool isMarkerHidden = false;
 			bool isMarkerTooFar = false;
 
 			if(ship == GameManager.Inst.PlayerControl.TargetShip)
+			{
+				isMarkerHidden = true;
+			}
+
+			if(ship.DockedStationID != "")
 			{
 				isMarkerHidden = true;
 			}

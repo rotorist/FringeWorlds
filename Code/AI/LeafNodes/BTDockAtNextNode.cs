@@ -11,13 +11,21 @@ public class BTDockAtNextNode : BTLeaf
 
 	public override void Initialize ()
 	{
+		//Debug.Log("Initializing dock at next node");
 		_currentSession = null;
 	}
 
 	public override BTResult Process ()
 	{
+		
 		if(MyParty == null)
 		{
+			return Exit(BTResult.Fail);
+		}
+
+		if(MyParty.IsPlayerParty && !GameManager.Inst.PlayerControl.IsAutopilot)
+		{
+			Debug.Log("autopilot disabled!");
 			return Exit(BTResult.Fail);
 		}
 
@@ -208,6 +216,7 @@ public class BTDockAtNextNode : BTLeaf
 				}
 
 			}
+
 
 			if(MyParty.CurrentTLSession == null)
 			{
@@ -439,7 +448,7 @@ public class BTDockAtNextNode : BTLeaf
 
 	public override BTResult Exit (BTResult result)
 	{
-		Debug.LogError("BTDockAtNextNode: " + result + " " + MyAI.MyShip.name);
+		//Debug.LogError("BTDockAtNextNode: " + result + " " + MyAI.MyShip.name);
 		MyAI.Whiteboard.Parameters["IgnoreAvoidance"] = false;
 		_currentSession = null;
 		_waitDistance = 0;
