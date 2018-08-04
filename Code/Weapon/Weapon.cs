@@ -9,6 +9,9 @@ public class Weapon : MonoBehaviour
 	public float Range;
 	public GameObject TurretBase;
 	public GameObject Barrel;
+	public WeaponRotationType RotationType;
+	public int MaxMagazine;
+	public int Magazine;
 
 	public virtual void Rebuild()
 	{
@@ -19,4 +22,11 @@ public class Weapon : MonoBehaviour
 	{
 
 	}
+}
+
+public enum WeaponRotationType
+{
+	Gimball,
+	Turret,
+	Fixed,
 }

@@ -83,6 +83,7 @@ public class MacroAI
 		party.Location = new RelLoc(origin.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position, origin);
 		party.PartyNumber = 0;
 		party.SpawnedShipsLeader = GameManager.Inst.PlayerControl.PlayerShip;
+		party.ShouldEnableAI = true;
 
 		//generate loadout
 		party.LeaderLoadout = new Loadout("LightTransporter", ShipType.Transporter);
@@ -95,7 +96,8 @@ public class MacroAI
 		};
 
 		party.FollowerLoadouts = new List<Loadout>();
-		for(int i=0; i<UnityEngine.Random.Range(1, 5); i++)
+		/*
+		for(int i=0; i<4; i++)
 		{
 			Loadout loadout = new Loadout("LightFighter", ShipType.Fighter);
 			party.FollowerLoadouts.Add(loadout);
@@ -104,7 +106,7 @@ public class MacroAI
 				{ "GimballLeft", "Gun1" },
 				{ "GimballRight", "Gun1" },
 			};
-		}
+		}*/
 
 		MacroAITask task = null;
 
@@ -116,6 +118,8 @@ public class MacroAI
 
 		LoadPartyTreeset(party);
 		GenerateFormationForParty(party);
+
+		GameManager.Inst.NPCManager.AllParties.Add(party);
 
 		return party;
 	}
@@ -197,11 +201,13 @@ public class MacroAI
 
 
 
-				if(party.SpawnedShips.Count <= 0)
+				if(party.SpawnedShips.Count < party.FollowerLoadouts.Count + 1)
 				{
 					SpawnPartyMembers(party);
 					GenerateFormationForParty(party);
 				}
+
+
 
 				if(!party.ShouldEnableAI)
 				{
@@ -225,46 +231,68 @@ public class MacroAI
 				}
 
 
-				//if one ship near (<1000) player then turn on AI for all party
-				//if all party are too far (>1500) from player then turn off ai for all party
-				//otherwise stay the same
-				foreach(ShipBase ship in party.SpawnedShips)
-				{
-					float distFromPlayer = Vector3.Distance(ship.transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position);
-					if(distFromPlayer < 1000)
-					{
-						party.ShouldEnableAI = true;
-						break;
-					}
-					else if(distFromPlayer > 1500)
-					{
-						party.ShouldEnableAI = false;
 
+
+				if(party.IsPlayerParty)
+				{
+					party.ShouldEnableAI = true;
+				}
+				else
+				{
+					//if one ship near (<1000) player then turn on AI for all party
+					//if all party are too far (>1500) from player then turn off ai for all party
+					//otherwise stay the same
+					foreach(ShipBase ship in party.SpawnedShips)
+					{
+						float distFromPlayer = Vector3.Distance(ship.transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position);
+						if(distFromPlayer < 1000)
+						{
+							party.ShouldEnableAI = true;
+							break;
+						}
+						else if(distFromPlayer > 1500)
+						{
+							party.ShouldEnableAI = false;
+
+						}
 					}
 				}
 
 				bool needRepath = false;
 
-				foreach(ShipBase ship in party.SpawnedShips)
+				if(party.IsPlayerParty)
 				{
-					AI ai = ship.GetComponent<AI>();
-					if(party.ShouldEnableAI)
+					foreach(ShipBase ship in party.SpawnedShips)
 					{
-						if(!ai.IsActive)
+						if(ship != party.SpawnedShipsLeader)
 						{
-							Debug.Log("Activating AI");
-							ai.Activate();
-							//here we need to place all members in formation
-
+							ship.MyAI.Activate();
 						}
 					}
-					else 
+				}
+				else
+				{
+					foreach(ShipBase ship in party.SpawnedShips)
 					{
-						if(ai.IsActive)
+						AI ai = ship.GetComponent<AI>();
+						if(party.ShouldEnableAI)
 						{
-							Debug.Log("Deactivating AI");
-							ai.Deactivate();
-							//needRepath = true;
+							if(!ai.IsActive)
+							{
+								Debug.Log("Activating AI");
+								ai.Activate();
+								//here we need to place all members in formation
+
+							}
+						}
+						else 
+						{
+							if(ai.IsActive)
+							{
+								Debug.Log("Deactivating AI");
+								ai.Deactivate();
+								//needRepath = true;
+							}
 						}
 					}
 				}
@@ -284,11 +312,13 @@ public class MacroAI
 				}
 			}
 
+			/*
 			if(party.CurrentTask == null)
 			{
 				Debug.Log("no task? " + (party.CurrentTask == null));
 				continue;
 			}
+			*/
 
 			float deltaTime = Time.time - party.LastUpdateTime;
 			party.WaitTimer += deltaTime;
@@ -758,7 +788,10 @@ public class MacroAI
 
 	private void SpawnPartyMembers(MacroAIParty party)
 	{
-		party.SpawnedShipsLeader = SpawnPartyMember(party, party.LeaderLoadout);
+		if(!party.IsPlayerParty)
+		{
+			party.SpawnedShipsLeader = SpawnPartyMember(party, party.LeaderLoadout);
+		}
 		foreach(Loadout loadOut in party.FollowerLoadouts)
 		{
 			SpawnPartyMember(party, loadOut);
@@ -769,7 +802,7 @@ public class MacroAI
 	{
 		
 		ShipBase ship = GameManager.Inst.NPCManager.SpawnAIShip(loadout, party.FactionID, party);
-		ship.transform.position = party.Location.RealPos;
+		ship.transform.position = party.Location.RealPos + UnityEngine.Random.insideUnitSphere * 15f;
 		party.SpawnedShips.Add(ship);
 		AI ai = ship.GetComponent<AI>();
 		ai.MyParty = party;

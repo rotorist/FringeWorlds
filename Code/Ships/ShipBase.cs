@@ -25,6 +25,7 @@ public class ShipBase : MonoBehaviour
 	public float WeaponPowerAmount;
 
 	public bool IsInPortal;
+	public StationType InPortalStationType;
 	public float InPortalSpeed;
 	public string DockedStationID;
 
@@ -83,8 +84,14 @@ public class ShipBase : MonoBehaviour
 		//call death event
 		GameEventHandler.Instance.TriggerShipDeath(this);
 
+		//create explosion
+		GameObject explosion = GameObject.Instantiate(Resources.Load("Explosion" + UnityEngine.Random.Range(1, 5).ToString())) as GameObject;
+		explosion.transform.position = this.transform.position;
+			
 		//destroy ship
 		GameObject.Destroy(this.gameObject);
+
+
 	}
 
 	public void ProcessHullDamage(Damage damage)

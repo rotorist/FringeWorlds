@@ -75,7 +75,7 @@ public class BTCheck : BTLeaf
 			break;
 		case "IsEnemyOnMyTail":
 			{
-				Debug.Log("Checking is enemy on my tail, param0 " + Parameters[0]);
+				//Debug.Log("Checking is enemy on my tail, param0 " + Parameters[0]);
 				ShipBase target = (ShipBase)MyAI.Whiteboard.Parameters[Parameters[0]];
 				if(target != null)
 				{
@@ -247,7 +247,7 @@ public class BTCheck : BTLeaf
 				}
 				else if(MyParty.CurrentTask == null || MyParty.CurrentTask.TaskType == MacroAITaskType.None)
 				{
-					Debug.Log("task completed " + MyParty.CurrentTask.TaskType);
+					//Debug.Log("task completed " + MyParty.CurrentTask.TaskType);
 					result = BTResult.Success;
 				}
 				else

@@ -153,6 +153,7 @@ public class Tradelane : StationBase
 
 	public override void OnDetectDocking (string triggerID, ShipBase requester)
 	{
+		//Debug.Log("On detect docking " + (_sessionB == null) + _dockingStageB.ToString() + (_sessionB.LeaderPassenger == requester));
 		if(_sessionA != null && _sessionA.LeaderPassenger == requester && _dockingStageA == 2)
 		{
 			//start session A

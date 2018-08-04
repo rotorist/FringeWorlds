@@ -61,6 +61,7 @@ public class PlayerControl
 	private Transform _testSphere;
 
 
+	private Launcher _testLauncher;
 
 
 	public void Initialize()
@@ -86,6 +87,10 @@ public class PlayerControl
 
 		PlayerShip.RB.inertiaTensor = new Vector3(1, 1, 1);
 
+		_testLauncher = PlayerShip.ShipModel.GetComponentInChildren<Launcher>();
+
+		GameEventHandler.OnShipDeath -= OnNPCDeath;
+		GameEventHandler.OnShipDeath += OnNPCDeath;
 
 	}
 
@@ -140,6 +145,14 @@ public class PlayerControl
 		
 	}
 
+
+	public void OnNPCDeath(ShipBase ship)
+	{
+		if(TargetShip == ship)
+		{
+			GameManager.Inst.UIManager.HUDPanel.OnClearSelectedObject();
+		}
+	}
 
 	public void DockComplete(StationBase dockedStation, StationType type)
 	{
@@ -385,7 +398,7 @@ public class PlayerControl
 		_throttle = Mathf.Clamp01(_throttle);
 
 		//firing weapon
-		Fighter fighter = (Fighter)PlayerShip;
+
 		if(Input.GetMouseButton(0))
 		{
 			foreach(WeaponJoint joint in PlayerShip.MyReference.WeaponJoints)
@@ -395,7 +408,12 @@ public class PlayerControl
 					joint.MountedWeapon.Fire();
 				}
 			}
+				
+		}
 
+		if(Input.GetMouseButton(1))
+		{
+			_testLauncher.Fire();
 		}
 
 	}
@@ -603,7 +621,12 @@ public class PlayerControl
 		Vector2 mousePos = new Vector2();
 
 		mousePos = Input.mousePosition;
-		Vector3 targetPos = camera.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, 100));
+		float targetDist = 100;
+		if(TargetShip != null)
+		{
+			targetDist = Mathf.Clamp(Vector3.Distance(camera.transform.position, TargetShip.transform.position), 30, 100);
+		}
+		Vector3 targetPos = camera.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, targetDist));
 
 		foreach(WeaponJoint joint in PlayerShip.MyReference.WeaponJoints)
 		{

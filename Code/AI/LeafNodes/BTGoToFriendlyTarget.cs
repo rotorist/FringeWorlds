@@ -23,7 +23,7 @@ public class BTGoToFriendlyTarget : BTLeaf
 				return Exit(BTResult.Fail);
 			}
 
-			if(MyParty.SpawnedShipsLeader.IsInPortal && MyParty.NextNode.NavNodeType == NavNodeType.Station)
+			if(MyParty.SpawnedShipsLeader.IsInPortal && MyParty.SpawnedShipsLeader.InPortalStationType == StationType.Station)
 			{
 				//Debug.Log("leader is docking on a station, stop following ");
 				return BTResult.Running;

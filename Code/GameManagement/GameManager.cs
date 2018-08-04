@@ -73,6 +73,14 @@ public class GameManager : MonoBehaviour
 		{
 			PlayerControl.FixedFrameUpdate();
 			CameraController.PerFrameFixedUpdate();
+
+			if(Time.time % 5 == 0)
+			{
+				if(GameManager.Inst.NPCManager.AllParties.Count < 2)
+				{
+					NPCManager.TestSpawn();
+				}
+			}
 		}
 		else if(SceneType == SceneType.SpaceTest)
 		{
@@ -80,13 +88,7 @@ public class GameManager : MonoBehaviour
 			CameraController.PerFrameFixedUpdate();
 		}
 
-		if(Time.time % 5 == 0)
-		{
-			if(GameManager.Inst.NPCManager.AllParties.Count < 1)
-			{
-				NPCManager.TestSpawn();
-			}
-		}
+
 	}
 
 	void LateUpdate()

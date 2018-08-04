@@ -16,7 +16,7 @@ public class WeaponJoint : MonoBehaviour
 	void Update()
 	{
 		if((ControlMode == TurretControlMode.Automatic || ControlMode == TurretControlMode.Selected) && MountedWeapon != null 
-			&& MountedWeapon.TurretBase != null && ParentShip.DockedStationID == "" && !ParentShip.IsInPortal)
+			&& MountedWeapon.RotationType == WeaponRotationType.Turret && ParentShip.DockedStationID == "" && !ParentShip.IsInPortal)
 		{
 			UpdateTarget();
 			if(Target != null)
@@ -26,9 +26,9 @@ public class WeaponJoint : MonoBehaviour
 			}
 		}
 
-		if(GimballMax > 0 && MountedWeapon != null)
+		if(MountedWeapon != null)
 		{
-			if(ControlMode == TurretControlMode.Automatic || ControlMode == TurretControlMode.Selected)
+			if(MountedWeapon.RotationType == WeaponRotationType.Turret && (ControlMode == TurretControlMode.Automatic || ControlMode == TurretControlMode.Selected))
 			{
 				if(Target != null)
 				{
@@ -48,7 +48,7 @@ public class WeaponJoint : MonoBehaviour
 
 			Vector3 lookDir = TargetPos - MountedWeapon.transform.position;
 
-			if(MountedWeapon.TurretBase == null)
+			if(MountedWeapon.RotationType == WeaponRotationType.Gimball)
 			{
 				Vector3 verticalLos = lookDir - (transform.forward * 100);
 				float angle = Vector3.Angle(lookDir, transform.forward);
@@ -64,7 +64,7 @@ public class WeaponJoint : MonoBehaviour
 				Quaternion rotation = Quaternion.LookRotation(lookDir, transform.up);
 				MountedWeapon.Barrel.transform.rotation = Quaternion.Lerp(MountedWeapon.Barrel.transform.rotation, rotation, Time.deltaTime * 9);
 			}
-			else
+			else if(MountedWeapon.RotationType == WeaponRotationType.Turret)
 			{
 				Vector3 baseLookDir = Vector3.ProjectOnPlane(lookDir, transform.up);
 				Quaternion baseRotation = Quaternion.LookRotation(baseLookDir, transform.up);
@@ -85,6 +85,10 @@ public class WeaponJoint : MonoBehaviour
 
 				MountedWeapon.TurretBase.transform.rotation = Quaternion.Lerp(MountedWeapon.TurretBase.transform.rotation, baseRotation, Time.deltaTime * 9);
 				MountedWeapon.Barrel.transform.rotation = Quaternion.Lerp(MountedWeapon.Barrel.transform.rotation, barrelRotation, Time.deltaTime * 9);
+			}
+			else
+			{
+				
 			}
 		}
 	}
@@ -116,8 +120,8 @@ public class WeaponJoint : MonoBehaviour
 			if(GameManager.Inst.PlayerControl.SelectedObjectType == SelectedObjectType.Ship)
 			{
 				ShipBase ship = (ShipBase)GameManager.Inst.PlayerControl.SelectedObject;
-				//float relationship = GameManager.Inst.NPCManager.GetFactionRelationship(ParentShip.MyAI.MyFaction, ship.MyAI.MyFaction);
-				if(ship.DockedStationID == "")
+				float relationship = GameManager.Inst.NPCManager.GetFactionRelationship(ParentShip.MyAI.MyFaction, ship.MyAI.MyFaction);
+				if(relationship < 0.4f && ship.DockedStationID == "")
 				{
 					Target = ship.transform;
 				}
@@ -148,10 +152,10 @@ public class WeaponJoint : MonoBehaviour
 				{
 					continue;
 				}
-
+				float relationship = GameManager.Inst.NPCManager.GetFactionRelationship(ParentShip.MyAI.MyFaction, ship.MyAI.MyFaction);
 				Vector3 los = ship.transform.position - transform.position;
 
-				if(Vector3.Angle(MountedWeapon.TurretBase.transform.up, los) <= GimballMax * GimballLimitPercent && los.magnitude < MountedWeapon.Range)
+				if(relationship < 0.4f && Vector3.Angle(MountedWeapon.TurretBase.transform.up, los) <= GimballMax * GimballLimitPercent && los.magnitude < MountedWeapon.Range)
 				{
 					Target = ship.transform;
 					return;

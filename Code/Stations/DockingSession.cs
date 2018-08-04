@@ -76,9 +76,12 @@ public class DockingSession : DockSessionBase
 				_waitTimer = 0;
 				Stage = DockingSessionStage.Undocking;
 			}
+			//disable requester collider 
+			Requester.DisableColliders();
 		}
 		if(Stage == DockingSessionStage.Undocking)
 		{
+			_waitTimer += Time.fixedDeltaTime;
 			Vector3 exitTarget = Gate.DockingTrigger.transform.position + Gate.DockingTrigger.transform.forward * 5f;
 			float totalDist = Vector3.Distance(exitTarget, Requester.transform.position);
 			float topSpeed = 4f;
@@ -95,7 +98,13 @@ public class DockingSession : DockSessionBase
 			Requester.transform.LookAt(exitTarget);
 			Requester.InPortalSpeed = _currentSpeed;
 
-			if(totalDist < 0.2f)
+
+			if(_waitTimer > 3)
+			{
+				Requester.EnableColliders();
+			}
+
+			if(totalDist < 0.2f || _waitTimer > 6)
 			{
 				Stage = DockingSessionStage.NoDock;
 				Gate.Close();
@@ -103,6 +112,7 @@ public class DockingSession : DockSessionBase
 				ParentStation.OnDockingSessionComplete(this);
 				Requester.MyAI.IsDocked = false;
 				Requester.DockedStationID = "";
+
 				if(Requester == Requester.MyAI.MyParty.SpawnedShipsLeader)
 				{
 					Requester.MyAI.Whiteboard.Parameters["Destination"] = Requester.transform.position + Requester.transform.forward * 15;
@@ -127,6 +137,7 @@ public class DockingSession : DockSessionBase
 				{
 					Stage = DockingSessionStage.Docking;
 					Requester.IsInPortal = true;
+					Requester.InPortalStationType = StationType.Station;
 					if(Requester == GameManager.Inst.PlayerControl.PlayerShip)
 					{
 						//trigger begin docking
@@ -144,6 +155,7 @@ public class DockingSession : DockSessionBase
 			//make requester look towards trigger's reverse forward
 			Quaternion lookRot = Quaternion.LookRotation(Gate.DockingTrigger.transform.forward * -1, Vector3.up);
 			Requester.transform.rotation = Quaternion.Lerp(Requester.transform.rotation, lookRot, Time.fixedDeltaTime * 1);
+			Requester.DisableColliders();
 
 			if(CheckRequesterInPosition())
 			{

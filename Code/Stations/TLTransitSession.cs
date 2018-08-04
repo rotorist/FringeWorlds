@@ -22,7 +22,7 @@ public class TLTransitSession : DockSessionBase
 		PassengerTargetRotations = new Dictionary<ShipBase, Quaternion>();
 		PassengerTargetPositions = new Dictionary<ShipBase, RelLoc>();
 		Party = leader.MyAI.MyParty;
-
+		LeaderPassenger = leader;
 
 		Direction = direction;
 		Stage = TLSessionStage.None;
@@ -45,6 +45,7 @@ public class TLTransitSession : DockSessionBase
 
 	public void UpdateTransit()
 	{
+		//Debug.Log("TLTransit stage " + Stage + " parent lane " + CurrentTradelane.ID);
 		if(Party == null || Party.SpawnedShips.Count <= 0)
 		{
 			CurrentTradelane.ClearSession(Direction);
@@ -56,7 +57,7 @@ public class TLTransitSession : DockSessionBase
 			return;
 		}
 
-		//Debug.Log("TLTransit stage " + Stage + " parent lane " + CurrentTradelane.ID);
+
 		if(Stage == TLSessionStage.Initializing)
 		{
 			LeaderPassenger = Party.SpawnedShipsLeader;
@@ -113,6 +114,7 @@ public class TLTransitSession : DockSessionBase
 				foreach(ShipBase passenger in Passengers)
 				{
 					passenger.IsInPortal = true;
+					passenger.InPortalStationType = StationType.Tradelane;
 				}
 				Stage = TLSessionStage.FindingDest;
 			}
@@ -292,7 +294,7 @@ public class TLTransitSession : DockSessionBase
 		Debug.Log("Starting tradelane session " + CurrentTradelane.ID);
 		Stage = TLSessionStage.Initializing;
 		LeaderPassenger.IsInPortal = true;
-
+		LeaderPassenger.InPortalStationType = StationType.Tradelane;
 	}
 
 	public void StartMidwaySession()
@@ -311,6 +313,7 @@ public class TLTransitSession : DockSessionBase
 		((Tradelane)NextTrigger.ParentStation).AssignLiveSession(Direction, this);
 		Stage = TLSessionStage.Sending;
 		LeaderPassenger.IsInPortal = true;
+		LeaderPassenger.InPortalStationType = StationType.Tradelane;
 	}
 
 

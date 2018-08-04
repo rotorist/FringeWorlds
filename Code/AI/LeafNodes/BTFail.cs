@@ -12,7 +12,7 @@ public class BTFail : BTLeaf
 
 	public override BTResult Process ()
 	{
-		Debug.Log("Processing Fail action");
+		//Debug.Log("Processing Fail action");
 		return BTResult.Fail;
 	}
 

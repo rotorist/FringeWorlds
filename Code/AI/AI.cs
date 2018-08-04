@@ -16,12 +16,15 @@ public class AI : MonoBehaviour
 	public Whiteboard Whiteboard;
 	public AvoidanceDetector AvoidanceDetector;
 
+	public float AimSkill;//0 to 1
+
 	public Dictionary<string,BehaviorTree> TreeSet;
 
 	private bool _isActive;
 	private bool _isEngineKilled;
 	private Vector3 _avoidanceForce;
 	private float _targetLockTimer;
+	private Vector3 _aimError;
 
 	
 	// Update is called once per frame
@@ -35,7 +38,7 @@ public class AI : MonoBehaviour
 			if(!IsDocked)
 			{
 				Turn();
-
+				UpdateAimError();
 				UpdateSensor();
 				if(Whiteboard.Parameters["TargetEnemy"] != null)
 				{
@@ -66,6 +69,7 @@ public class AI : MonoBehaviour
 	// Use this for initialization
 	public virtual void Initialize(MacroAIParty party, Faction faction) 
 	{
+		AimSkill = 0.4f;
 		MyShip = transform.GetComponent<ShipBase>();
 		AvoidanceDetector = MyShip.MyReference.AvoidanceDetector;
 		AvoidanceDetector.ParentShip = MyShip;
@@ -286,7 +290,7 @@ public class AI : MonoBehaviour
 		{
 			foreach(WeaponJoint joint in MyShip.MyReference.WeaponJoints)
 			{
-				joint.TargetPos = aimPoint;
+				joint.TargetPos = aimPoint + _aimError;
 			}
 		}
 
@@ -387,6 +391,11 @@ public class AI : MonoBehaviour
 			ShipBase closestTarget = null;
 			foreach(ShipBase ship in GameManager.Inst.NPCManager.AllShips)
 			{
+				if(ship.DockedStationID != "")
+				{
+					continue;
+				}
+
 				float dist = Vector3.Distance(MyShip.transform.position, ship.transform.position);
 				if(dist < closestDist)
 				{
@@ -414,5 +423,27 @@ public class AI : MonoBehaviour
 		}
 
 		_targetLockTimer = Mathf.Clamp(_targetLockTimer - Time.deltaTime, 0, 60);
+	}
+
+	private void UpdateAimError()
+	{
+		//calculate error magnitude based on target horizontal speed and aiming skill
+		ShipBase currentTarget = (ShipBase)Whiteboard.Parameters["TargetEnemy"];
+		if(currentTarget == null)
+		{
+			return;
+		}
+
+		float horizontalSpeed = Mathf.Abs(Vector3.Dot(currentTarget.RB.velocity, MyShip.transform.right));
+		float factor = (Mathf.Clamp01(horizontalSpeed / 8)) * 0.4f + (1 - AimSkill) * 0.6f;
+		float errorMagnitude = 40 * factor;
+
+		if(_aimError.magnitude < 0.5f)
+		{
+			_aimError = errorMagnitude * UnityEngine.Random.insideUnitSphere;
+		}
+
+		_aimError = Vector3.Lerp(_aimError, Vector3.zero, AimSkill * 6f * Time.deltaTime);
+		//Debug.Log(_aimError);
 	}
 }

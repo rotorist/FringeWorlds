@@ -22,19 +22,20 @@ public class BTFighterAttack : BTLeaf
 			fighter.LeftGun.GetComponent<Weapon>().Fire();
 			fighter.RightGun.GetComponent<Weapon>().Fire();
 			*/
-			foreach(WeaponJoint joint in MyAI.MyShip.MyReference.WeaponJoints)
-			{
-				joint.MountedWeapon.Fire();
-			}
+
 
 			if(Vector3.Distance(MyAI.MyShip.transform.position, target.transform.position) < (float)MyAI.Whiteboard.Parameters["FiringRange"])
 			{
+				foreach(WeaponJoint joint in MyAI.MyShip.MyReference.WeaponJoints)
+				{
+					joint.MountedWeapon.Fire();
+				}
 				//Debug.Log("Processing Fighter Attack");
 				return BTResult.Running;
 			}
 			else
 			{
-				Debug.Log("Target too far!");
+				//Debug.Log("Target too far!");
 				return Exit(BTResult.Fail);
 			}
 		}

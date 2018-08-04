@@ -107,6 +107,7 @@ public class JumpGate : StationBase
 		{
 			Debug.Log("Through the wormhole!");
 			requester.IsInPortal = true;
+			requester.InPortalStationType = StationType.JumpGate;
 			_isPlayerWarping = true;
 			UIEventHandler.Instance.TriggerBeginDocking();
 			GameManager.Inst.PlayerControl.DockComplete(this, StationType.JumpGate);

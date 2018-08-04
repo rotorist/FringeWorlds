@@ -184,8 +184,11 @@ public class HUDPanel : PanelBase
 	{
 		if(_unselectedShips.ContainsKey(ship))
 		{
+			GameObject.Destroy(_unselectedShips[ship].gameObject);
 			_unselectedShips.Remove(ship);
 		}
+
+
 	}
 
 

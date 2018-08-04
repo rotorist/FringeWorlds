@@ -41,7 +41,7 @@ public class Gun : Weapon
 			projectile.Damage = new Damage();
 			projectile.Damage.DamageType = DamageType.Photon;
 			projectile.Damage.ShieldAmount = 25;
-			projectile.Damage.HullAmount = 10;
+			projectile.Damage.HullAmount = 30;
 
 			projectile.transform.position = Barrel.transform.position + Barrel.transform.forward * 2;
 			Vector3 target = Barrel.transform.position + Barrel.transform.forward * 100;

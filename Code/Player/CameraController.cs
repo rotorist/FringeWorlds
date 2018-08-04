@@ -106,8 +106,8 @@ public class CameraController : MonoBehaviour
 		float rollForce = GameManager.Inst.PlayerControl.RollForce * -1;
 
 		_tiltFactor += Mathf.Clamp(yawForce + rollForce * 0.66f, -1.3f, 1.3f) * deltaTime * 3f;
-		_xFactor += yawForce * deltaTime * 1.5f;
-		_yFactor += pitchForce * deltaTime * 2.5f;
+		_xFactor += yawForce * deltaTime * 0.75f;// * 1.5f;
+		_yFactor += pitchForce * deltaTime * 1.75f;//* 2.5f;
 
 
 		_tiltFactor = Mathf.Lerp(_tiltFactor, 0, deltaTime * 2f);
