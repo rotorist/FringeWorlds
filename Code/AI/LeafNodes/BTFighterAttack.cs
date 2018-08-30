@@ -28,7 +28,10 @@ public class BTFighterAttack : BTLeaf
 			{
 				foreach(WeaponJoint joint in MyAI.MyShip.MyReference.WeaponJoints)
 				{
-					joint.MountedWeapon.Fire();
+					if(joint.MountedWeapon != null)
+					{
+						joint.MountedWeapon.Fire();
+					}
 				}
 				//Debug.Log("Processing Fighter Attack");
 				return BTResult.Running;

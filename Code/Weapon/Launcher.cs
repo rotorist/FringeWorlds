@@ -37,7 +37,7 @@ public class Launcher : Weapon
 		if(_isCooledDown)
 		{
 
-			GameObject o = GameObject.Instantiate(Resources.Load("Missile")) as GameObject;
+			GameObject o = GameObject.Instantiate(Resources.Load("Class1Missile1")) as GameObject;
 			Missile missile = o.GetComponent<Missile>();
 
 			Rigidbody target = null;
@@ -58,10 +58,10 @@ public class Launcher : Weapon
 			}
 			missile.Initialize(target);
 
-			missile.transform.position = Barrel.transform.position + Barrel.transform.forward * 2;
+			missile.transform.position = Barrel.transform.position + Barrel.transform.forward * 1f;
 			Vector3 lookTarget = Barrel.transform.position + Barrel.transform.forward * 100;
 			missile.transform.LookAt(lookTarget);
-			missile.Fire(this.ParentShip, missile.transform.forward * 20 + ParentShip.RB.velocity);
+			missile.Fire(this.ParentShip, missile.transform.forward * 6 + ParentShip.RB.velocity);
 
 			_isCooledDown = false;
 			_coolDownTimer = 0;

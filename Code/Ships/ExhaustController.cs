@@ -1,0 +1,92 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class ExhaustController : MonoBehaviour 
+{
+	public List<Transform> ExhaustHolders;
+	public Vector3 FlameScale;
+
+	private ExhaustState _state;
+	private List<GameObject> _exhausts;
+	private float _normalExhaustScaleZ;
+
+	public void setExhaustLength(float length) //length is 0 to 1
+	{
+		_normalExhaustScaleZ = length;
+		if(_state == ExhaustState.Normal)
+		{
+			foreach(GameObject exhaust in _exhausts)
+			{
+				float zScale = exhaust.transform.localScale.z;
+				zScale = FlameScale.z * 0.5f + (FlameScale.z * 0.5f) * length;
+				exhaust.transform.localScale = new Vector3(FlameScale.x, FlameScale.y, zScale);
+			}
+		}
+	}
+
+	public void setExhaustState(ExhaustState state)
+	{
+		if(state == _state)
+		{
+			return;
+		}
+
+		if(_exhausts == null)
+		{
+			_exhausts = new List<GameObject>();
+		}
+
+		foreach(GameObject go in _exhausts)
+		{
+			GameObject.Destroy(go);
+		}
+
+		_exhausts.Clear();
+		_state = state;
+
+		foreach(Transform t in ExhaustHolders)
+		{
+			GameObject exhaust = null;
+			if(state == ExhaustState.Idle)
+			{
+				exhaust = GameObject.Instantiate(Resources.Load("EngineFlameIdle")) as GameObject;
+
+			}
+			else if(state == ExhaustState.Normal)
+			{
+				exhaust = GameObject.Instantiate(Resources.Load("EngineFlameNormal")) as GameObject;
+				setExhaustLength(_normalExhaustScaleZ);
+				GameObject flare = GameObject.Instantiate(Resources.Load("EngineFlare")) as GameObject;
+				flare.transform.parent = t;
+				flare.transform.localScale = new Vector3(1, 1, 1);
+				flare.transform.localPosition = Vector3.zero;
+				flare.transform.localEulerAngles = Vector3.zero;
+
+			}
+			else if(state == ExhaustState.Thruster)
+			{
+				exhaust = GameObject.Instantiate(Resources.Load("EngineFlameThruster")) as GameObject;
+			}
+
+			exhaust.transform.parent = t;
+			exhaust.transform.localScale = FlameScale;
+			exhaust.transform.localPosition = Vector3.zero;
+			exhaust.transform.localEulerAngles = Vector3.zero;
+			ParticleSystem particle = exhaust.GetComponent<ParticleSystem>();
+			ParticleSystemRenderer renderer = particle.GetComponent<ParticleSystemRenderer>();
+			renderer.maxParticleSize *= FlameScale.x;
+			_exhausts.Add(exhaust);
+
+		}
+	}
+
+}
+
+public enum ExhaustState
+{
+	Idle,
+	Normal,
+	Thruster,
+	Cruise,
+}

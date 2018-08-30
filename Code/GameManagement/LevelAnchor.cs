@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class LevelAnchor : MonoBehaviour 
 {
+	public bool IsNewGame;
 	public SaveGame Save;
 
 

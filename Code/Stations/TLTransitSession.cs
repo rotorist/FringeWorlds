@@ -45,7 +45,7 @@ public class TLTransitSession : DockSessionBase
 
 	public void UpdateTransit()
 	{
-		//Debug.Log("TLTransit stage " + Stage + " parent lane " + CurrentTradelane.ID);
+		//Debug.Log("TLTransit stage " + Stage + " parent lane " + CurrentTradelane.ID + " party " + Party.PartyNumber);
 		if(Party == null || Party.SpawnedShips.Count <= 0)
 		{
 			CurrentTradelane.ClearSession(Direction);
@@ -60,41 +60,7 @@ public class TLTransitSession : DockSessionBase
 
 		if(Stage == TLSessionStage.Initializing)
 		{
-			LeaderPassenger = Party.SpawnedShipsLeader;
-			if(LeaderPassenger.MyAI != null && LeaderPassenger.MyAI.MyParty != null)
-			{
-				foreach(ShipBase ship in LeaderPassenger.MyAI.MyParty.SpawnedShips)
-				{
-					Passengers.Add(ship);
-				}
-			}
-			else
-			{
-				Passengers.Add(LeaderPassenger);
-			}
-
-			Transform origin = GameObject.Find("Origin").transform;
-			foreach(ShipBase ship in Passengers)
-			{
-				
-				if(!PassengerTargetRotations.ContainsKey(ship))
-				{
-					PassengerTargetRotations.Add(ship, Quaternion.LookRotation(CurrentTrigger.transform.forward, Vector3.up));
-				}
-				if(!PassengerTargetPositions.ContainsKey(ship))
-				{
-					if(ship == LeaderPassenger)
-					{
-						PassengerTargetPositions.Add(LeaderPassenger, new RelLoc(origin.position, CurrentTrigger.transform.position, origin));
-					}
-					else
-					{
-						Vector3 pos = CurrentTrigger.transform.TransformPoint(ship.MyAI.MyParty.Formation[ship]);
-						Debug.LogError(pos);
-						PassengerTargetPositions.Add(ship, new RelLoc(origin.position, pos, origin));
-					}
-				}
-			}
+			SetupPassengers();
 
 			Stage = TLSessionStage.Entering;
 		}
@@ -314,13 +280,51 @@ public class TLTransitSession : DockSessionBase
 		Stage = TLSessionStage.Sending;
 		LeaderPassenger.IsInPortal = true;
 		LeaderPassenger.InPortalStationType = StationType.Tradelane;
+		SetupPassengers();
 	}
 
 
 
 
 
+	private void SetupPassengers()
+	{
+		LeaderPassenger = Party.SpawnedShipsLeader;
+		if(LeaderPassenger.MyAI != null && LeaderPassenger.MyAI.MyParty != null)
+		{
+			foreach(ShipBase ship in LeaderPassenger.MyAI.MyParty.SpawnedShips)
+			{
+				Passengers.Add(ship);
+			}
+		}
+		else
+		{
+			Passengers.Add(LeaderPassenger);
+		}
 
+		Transform origin = GameObject.Find("Origin").transform;
+		foreach(ShipBase ship in Passengers)
+		{
+
+			if(!PassengerTargetRotations.ContainsKey(ship))
+			{
+				PassengerTargetRotations.Add(ship, Quaternion.LookRotation(CurrentTrigger.transform.forward, Vector3.up));
+			}
+			if(!PassengerTargetPositions.ContainsKey(ship))
+			{
+				if(ship == LeaderPassenger)
+				{
+					PassengerTargetPositions.Add(LeaderPassenger, new RelLoc(origin.position, CurrentTrigger.transform.position, origin));
+				}
+				else
+				{
+					Vector3 pos = CurrentTrigger.transform.TransformPoint(ship.MyAI.MyParty.Formation[ship]);
+					Debug.LogError(pos);
+					PassengerTargetPositions.Add(ship, new RelLoc(origin.position, pos, origin));
+				}
+			}
+		}
+	}
 
 	private bool CheckPassengersInPosition()
 	{

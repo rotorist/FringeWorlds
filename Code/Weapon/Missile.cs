@@ -8,6 +8,8 @@ public class Missile : Ammunition
 
 	public Rigidbody Target;
 	public float MaxSpeed;
+	public Transform EngineFlameHolder;
+	public ParticleSystem Smoke;
 
 
 	private MissileStage _stage;
@@ -20,9 +22,10 @@ public class Missile : Ammunition
 	{
 		if(_stage == MissileStage.Launched)
 		{
-			if(_age > 0.1f)
+			if(_age > 0.3f)
 			{
 				_stage = MissileStage.Chasing;
+				LoadEngineFlame();
 			}
 		}
 		else if(_stage == MissileStage.Chasing)
@@ -57,7 +60,7 @@ public class Missile : Ammunition
 
 
 			Vector3 driftVelocity = _rigidbody.velocity - Vector3.Dot(_rigidbody.velocity, transform.forward) * transform.forward;
-			_rigidbody.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * 0.5f);
+			_rigidbody.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * 2f);
 		}
 
 		//keep under max speed
@@ -80,7 +83,7 @@ public class Missile : Ammunition
 	{
 		_stage = MissileStage.None;
 		Target = target;
-		MaxSpeed = 40;
+		MaxSpeed = 30;
 		Damage = new Damage();
 		Damage.DamageType = DamageType.Shock;
 		Damage.ShieldAmount = 5;
@@ -94,13 +97,14 @@ public class Missile : Ammunition
 		_initialVelocity = initialVelocity;
 		_rigidbody.velocity = _initialVelocity;
 	}
-
+	/*
 	public override void OnTriggerEnter(Collider other)
 	{
-		Explode();
-		base.OnTriggerEnter(other);
-		GameObject.Destroy(gameObject);
+		//Explode();
+		//base.OnTriggerEnter(other);
+		//GameObject.Destroy(gameObject);
 	}
+	*/
 
 	public override void OnCollisionEnter(Collision collision) 
 	{
@@ -110,6 +114,15 @@ public class Missile : Ammunition
 	}
 
 
+	private void LoadEngineFlame()
+	{
+		GameObject flame = GameObject.Instantiate(Resources.Load("EngineFlameMissile")) as GameObject;
+		flame.transform.parent = EngineFlameHolder;
+		flame.transform.localPosition = Vector3.zero;
+		flame.transform.localScale = new Vector3(1, 1, 1);
+		flame.transform.localEulerAngles = Vector3.zero;
+
+	}
 
 	private void AddLookTorque(Vector3 direction)
 	{

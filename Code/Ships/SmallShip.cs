@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Fighter : ShipBase
+public class SmallShip : ShipBase
 {
 	//for testing only
 	/*

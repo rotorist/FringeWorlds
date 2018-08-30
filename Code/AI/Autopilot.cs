@@ -7,8 +7,7 @@ public class Autopilot : AI
 	public override void Initialize (MacroAIParty party, Faction faction)
 	{
 		MyShip = transform.GetComponent<ShipBase>();
-		AvoidanceDetector = MyShip.MyReference.AvoidanceDetector;
-		AvoidanceDetector.ParentShip = MyShip;
+
 
 		Whiteboard = new Whiteboard();
 		Whiteboard.Initialize();

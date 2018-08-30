@@ -29,7 +29,7 @@ public class FloatingOrigin : MonoBehaviour
 	{
 		Vector3 cameraPosition = gameObject.transform.position;
 		cameraPosition.y = 0f;
-		if (cameraPosition.magnitude > threshold)
+		if (cameraPosition.magnitude > threshold)// && !GameManager.Inst.PlayerControl.PlayerShip.IsInPortal)
 		{
 			Debug.Log("Shifting Origin! " + _counter);
 			_counter ++;

@@ -164,6 +164,7 @@ public class BTCheck : BTLeaf
 				}
 				else
 				{
+					//Debug.Log("Detected enemy! I am " + MyParty.PartyNumber + "-" + MyAI.MyShip.name);
 					result = BTResult.Success;
 				}
 			}

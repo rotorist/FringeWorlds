@@ -44,7 +44,7 @@ public class MacroAI
 		party.FollowerLoadouts = new List<Loadout>();
 		for(int i=0; i<UnityEngine.Random.Range(1, 5); i++)
 		{
-			Loadout loadout = new Loadout("LightFighter", ShipType.Fighter);
+			Loadout loadout = new Loadout("Spitfire", ShipType.Fighter);
 			party.FollowerLoadouts.Add(loadout);
 			loadout.WeaponJoints = new Dictionary<string, string>()
 			{
@@ -159,7 +159,7 @@ public class MacroAI
 		party.FollowerLoadouts = new List<Loadout>();
 		for(int i=0; i<UnityEngine.Random.Range(1, 5); i++)
 		{
-			Loadout loadout = new Loadout("LightFighter", ShipType.Fighter);
+			Loadout loadout = new Loadout("Spitfire", ShipType.Fighter);
 			party.FollowerLoadouts.Add(loadout);
 			loadout.WeaponJoints = new Dictionary<string, string>()
 			{
@@ -676,7 +676,7 @@ public class MacroAI
 				//StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems["new_england_system"];
 				task.TravelDestSystemID = destSystem.ID;
 				//task.TravelDestNodeID = destSystem.Stations[UnityEngine.Random.Range(0, destSystem.Stations.Count)].ID;
-				task.TravelDestNodeID = "planet_colombia_landing";//"bethesda_station";
+				task.TravelDestNodeID = "annandale_station";//"planet_colombia_landing";//"bethesda_station";
 				task.IsDestAStation = true;
 				//task.TravelDestCoord = new RelLoc(destSystem.OriginPosition, new Vector3(-28.3f, 5f, 418.8f), null);
 			}
@@ -806,6 +806,11 @@ public class MacroAI
 		party.SpawnedShips.Add(ship);
 		AI ai = ship.GetComponent<AI>();
 		ai.MyParty = party;
+		if(ship.MyReference.ExhaustController != null)
+		{
+			ship.MyReference.ExhaustController.setExhaustState(ExhaustState.Normal);
+		}
+
 		if(party.SpawnedShipsLeader != null)
 		{
 			ai.Whiteboard.Parameters["FriendlyTarget"] = party.SpawnedShipsLeader;

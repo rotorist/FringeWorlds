@@ -40,6 +40,58 @@ public class SaveGameManager
 	public void Save()
 	{
 		CurrentSave = new SaveGame();
+		/*
+		//save all macroAI parties
+		CurrentSave.AllParties = new List<MacroAIPartySaveData>();
+		foreach(MacroAIParty party in GameManager.Inst.NPCManager.AllParties)
+		{
+			MacroAIPartySaveData partyData = new MacroAIPartySaveData();
+			partyData.Destination = new SerVector3(party.Destination);
+			partyData.PartyNumber = party.PartyNumber;
+			partyData.FactionID = party.FactionID;
+			partyData.Location = new SerVector3(party.Location.Disposition);
+			partyData.DockedStationID = party.DockedStationID;
+			partyData.CurrentSystemID = party.CurrentSystemID;
+			partyData.MoveSpeed = party.MoveSpeed;
+			partyData.IsPlayerParty = party.IsPlayerParty;
+			partyData.IsInTradelane = party.IsInTradelane;
+			partyData.NextTwoNodesIDs = new List<string>();
+			foreach(NavNode node in party.NextTwoNodes)
+			{
+				partyData.NextTwoNodesIDs.Add(node.ID);
+			}
+			partyData.PrevNodeID = (party.PrevNode == null)? "" : party.PrevNode.ID;
+			partyData.DestNodeID = (party.DestNode == null)? "" : party.DestNode.ID;
+			partyData.HasReachedDestNode = party.HasReachedDestNode;
+			partyData.WaitTimer = party.WaitTimer;
+			if(party.CurrentTask != null)
+			{
+				partyData.CurrentTask = new MacroAITaskSaveData();
+				partyData.CurrentTask.TaskType = party.CurrentTask.TaskType;
+				partyData.CurrentTask.StayDuration = party.CurrentTask.StayDuration;
+				partyData.CurrentTask.TravelDestCoord = new SerVector3(party.CurrentTask.TravelDestCoord.Disposition);
+				partyData.CurrentTask.TravelDestSystemID = party.CurrentTask.TravelDestSystemID;
+				partyData.CurrentTask.TravelDestNodeID = party.CurrentTask.TravelDestNodeID;
+				partyData.CurrentTask.IsDestAStation = party.CurrentTask.IsDestAStation;
+			}
+			partyData.LastUpdateTime = party.LastUpdateTime;
+			partyData.ShouldEnableAI = party.ShouldEnableAI;
+			partyData.FollowerLoadouts = new List<LoadoutSaveData>();
+			foreach(Loadout loadout in party.FollowerLoadouts)
+			{
+				LoadoutSaveData loadoutData = CreateLoadoutSaveData(loadout);
+				partyData.FollowerLoadouts.Add(loadoutData);
+			}
+			partyData.LeaderLoadout = CreateLoadoutSaveData(party.LeaderLoadout);
+			partyData.TreeSetNames = new List<string>();
+			foreach(KeyValuePair<string, BehaviorTree> tree in party.TreeSet)
+			{
+				partyData.TreeSetNames.Add(tree.Key);
+			}
+
+			CurrentSave.AllParties.Add(partyData);
+		}
+		*/
 	}
 
 	public void Load(SaveGame save)
@@ -58,4 +110,24 @@ public class SaveGameManager
 
 
 
+
+	private LoadoutSaveData CreateLoadoutSaveData(Loadout loadout)
+	{
+		if(loadout == null)
+		{
+			return null;
+		}
+		LoadoutSaveData loadoutData = new LoadoutSaveData();
+		loadoutData.ShipID = loadout.ShipID;
+		loadoutData.ShipType = loadout.ShipType;
+		loadoutData.WeaponJointNames = new List<string>();
+		loadoutData.WeaponNames = new List<string>();
+		foreach(KeyValuePair<string, string> joint in loadout.WeaponJoints)
+		{
+			loadoutData.WeaponJointNames.Add(joint.Key);
+			loadoutData.WeaponNames.Add(joint.Value);
+		}
+
+		return loadoutData;
+	}
 }

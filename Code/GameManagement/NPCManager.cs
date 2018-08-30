@@ -131,10 +131,8 @@ public class NPCManager
 		//MacroAI.GenerateTestParty("otu");
 	}
 
-	public ShipBase SpawnAIShip(Loadout loadout, string factionID, MacroAIParty party)
+	public void BuildShip(ShipBase ship, Loadout loadout, string factionID, MacroAIParty party)
 	{
-		ShipBase ship = (GameObject.Instantiate(Resources.Load("AIShip")) as GameObject).GetComponent<ShipBase>();
-
 		string shipModelID = loadout.ShipID;
 		ShipType shipType = loadout.ShipType;
 
@@ -148,15 +146,51 @@ public class NPCManager
 		ship.MyReference = shipModel.GetComponent<ShipReference>();
 		ship.MyReference.ParentShip = ship;
 		ship.Shield = ship.MyReference.Shield.GetComponent<ShieldBase>();
+		ship.Shield.Initialize();
+		ship.Shield.ParentShip = ship;
 		ship.RB = ship.GetComponent<Rigidbody>();
 		ship.RB.inertiaTensor = new Vector3(1, 1, 1);
 		ship.Engine = shipModel.GetComponent<Engine>();
 		ship.Thruster = shipModel.GetComponent<Thruster>();
 		ship.Scanner = shipModel.GetComponent<Scanner>();
 		ship.MyLoadout = loadout;
+	}
+
+	public ShipBase SpawnAIShip(Loadout loadout, string factionID, MacroAIParty party)
+	{
+		ShipBase ship = (GameObject.Instantiate(Resources.Load("AIShip")) as GameObject).GetComponent<ShipBase>();
+
+		BuildShip(ship, loadout, factionID, party);
 
 		AI ai = ship.GetComponent<AI>();
 		ai.Initialize(party, _allFactions[factionID]);
+
+		//load weapons
+		foreach(WeaponJoint joint in ship.MyReference.WeaponJoints)
+		{
+			joint.ParentShip = ship;
+			foreach(KeyValuePair<string, string> jointSetup in loadout.WeaponJoints)
+			{
+				if(jointSetup.Key == joint.JointID)
+				{
+					joint.LoadWeapon(jointSetup.Value);
+				}
+			}
+		}
+
+		return ship;
+	}
+
+	public ShipBase SpawnPlayerShip(Loadout loadout, string factionID, MacroAIParty party)
+	{
+		ShipBase ship = GameManager.Inst.PlayerControl.PlayerShip;
+
+		BuildShip(ship, loadout, factionID, party);
+
+		Autopilot pilot = GameManager.Inst.PlayerControl.PlayerAutopilot;
+		pilot.AvoidanceDetector = ship.MyReference.AvoidanceDetector;
+		pilot.AvoidanceDetector.ParentShip = ship;
+
 
 		//load weapons
 		foreach(WeaponJoint joint in ship.MyReference.WeaponJoints)

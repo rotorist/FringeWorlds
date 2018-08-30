@@ -67,7 +67,7 @@ public class HUDPanel : PanelBase
 	public override void PerFrameUpdate ()
 	{
 		UpdatePipPosition();
-		UpdateShieldBalance();
+		UpdateShieldAmount();
 		UpdateHullAmount();
 		UpdateSelectMarkerPosition();
 		UpdateUnselectedMarkerPosition();
@@ -244,20 +244,21 @@ public class HUDPanel : PanelBase
 		}
 	}
 
-	private void UpdateShieldBalance()
+
+
+	private void UpdateShieldAmount()
 	{
 		ShieldBase shieldBase = GameManager.Inst.PlayerControl.PlayerShip.Shield;
 		if(shieldBase != null && shieldBase.Type == ShieldType.Fighter)
 		{
 			FighterShield shield = (FighterShield)shieldBase;
-			ShieldIndicatorFront.alpha = Mathf.Clamp01(shield.FrontCapacity / shield.TotalCapacity);
-			ShieldIndicatorRear.alpha = Mathf.Clamp01(shield.RearCapacity / shield.TotalCapacity);
-			//Debug.Log(shield.FrontAmount + ", " + shield.RearAmount);
-
 			ShieldAmountIndicator.SetFillPercentage(shield.GetShieldPercentage());
 		}
-
-
+		else if(shieldBase != null && shieldBase.Type == ShieldType.BigShip)
+		{
+			BigShipShield shield = (BigShipShield)shieldBase;
+			ShieldAmountIndicator.SetFillPercentage(shield.GetShieldPercentage());
+		}
 	}
 
 	private void UpdateHullAmount()

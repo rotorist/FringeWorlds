@@ -59,6 +59,17 @@ public class ShipBase : MonoBehaviour
 				{
 					r.enabled = true;
 				}
+				else 
+				{
+					if(this != GameManager.Inst.PlayerControl.PlayerShip)
+					{
+						r.enabled = false;
+					}
+					else
+					{
+						r.enabled = true;
+					}
+				}
 			}
 			EnableColliders();
 		}

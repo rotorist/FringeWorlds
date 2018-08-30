@@ -12,11 +12,12 @@ public class BTGoToFriendlyTarget : BTLeaf
 
 	public override BTResult Process ()
 	{
-		//Debug.Log("GoToFriendlyTarget processing, I am " + MyAI.MyShip.name);
+		
 		ShipBase target = (ShipBase)MyAI.Whiteboard.Parameters[Parameters[0]];
+
 		if(target != null)
 		{
-			
+			//Debug.Log("GoToFriendlyTarget processing, to " + Parameters[0] + " which is " + target.name + " I am " + MyAI.MyShip.name);
 			if(MyParty.SpawnedShipsLeader == null || target.MyAI.IsDocked || MyAI.IsDocked)
 			{
 				//Debug.LogError("leader is docked in station, or I'm docked in station, can't follow ");
@@ -34,7 +35,7 @@ public class BTGoToFriendlyTarget : BTLeaf
 			{
 				dest = MyParty.SpawnedShipsLeader.transform.TransformPoint(MyParty.Formation[MyAI.MyShip]);
 				MyAI.Whiteboard.Parameters["Destination"] = dest;
-				//Debug.Log("Going towards formation point ");
+				Debug.Log("Going towards formation point ");
 				return BTResult.Running;
 			}
 			else

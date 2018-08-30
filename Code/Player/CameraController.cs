@@ -5,7 +5,7 @@ using UnityStandardAssets.ImageEffects;
 
 public class CameraController : MonoBehaviour 
 {
-
+	public bool IsFirstPerson;
 	public Camera CloseCamera;
 	public Camera FarCamera;
 	public Transform FollowTarget;
@@ -40,11 +40,21 @@ public class CameraController : MonoBehaviour
 	{
 		if(GameManager.Inst.SceneType == SceneType.Space || GameManager.Inst.SceneType == SceneType.SpaceTest)
 		{
-
-			UpdateCameraFollow();
+			if(IsFirstPerson)
+			{
+				UpdateFirstPerson();
+			}
+			else
+			{
+				UpdateCameraFollow();
+			}
 		}
 	}
 
+	public void SetView(bool isFirstPerson)
+	{
+		IsFirstPerson = isFirstPerson;
+	}
 
 	public void SetCameraBlur(float speed, bool isOn)
 	{
@@ -80,12 +90,22 @@ public class CameraController : MonoBehaviour
 		}
 	}
 
-
+	private void UpdateFirstPerson()
+	{
+		ShipBase playerShip = GameManager.Inst.PlayerControl.PlayerShip;
+		if(playerShip.MyReference.FPCameraAnchor != null)
+		{
+			transform.parent = playerShip.MyReference.FPCameraAnchor;
+			transform.localEulerAngles = Vector3.zero;
+			transform.localPosition = Vector3.zero;
+		}
+	}
 
 	private void UpdateCameraFollow()
 	{
 		ShipBase playerShip = GameManager.Inst.PlayerControl.PlayerShip;
-		Vector3 followTarget = playerShip.transform.position - playerShip.transform.forward * 5f + playerShip.transform.up * 1.5f;
+		Vector3 cameraChasePoint = playerShip.MyReference.CameraChasePoint;
+		Vector3 followTarget = playerShip.transform.position - playerShip.transform.forward * cameraChasePoint.z + playerShip.transform.up * cameraChasePoint.y;
 		FollowTarget.transform.position = followTarget;
 
 		float deltaTime = Time.deltaTime;
@@ -104,10 +124,10 @@ public class CameraController : MonoBehaviour
 		float yawForce = GameManager.Inst.PlayerControl.YawForce;
 		float pitchForce = GameManager.Inst.PlayerControl.PitchForce * -1;
 		float rollForce = GameManager.Inst.PlayerControl.RollForce * -1;
-
-		_tiltFactor += Mathf.Clamp(yawForce + rollForce * 0.66f, -1.3f, 1.3f) * deltaTime * 3f;
-		_xFactor += yawForce * deltaTime * 0.75f;// * 1.5f;
-		_yFactor += pitchForce * deltaTime * 1.75f;//* 2.5f;
+		float tiltAmount = playerShip.MyReference.CameraTilt;
+		_tiltFactor += Mathf.Clamp(yawForce + rollForce * 0.66f, -1 * tiltAmount, tiltAmount) * deltaTime * 3f;
+		_xFactor += yawForce * deltaTime * 1f; //* 0.75f;
+		_yFactor += pitchForce * deltaTime * 2.1f; // * 1.75f;
 
 
 		_tiltFactor = Mathf.Lerp(_tiltFactor, 0, deltaTime * 2f);

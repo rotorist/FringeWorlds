@@ -9,7 +9,6 @@ public class WeaponJoint : MonoBehaviour
 	public Transform Target;
 	public Vector3 TargetPos;
 	public float GimballLimitPercent;
-	public float GimballMax;
 	public TurretControlMode ControlMode;
 	public ShipBase ParentShip;
 
@@ -42,7 +41,7 @@ public class WeaponJoint : MonoBehaviour
 				}
 				else if(MountedWeapon.TurretBase != null)
 				{
-					TargetPos = transform.position + transform.forward * 100;
+					//TargetPos = transform.position + transform.forward * 100;
 				}
 			}
 
@@ -53,9 +52,9 @@ public class WeaponJoint : MonoBehaviour
 				Vector3 verticalLos = lookDir - (transform.forward * 100);
 				float angle = Vector3.Angle(lookDir, transform.forward);
 
-				if(angle > GimballMax * GimballLimitPercent)
+				if(angle > MountedWeapon.GimballMax * GimballLimitPercent)
 				{
-					verticalLos = verticalLos.normalized * (Mathf.Tan(Mathf.Deg2Rad * GimballMax * GimballLimitPercent) * 100);
+					verticalLos = verticalLos.normalized * (Mathf.Tan(Mathf.Deg2Rad * MountedWeapon.GimballMax * GimballLimitPercent) * 100);
 					Vector3 newTarget = transform.position + transform.forward * 100 + verticalLos;
 					lookDir = newTarget - MountedWeapon.transform.position;
 
@@ -72,19 +71,27 @@ public class WeaponJoint : MonoBehaviour
 				Vector3 barrelLookDir = Vector3.ProjectOnPlane(lookDir, MountedWeapon.TurretBase.transform.right);
 				Vector3 verticalLos = lookDir - (transform.up * 100);
 				float angle = Vector3.Angle(lookDir, transform.up);
-				if(angle > GimballMax * GimballLimitPercent)
+				if(angle > MountedWeapon.GimballMax)
 				{
 					//verticalLos = verticalLos.normalized * (Mathf.Tan(Mathf.Deg2Rad * GimballMax * GimballLimitPercent) * 100);
 					//Vector3 newTarget = transform.position + transform.up * 100 + verticalLos;
 					//barrelLookDir = newTarget - MountedWeapon.transform.position;
 					Vector3 flatDir = Vector3.ProjectOnPlane(lookDir, MountedWeapon.TurretBase.transform.up);
 					barrelLookDir = Vector3.ProjectOnPlane(flatDir, MountedWeapon.TurretBase.transform.right);
+
+					
+				}
+				else if(angle < MountedWeapon.GimballMin)
+				{
+					Vector3 flatDir = Vector3.ProjectOnPlane(lookDir, MountedWeapon.TurretBase.transform.up);
+					barrelLookDir = Vector3.ProjectOnPlane(flatDir, MountedWeapon.TurretBase.transform.right);
+					barrelLookDir = barrelLookDir / Mathf.Cos(Mathf.Deg2Rad * (MountedWeapon.GimballMax - MountedWeapon.GimballMin));
 				}
 
 				Quaternion barrelRotation = Quaternion.LookRotation(barrelLookDir, Vector3.Cross(barrelLookDir, MountedWeapon.TurretBase.transform.right) * -1);
 
-				MountedWeapon.TurretBase.transform.rotation = Quaternion.Lerp(MountedWeapon.TurretBase.transform.rotation, baseRotation, Time.deltaTime * 9);
-				MountedWeapon.Barrel.transform.rotation = Quaternion.Lerp(MountedWeapon.Barrel.transform.rotation, barrelRotation, Time.deltaTime * 9);
+				MountedWeapon.TurretBase.transform.rotation = Quaternion.Lerp(MountedWeapon.TurretBase.transform.rotation, baseRotation, Time.deltaTime * 6);
+				MountedWeapon.Barrel.transform.rotation = Quaternion.Lerp(MountedWeapon.Barrel.transform.rotation, barrelRotation, Time.deltaTime * 6);
 			}
 			else
 			{
@@ -138,7 +145,8 @@ public class WeaponJoint : MonoBehaviour
 		{
 			//check if target is still within range and fov
 			Vector3 los = Target.transform.position - transform.position;
-			if(Vector3.Angle(MountedWeapon.TurretBase.transform.up, los) > GimballMax * GimballLimitPercent || los.magnitude > MountedWeapon.Range)
+			float angle = Vector3.Angle(MountedWeapon.TurretBase.transform.up, los);
+			if(angle > MountedWeapon.GimballMax * GimballLimitPercent || angle < MountedWeapon.GimballMin || los.magnitude > MountedWeapon.Range)
 			{
 				Target = null;
 				return;
@@ -154,8 +162,8 @@ public class WeaponJoint : MonoBehaviour
 				}
 				float relationship = GameManager.Inst.NPCManager.GetFactionRelationship(ParentShip.MyAI.MyFaction, ship.MyAI.MyFaction);
 				Vector3 los = ship.transform.position - transform.position;
-
-				if(relationship < 0.4f && Vector3.Angle(MountedWeapon.TurretBase.transform.up, los) <= GimballMax * GimballLimitPercent && los.magnitude < MountedWeapon.Range)
+				float angle = Vector3.Angle(MountedWeapon.TurretBase.transform.up, los);
+				if(relationship < 0.4f && angle <= MountedWeapon.GimballMax * GimballLimitPercent && angle >= MountedWeapon.GimballMin && los.magnitude < MountedWeapon.Range)
 				{
 					Target = ship.transform;
 					return;

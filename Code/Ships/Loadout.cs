@@ -18,3 +18,13 @@ public class Loadout
 	}
 
 }
+
+[System.Serializable]
+public class LoadoutSaveData
+{
+	public string ShipID;
+	public ShipType ShipType;
+	public List<string> WeaponJointNames;
+	public List<string> WeaponNames;
+
+}

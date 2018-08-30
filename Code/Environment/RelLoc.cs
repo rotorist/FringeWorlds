@@ -34,6 +34,10 @@ public class RelLoc
 		}
 	}
 
+	public Vector3 Disposition
+	{
+		get { return _disposition; }
+	}
 
 	public RelLoc(Vector3 refPos, Vector3 realPos, Transform origin)
 	{

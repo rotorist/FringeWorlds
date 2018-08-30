@@ -15,19 +15,7 @@ public class Ammunition : MonoBehaviour
 		//Debug.Log("Hit something " + other.name);
 		if(other.tag == "Shield")
 		{
-			//Debug.Log("Hit shield");
-			ShieldBase shield = other.GetComponent<ShieldBase>();
-			if(shield.ParentShip == Attacker)
-			{
-				return;
-			}
-
-			Damage.HitLocation = transform.position;
-			Damage result = shield.ProcessDamage(Damage);
-			if(result.HullAmount <= 1f)
-			{
-				GameObject.Destroy(this.gameObject);
-			}
+			
 
 			return;
 		}
@@ -53,6 +41,21 @@ public class Ammunition : MonoBehaviour
 			}
 			else
 			{
+				//Debug.Log("Hit shield");
+				ShieldBase shield = hitShip.Shield.GetComponent<ShieldBase>();
+				if(shield.ParentShip == Attacker)
+				{
+					return;
+				}
+
+				Damage.HitLocation = collision.contacts[0].point;
+				Damage = shield.ProcessDamage(Damage);
+				if(Damage.HullAmount <= 1f)
+				{
+					GameObject.Destroy(this.gameObject);
+					return;
+				}
+
 				hitShip.ParentShip.ProcessHullDamage(Damage);
 
 				GameObject.Destroy(this.gameObject);

@@ -26,6 +26,8 @@ public class PlayerControl
 	public Autopilot PlayerAutopilot;
 	public MacroAIParty PlayerParty;
 
+	public List<WeaponJoint> [] WeaponGroups;
+
 	public float Throttle { get { return _throttle; } }
 	public bool IsFAKilled { get { return _isFAKilled; } }
 	public bool IsMouseFlight { get { return _isMouseFlight; } }
@@ -85,12 +87,30 @@ public class PlayerControl
 
 		GameManager.Inst.NPCManager.AllShips.Add(PlayerShip);
 
-		PlayerShip.RB.inertiaTensor = new Vector3(1, 1, 1);
-
-		_testLauncher = PlayerShip.ShipModel.GetComponentInChildren<Launcher>();
+		WeaponGroups = new List<WeaponJoint>[4];
+		WeaponGroups[0] = new List<WeaponJoint>();
+		WeaponGroups[1] = new List<WeaponJoint>();
+		WeaponGroups[2] = new List<WeaponJoint>();
+		WeaponGroups[3] = new List<WeaponJoint>();
 
 		GameEventHandler.OnShipDeath -= OnNPCDeath;
 		GameEventHandler.OnShipDeath += OnNPCDeath;
+
+	}
+
+	public void LoadPlayerShip()
+	{
+		PlayerShip.RB.inertiaTensor = new Vector3(1, 1, 1);
+
+		//use player loadout to spawn player ship here
+		GameManager.Inst.NPCManager.SpawnPlayerShip(GameManager.Inst.PlayerProgress.ActiveLoadout, "player", PlayerParty);
+
+		WeaponGroups[0].Add(PlayerShip.MyReference.WeaponJoints[2]);
+		WeaponGroups[1].Add(PlayerShip.MyReference.WeaponJoints[0]);
+		WeaponGroups[1].Add(PlayerShip.MyReference.WeaponJoints[1]);
+
+		PlayerShip.MyReference.ExhaustController.setExhaustState(ExhaustState.Normal);
+		PlayerShip.MyReference.ExhaustController.setExhaustLength(_throttle);
 
 	}
 
@@ -224,6 +244,12 @@ public class PlayerControl
 		if(Input.GetKeyDown(KeyCode.F2))
 		{
 			AutopilotGoTo();
+		}
+
+		//toggle view
+		if(Input.GetKeyDown(KeyCode.V))
+		{
+			GameManager.Inst.CameraController.SetView(!GameManager.Inst.CameraController.IsFirstPerson);
 		}
 	}
 
@@ -376,32 +402,35 @@ public class PlayerControl
 		{
 			if(Input.GetKey(KeyCode.LeftControl))
 			{
-				ShiftShield(true);
+				
 			}
 			else
 			{
-				_throttle += 0.1f;
+				
+				_throttle = Mathf.Clamp01(_throttle + 0.1f);
+				PlayerShip.MyReference.ExhaustController.setExhaustLength(_throttle);
 			}
 		}
 		else if(wheelInput < 0)
 		{
 			if(Input.GetKey(KeyCode.LeftControl))
 			{
-				ShiftShield(false);
+				
 			}
 			else
 			{
-				_throttle -= 0.1f;
+				_throttle = Mathf.Clamp01(_throttle - 0.1f);
+				PlayerShip.MyReference.ExhaustController.setExhaustLength(_throttle);
 			}
 		}
 
-		_throttle = Mathf.Clamp01(_throttle);
+
 
 		//firing weapon
 
 		if(Input.GetMouseButton(0))
 		{
-			foreach(WeaponJoint joint in PlayerShip.MyReference.WeaponJoints)
+			foreach(WeaponJoint joint in WeaponGroups[0])
 			{
 				if(joint.MountedWeapon != null && joint.ControlMode == TurretControlMode.Manual)
 				{
@@ -413,7 +442,13 @@ public class PlayerControl
 
 		if(Input.GetMouseButton(1))
 		{
-			_testLauncher.Fire();
+			foreach(WeaponJoint joint in WeaponGroups[1])
+			{
+				if(joint.MountedWeapon != null && joint.ControlMode == TurretControlMode.Manual)
+				{
+					joint.MountedWeapon.Fire();
+				}
+			}
 		}
 
 	}
@@ -480,6 +515,8 @@ public class PlayerControl
 			_forwardForce = _throttle * 1;
 			float maxSpeed = PlayerShip.Engine.MaxSpeed;
 
+			//PlayerShip.MyReference.ExhaustController.setExhaustState(ExhaustState.Thruster);
+
 			if(_thruster != 0 || _isFAKilled)
 			{
 				maxSpeed = maxSpeed * 1.5f;
@@ -489,6 +526,22 @@ public class PlayerControl
 			{
 				
 				maxSpeed = maxSpeed * _throttle;
+			}
+
+			if(_thruster > 0)
+			{
+				PlayerShip.MyReference.ExhaustController.setExhaustState(ExhaustState.Thruster);
+			}
+			else
+			{
+				if(_isFAKilled)
+				{
+					PlayerShip.MyReference.ExhaustController.setExhaustState(ExhaustState.Idle);
+				}
+				else
+				{
+					PlayerShip.MyReference.ExhaustController.setExhaustState(ExhaustState.Normal);
+				}
 			}
 
 			if(velocity.magnitude < maxSpeed && !_isFAKilled)
@@ -674,34 +727,32 @@ public class PlayerControl
 	}
 
 
-
+	/*
 	private void ShiftShield(bool isToFront)
 	{
 		if(PlayerShip.Shield != null && PlayerShip.Shield.Type == ShieldType.Fighter)
 		{
 			FighterShield shield = (FighterShield)PlayerShip.Shield;
+			float frontPortion = shield.FrontCapacity / shield.TotalCapacity;
+			float totalAmount = shield.FrontAmount + shield.RearAmount;
 			if(isToFront)
 			{
-				shield.FrontCapacity = Mathf.Clamp(shield.FrontCapacity + shield.TotalCapacity * 0.15f, 0.1f, shield.TotalCapacity);
-				shield.RearCapacity = Mathf.Clamp(shield.TotalCapacity - shield.FrontCapacity, 0.1f, shield.TotalCapacity);
-				if(shield.RearAmount > shield.RearCapacity)
-				{
-					shield.FrontAmount = Mathf.Clamp(shield.FrontAmount + (shield.RearAmount - shield.RearCapacity), 0, shield.FrontCapacity);
-					shield.RearAmount = shield.RearCapacity;
-				}
+				frontPortion = Mathf.Clamp01(frontPortion + 0.1f);
+
 			}
 			else
 			{
-				shield.RearCapacity = Mathf.Clamp(shield.RearCapacity + shield.TotalCapacity * 0.15f, 0.1f, shield.TotalCapacity);
-				shield.FrontCapacity = Mathf.Clamp(shield.TotalCapacity - shield.RearCapacity, 0.1f, shield.TotalCapacity);
-				if(shield.FrontAmount > shield.FrontCapacity)
-				{
-					shield.RearAmount = Mathf.Clamp(shield.RearAmount + (shield.FrontAmount - shield.FrontCapacity), 0, shield.RearCapacity);
-					shield.FrontAmount = shield.FrontCapacity;
-				}
+				frontPortion = Mathf.Clamp01(frontPortion - 0.1f);
+			
 			}
+
+			shield.FrontCapacity = shield.TotalCapacity * frontPortion;
+			shield.RearCapacity = shield.TotalCapacity * (1 - frontPortion);
+			shield.FrontAmount = totalAmount * frontPortion;
+			shield.RearAmount = totalAmount * (1 - frontPortion);
 		}
 	}
+	*/
 
 	private void SelectObject()
 	{

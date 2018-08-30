@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
 	public SceneType SceneType;
 	public Constants Constants;
 	public PlayerControl PlayerControl;
+	public PlayerProgress PlayerProgress;
 	public Camera MainCamera;
 	public CameraController CameraController;
 
@@ -27,6 +28,8 @@ public class GameManager : MonoBehaviour
 	public NPCManager NPCManager;
 	public WorldManager WorldManager;
 	public SaveGameManager SaveGameManager;
+
+	public ShipBase ShipForTesting;
 
 	public LevelAnchor LevelAnchor;
 
@@ -151,6 +154,9 @@ public class GameManager : MonoBehaviour
 			CursorManager = new CursorManager();
 			CursorManager.Initialize();
 
+			PlayerProgress = new PlayerProgress();
+			PlayerProgress.Initialize();
+
 			PlayerControl = new PlayerControl();
 			PlayerControl.Initialize();
 
@@ -173,7 +179,7 @@ public class GameManager : MonoBehaviour
 
 			//check if there's anchor save
 			StarSystem system = null;
-			if(LevelAnchor != null && LevelAnchor.Save != null)
+			if(LevelAnchor != null && !LevelAnchor.IsNewGame && LevelAnchor.Save != null)
 			{
 				//load system from anchor save
 				Debug.Log("Loading from anchor!");
@@ -194,14 +200,16 @@ public class GameManager : MonoBehaviour
 			WorldManager.Initialize();
 
 			PlayerControl.CreatePlayerParty();
+			PlayerControl.LoadPlayerShip();
 
 			UIManager.Initialize();
 
-			if(LevelAnchor != null && LevelAnchor.Save != null)
+			if(LevelAnchor != null && !LevelAnchor.IsNewGame && LevelAnchor.Save != null)
 			{
 				PlayerControl.SpawnPlayer();
 			}
 
+			LevelAnchor.IsNewGame = false;
 
 		}
 		else if(SceneType == SceneType.SpaceTest)

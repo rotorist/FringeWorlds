@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class AI : MonoBehaviour 
 {
+	public ShipBase TargetShip;
 	public ShipBase MyShip;
 	public bool IsDocked;
 	public bool IsActive { get { return _isActive; } }
@@ -69,7 +70,7 @@ public class AI : MonoBehaviour
 	// Use this for initialization
 	public virtual void Initialize(MacroAIParty party, Faction faction) 
 	{
-		AimSkill = 0.4f;
+		AimSkill = 0.8f;
 		MyShip = transform.GetComponent<ShipBase>();
 		AvoidanceDetector = MyShip.MyReference.AvoidanceDetector;
 		AvoidanceDetector.ParentShip = MyShip;
@@ -123,6 +124,9 @@ public class AI : MonoBehaviour
 		{
 			_isEngineKilled = (bool)Whiteboard.Parameters["IsEngineKilled"];
 			Vector3 dest = (Vector3)Whiteboard.Parameters["Destination"];
+
+
+
 			bool isStopping = false;
 			if(dest == Vector3.zero)
 			{
@@ -132,6 +136,9 @@ public class AI : MonoBehaviour
 			Vector3 interceptDest = StaticUtility.FirstOrderIntercept(MyShip.transform.position, MyShip.RB.velocity, 0, dest, Vector3.zero);
 			Whiteboard.Parameters["InterceptDest"] = interceptDest;
 			Vector3 los = interceptDest - transform.position;
+
+
+
 			if(isStopping)
 			{
 				los = RB.velocity * -1f;
@@ -158,6 +165,28 @@ public class AI : MonoBehaviour
 				if(Vector3.Angle(MyShip.transform.forward, los) < 30 || los.magnitude < 10f || isStopping)
 				{
 					RB.AddForce(los.normalized * force);
+				}
+			}
+
+			if((bool)Whiteboard.Parameters["IsThrusting"])
+			{
+				if(MyShip.MyReference.ExhaustController != null)
+				{
+					MyShip.MyReference.ExhaustController.setExhaustState(ExhaustState.Thruster);
+				}
+			}
+			else
+			{
+				if(MyShip.MyReference.ExhaustController != null)
+				{
+					if(_isEngineKilled)
+					{
+						MyShip.MyReference.ExhaustController.setExhaustState(ExhaustState.Idle);
+					}
+					else
+					{
+						MyShip.MyReference.ExhaustController.setExhaustState(ExhaustState.Normal);
+					}
 				}
 			}
 
@@ -225,6 +254,7 @@ public class AI : MonoBehaviour
 
 		Vector3 dest = (Vector3)Whiteboard.Parameters["Destination"];
 		ShipBase aimTarget = (ShipBase)Whiteboard.Parameters["AimTarget"];
+
 		Vector3 aimPoint = Vector3.zero;
 		Vector3 aimDir = MyShip.transform.forward;
 		float turnRate = 1.5f;
@@ -366,6 +396,15 @@ public class AI : MonoBehaviour
 
 	protected void UpdateSensor()
 	{
+		if(Whiteboard.Parameters["TargetEnemy"] != null)
+		{
+			TargetShip = (ShipBase)Whiteboard.Parameters["TargetEnemy"];
+		}
+		else
+		{
+			TargetShip = null;
+		}
+
 		if(MyShip.Scanner != null)
 		{
 			//check if current target enemy is still valid or within range
@@ -420,6 +459,27 @@ public class AI : MonoBehaviour
 			}
 
 			Whiteboard.Parameters["TargetEnemy"] = closestTarget;
+		}
+
+		//if still no target enemy check if anyone else on the party has it then take that
+		if(Whiteboard.Parameters["TargetEnemy"] == null)
+		{
+			foreach(ShipBase ship in MyParty.SpawnedShips)
+			{
+				if(ship.MyAI.Whiteboard.Parameters["TargetEnemy"] != null)
+				{
+					ShipBase targetShip = (ShipBase)ship.MyAI.Whiteboard.Parameters["TargetEnemy"];
+					if(Vector3.Distance(ship.transform.position, targetShip.transform.position) < ship.Scanner.Range)
+					{
+						Whiteboard.Parameters["TargetEnemy"] = ship.MyAI.Whiteboard.Parameters["TargetEnemy"];
+					}
+				}
+			}
+		}
+
+		if(Whiteboard.Parameters["TargetEnemy"] == null)
+		{
+			Whiteboard.Parameters["AimTarget"] = null;
 		}
 
 		_targetLockTimer = Mathf.Clamp(_targetLockTimer - Time.deltaTime, 0, 60);

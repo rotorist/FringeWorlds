@@ -4,20 +4,19 @@ using UnityEngine;
 
 public class FighterShield : ShieldBase
 {
-	public float FrontCapacity;
-	public float FrontAmount;
-	public float RearCapacity;
-	public float RearAmount;
-	public float RechargeRate;
-
-
-	public GameObject CurrentShieldFlash;
 
 	private float _shieldFlashTimer;
+	private float _fadeAlpha;
+
+	public override void Initialize ()
+	{
+		base.Initialize ();
+		Amount = TotalCapacity;
+	}
 
 	public override float GetShieldPercentage ()
 	{
-		return (FrontAmount + RearAmount) / TotalCapacity;
+		return Amount / TotalCapacity;
 	}
 
 	public override Damage ProcessDamage (Damage damage)
@@ -26,9 +25,10 @@ public class FighterShield : ShieldBase
 		processedDamage.DamageType = damage.DamageType;
 		processedDamage.HitLocation = damage.HitLocation;
 
-		//determine whether it hit front or back
-		float shieldFill = 1;
+
+		/*
 		bool isFront = true;
+
 		float hitAngle = Vector3.Angle((damage.HitLocation - transform.position), transform.forward);
 		if(hitAngle <= 90)
 		{
@@ -39,26 +39,25 @@ public class FighterShield : ShieldBase
 			isFront = false;
 			shieldFill = RearAmount / RearCapacity;
 		}
+		*/
+		float shieldFill = Amount / TotalCapacity;
 
 		if(shieldFill > 0.2f)
 		{
 			if(ParentShip != GameManager.Inst.PlayerControl.PlayerShip)
 			{
-				//load a shield flash
-				if(CurrentShieldFlash == null)
-				{
-					CurrentShieldFlash = GameObject.Instantiate(Resources.Load("ShieldFlash")) as GameObject;
-				}
-
-				CurrentShieldFlash.transform.parent = transform;
-				CurrentShieldFlash.transform.localPosition = Vector3.zero;
-				CurrentShieldFlash.transform.localScale = new Vector3(1, 1, 1);
-				CurrentShieldFlash.transform.LookAt(damage.HitLocation);
+				//show shield flash
+				this.MyRenderer = this.GetComponent<MeshRenderer>();
+				this.MyRenderer.enabled = true;
 				_shieldFlashTimer = 0;
+			}
+			else
+			{
+				_fadeAlpha = Mathf.Clamp01(_fadeAlpha + 0.1f);
 			}
 
 			//load shield hit mark
-			GameObject hitMark = GameObject.Instantiate(Resources.Load("ShieldHitMark1")) as GameObject;
+			GameObject hitMark = GameObject.Instantiate(Resources.Load("ShieldHitMark" + this.GetShieldHitEffectNumber())) as GameObject;
 			hitMark.transform.position = damage.HitLocation;
 			Quaternion lookRotation = Quaternion.LookRotation(damage.HitLocation - transform.position);
 			hitMark.transform.rotation = lookRotation;
@@ -69,7 +68,14 @@ public class FighterShield : ShieldBase
 
 		//get multiplier
 		float multiplier = StaticUtility.GetShieldDamageMultiplier(this.Tech, damage.DamageType); 
+		Amount = Mathf.Clamp(Amount - damage.ShieldAmount * multiplier, 0, TotalCapacity);
 
+		//float totalAmount = FrontAmount + RearAmount;
+		//float frontPortion = FrontCapacity / TotalCapacity;
+		//totalAmount = Mathf.Clamp(totalAmount - damage.ShieldAmount * multiplier, 0, TotalCapacity);
+		//FrontAmount = totalAmount * frontPortion;
+		//RearAmount = totalAmount * (1 - frontPortion);
+		/*
 		if(isFront)
 		{
 			FrontAmount = Mathf.Clamp(FrontAmount - damage.ShieldAmount * multiplier, 0, FrontCapacity);
@@ -78,27 +84,30 @@ public class FighterShield : ShieldBase
 		{
 			RearAmount = Mathf.Clamp(RearAmount - damage.ShieldAmount * multiplier, 0, RearCapacity);
 		}
+		*/
+
+		float damageEval = 1;
+		if(ParentShip != GameManager.Inst.PlayerControl.PlayerShip)
+		{
+			damageEval = Mathf.Clamp01(GameManager.Inst.Constants.ShieldProtectionCurve.Evaluate(shieldFill));
+		}
+		else
+		{
+			damageEval = Mathf.Clamp01(GameManager.Inst.Constants.PlayerShieldProtectionCurve.Evaluate(shieldFill));
+		}
 
 		processedDamage.ShieldAmount = 0;
-		processedDamage.HullAmount = Mathf.Clamp01(GameManager.Inst.Constants.ShieldProtectionCurve.Evaluate(shieldFill)) * damage.HullAmount;
+		processedDamage.HullAmount = damageEval * damage.HullAmount;
 
 		return processedDamage;
 	}
-	
+
 	// Update is called once per frame
 	void Update () 
 	{
 		_shieldFlashTimer += Time.deltaTime;
-		if(_shieldFlashTimer > 0.1f)
-		{
-			_shieldFlashTimer = 0;
-			if(CurrentShieldFlash != null)
-			{
-				GameObject.Destroy(CurrentShieldFlash.gameObject);
-			}
-			CurrentShieldFlash = null;
-		}
 
+		/*
 		if(FrontAmount < FrontCapacity)
 		{
 			float recharge = RechargeRate;
@@ -120,6 +129,27 @@ public class FighterShield : ShieldBase
 			}
 
 			RearAmount = Mathf.Clamp(RearAmount + recharge * Time.deltaTime, 0, RearCapacity);
+		}
+		*/
+
+		if(Amount < TotalCapacity)
+		{
+			float recharge = RechargeRate;
+			Amount = Mathf.Clamp(Amount + recharge * Time.deltaTime, 0, TotalCapacity);
+		}
+
+		if(ParentShip == GameManager.Inst.PlayerControl.PlayerShip)
+		{
+			base.UpdateShieldFading(_fadeAlpha);
+			_fadeAlpha = Mathf.Lerp(_fadeAlpha, 0, Time.deltaTime * 1);
+		}
+		else
+		{
+			if(this.MyRenderer != null && _shieldFlashTimer > 0.2f)
+			{
+				_shieldFlashTimer = 0;
+				this.MyRenderer.enabled = false;
+			}
 		}
 	}
 }

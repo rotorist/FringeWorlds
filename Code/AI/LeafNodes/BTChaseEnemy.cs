@@ -12,7 +12,7 @@ public class BTChaseEnemy : BTLeaf
 
 	public override BTResult Process ()
 	{
-		//Debug.Log("Processing Chase Enemy");
+		//Debug.Log("Processing Chase Enemy " + MyAI.name);
 
 		ShipBase target = (ShipBase)MyAI.Whiteboard.Parameters[Parameters[0]];
 		if(target != null)
@@ -45,6 +45,7 @@ public class BTChaseEnemy : BTLeaf
 
 	public override BTResult Exit (BTResult result)
 	{
+		//Debug.Log("Chase enemy result " + result);
 		return result;
 	}
 

@@ -66,7 +66,9 @@ class AnimateSpriteSheet : MonoBehaviour
 			if (RunOnce)
 			{
 				Destroy(_newMaterial);
+				GameObject parent = this.transform.parent.gameObject;
 				GameObject.Destroy(this.gameObject);
+				GameObject.Destroy(parent);
 				yield break;
 			}
 		}

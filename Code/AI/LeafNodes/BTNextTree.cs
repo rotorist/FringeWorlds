@@ -16,10 +16,12 @@ public class BTNextTree : BTLeaf
 		if(MyAI != null)
 		{
 			result = MyAI.TreeSet[Parameters[0]].Run();
+			//Debug.Log("Running AI tree set " + Parameters[0] + " result: " + result);
 		}
 		else if(MyParty != null)
 		{
 			result = MyParty.TreeSet[Parameters[0]].Run();
+			//Debug.Log("Running party tree set " + Parameters[0] + " result: " + result);
 		}
 		return result;
 	}
