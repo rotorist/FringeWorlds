@@ -5,7 +5,8 @@ using UnityEngine;
 public class LevelAnchor : MonoBehaviour 
 {
 	public bool IsNewGame;
-	public SaveGame Save;
+	public string SpawnSystem;
+	public string ProfileName;
 
 
 	void Awake()

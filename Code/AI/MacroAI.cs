@@ -75,7 +75,7 @@ public class MacroAI
 		party.SpawnedShips.Add(GameManager.Inst.PlayerControl.PlayerShip);
 		party.IsPlayerParty = true;
 
-		StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems["washington_system"];
+		StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems[GameManager.Inst.WorldManager.CurrentSystem.ID];
 		party.CurrentSystemID = currentSystem.ID;
 		StationData currentStation = null;
 		party.DockedStationID = "";
@@ -245,7 +245,7 @@ public class MacroAI
 					foreach(ShipBase ship in party.SpawnedShips)
 					{
 						float distFromPlayer = Vector3.Distance(ship.transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position);
-						if(distFromPlayer < 1000)
+						if(distFromPlayer < 9999999)
 						{
 							party.ShouldEnableAI = true;
 							break;

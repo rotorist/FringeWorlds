@@ -35,7 +35,7 @@ public class BTGoToFriendlyTarget : BTLeaf
 			{
 				dest = MyParty.SpawnedShipsLeader.transform.TransformPoint(MyParty.Formation[MyAI.MyShip]);
 				MyAI.Whiteboard.Parameters["Destination"] = dest;
-				Debug.Log("Going towards formation point ");
+				//Debug.Log("Going towards formation point ");
 				return BTResult.Running;
 			}
 			else

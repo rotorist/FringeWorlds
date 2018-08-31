@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 public class SaveGameManager
 {
@@ -29,7 +32,8 @@ public class SaveGameManager
 		}
 
 		LevelAnchor anchor = GameObject.FindObjectOfType<LevelAnchor>();
-		anchor.Save = CurrentSave;
+		anchor.SpawnSystem = CurrentSave.SpawnSystem;
+		anchor.ProfileName = GameManager.Inst.PlayerProgress.ProfileName;
 	}
 
 	public void CreateExitSave(StationBase station)
@@ -40,7 +44,7 @@ public class SaveGameManager
 	public void Save()
 	{
 		CurrentSave = new SaveGame();
-		/*
+
 		//save all macroAI parties
 		CurrentSave.AllParties = new List<MacroAIPartySaveData>();
 		foreach(MacroAIParty party in GameManager.Inst.NPCManager.AllParties)
@@ -69,7 +73,10 @@ public class SaveGameManager
 				partyData.CurrentTask = new MacroAITaskSaveData();
 				partyData.CurrentTask.TaskType = party.CurrentTask.TaskType;
 				partyData.CurrentTask.StayDuration = party.CurrentTask.StayDuration;
-				partyData.CurrentTask.TravelDestCoord = new SerVector3(party.CurrentTask.TravelDestCoord.Disposition);
+				if(party.CurrentTask.TravelDestCoord != null)
+				{
+					partyData.CurrentTask.TravelDestCoord = new SerVector3(party.CurrentTask.TravelDestCoord.Disposition);
+				}
 				partyData.CurrentTask.TravelDestSystemID = party.CurrentTask.TravelDestSystemID;
 				partyData.CurrentTask.TravelDestNodeID = party.CurrentTask.TravelDestNodeID;
 				partyData.CurrentTask.IsDestAStation = party.CurrentTask.IsDestAStation;
@@ -91,14 +98,49 @@ public class SaveGameManager
 
 			CurrentSave.AllParties.Add(partyData);
 		}
-		*/
+
+		string fullPath = Application.persistentDataPath + "/" + GameManager.Inst.PlayerProgress.ProfileName + ".dat";
+
+		BinaryFormatter bf = new BinaryFormatter();
+		FileStream file;
+		if(File.Exists(fullPath))
+		{
+			file = File.Open(fullPath, FileMode.Open);
+		}
+		else
+		{
+			file = File.Create(fullPath);
+		}
+
+		bf.Serialize(file, CurrentSave);
+		file.Close();
+		Debug.Log("Game has been saved");
+
+
 	}
 
-	public void Load(SaveGame save)
+	public void Load(string profileName)
 	{
 		CurrentSave = null;
-		GameManager.Inst.PlayerControl.SpawnStationID = save.SpawnStationID;
-		GameManager.Inst.PlayerControl.SpawnStationType = save.SpawnStationType;
+
+		Debug.Log("Loading save " + profileName);
+		string fullPath = Application.persistentDataPath + "/" + profileName + ".dat";
+
+		BinaryFormatter bf = new BinaryFormatter();
+		FileStream file;
+		if(File.Exists(fullPath))
+		{
+			file = File.Open(fullPath, FileMode.Open);
+		}
+		else
+		{
+			return false;
+		}
+
+		CurrentSave = (SaveGame)bf.Deserialize(file);
+
+		//GameManager.Inst.PlayerControl.SpawnStationID = save.SpawnStationID;
+		//GameManager.Inst.PlayerControl.SpawnStationType = save.SpawnStationType;
 	}
 
 	public void LoadNewGame()

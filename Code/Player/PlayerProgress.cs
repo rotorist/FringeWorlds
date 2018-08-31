@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PlayerProgress
 {
+	public string ProfileName;
 	public Loadout ActiveLoadout;
 
 	public void Initialize()
@@ -25,5 +26,6 @@ public class PlayerProgress
 			{ "GimballFront", "Class1Launcher1" },
 		};
 
+		ProfileName = "Kurt";
 	}
 }

@@ -36,6 +36,7 @@ public class GameManager : MonoBehaviour
 	// Use this for initialization
 	void Start () 
 	{
+		
 		QualitySettings.vSyncCount = 0;  // VSync must be disabled
 		Application.targetFrameRate = 60;
 		Initialize();
@@ -137,6 +138,12 @@ public class GameManager : MonoBehaviour
 		SaveGameManager = new SaveGameManager();
 		LevelAnchor = GameObject.FindObjectOfType<LevelAnchor>();
 
+		if(LevelAnchor == null)
+		{
+			GameObject o = GameObject.Instantiate(Resources.Load("LevelAnchor")) as GameObject;
+			LevelAnchor = o.GetComponent<LevelAnchor>();
+		}
+
 		MaterialManager = new MaterialManager();
 		MaterialManager.Initialize();
 
@@ -179,12 +186,12 @@ public class GameManager : MonoBehaviour
 
 			//check if there's anchor save
 			StarSystem system = null;
-			if(LevelAnchor != null && !LevelAnchor.IsNewGame && LevelAnchor.Save != null)
+			if(LevelAnchor != null && !LevelAnchor.IsNewGame)
 			{
 				//load system from anchor save
 				Debug.Log("Loading from anchor!");
-				system = DBManager.XMLParserWorld.GenerateSystemScene(LevelAnchor.Save.SpawnSystem);
-				SaveGameManager.Load(LevelAnchor.Save);
+				system = DBManager.XMLParserWorld.GenerateSystemScene(LevelAnchor.SpawnSystem);
+				SaveGameManager.Load(LevelAnchor.ProfileName);
 
 			}
 			else
@@ -204,7 +211,7 @@ public class GameManager : MonoBehaviour
 
 			UIManager.Initialize();
 
-			if(LevelAnchor != null && !LevelAnchor.IsNewGame && LevelAnchor.Save != null)
+			if(LevelAnchor != null && !LevelAnchor.IsNewGame)
 			{
 				PlayerControl.SpawnPlayer();
 			}

@@ -178,7 +178,7 @@ public class BTDockAtNextNode : BTLeaf
 				return Exit(BTResult.Fail);
 			}
 
-			Debug.Log("Docking stage " + _dockingStage + " - " + MyAI.name);
+			//Debug.Log("Docking stage " + _dockingStage + " - " + MyAI.name);
 
 			//if already in tradelane then do a midway dock on prevNode tradelane
 			if(Vector3.Distance(MyAI.MyShip.transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position) > 500 && MyParty.PrevNode != null 
@@ -304,7 +304,7 @@ public class BTDockAtNextNode : BTLeaf
 			if(MyParty.CurrentTLSession != null && MyAI.MyShip.IsInPortal)
 			{
 				float distToNextNode = Vector3.Distance(MyAI.MyShip.transform.position, MyParty.NextNode.Location.RealPos);
-				Debug.Log(distToNextNode + " next node " + MyParty.NextNode.ID);
+				//Debug.Log(distToNextNode + " next node " + MyParty.NextNode.ID);
 				if(distToNextNode < 10)
 				{
 					

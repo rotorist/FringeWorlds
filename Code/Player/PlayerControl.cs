@@ -68,10 +68,16 @@ public class PlayerControl
 
 	public void Initialize()
 	{
+		Debug.Log("Initializing player control");
 		GameObject o = GameObject.Find("PlayerShip");
+
 		if(o != null)
 		{
 			PlayerShip = o.GetComponent<ShipBase>();
+		}
+		else
+		{
+			Debug.Log("Can't find player ship");
 		}
 
 		o = GameObject.Find("SpaceDust");

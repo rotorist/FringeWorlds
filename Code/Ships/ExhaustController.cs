@@ -10,6 +10,7 @@ public class ExhaustController : MonoBehaviour
 	private ExhaustState _state;
 	private List<GameObject> _exhausts;
 	private float _normalExhaustScaleZ;
+	private GameObject _flare;
 
 	public void setExhaustLength(float length) //length is 0 to 1
 	{
@@ -57,11 +58,15 @@ public class ExhaustController : MonoBehaviour
 			{
 				exhaust = GameObject.Instantiate(Resources.Load("EngineFlameNormal")) as GameObject;
 				setExhaustLength(_normalExhaustScaleZ);
-				GameObject flare = GameObject.Instantiate(Resources.Load("EngineFlare")) as GameObject;
-				flare.transform.parent = t;
-				flare.transform.localScale = new Vector3(1, 1, 1);
-				flare.transform.localPosition = Vector3.zero;
-				flare.transform.localEulerAngles = Vector3.zero;
+
+				if(_flare == null)
+				{
+					_flare = GameObject.Instantiate(Resources.Load("EngineFlare")) as GameObject;
+					_flare.transform.parent = t;
+					_flare.transform.localScale = new Vector3(1, 1, 1);
+					_flare.transform.localPosition = Vector3.zero;
+					_flare.transform.localEulerAngles = Vector3.zero;
+				}
 
 			}
 			else if(state == ExhaustState.Thruster)

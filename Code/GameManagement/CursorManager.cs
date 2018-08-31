@@ -36,11 +36,12 @@ public class CursorManager
 
 			Vector3 markerPos = new Vector3(marker.Value.transform.position.x, marker.Value.transform.position.y, 0);
 			//marker.Value.transform.position = mousePos;
-			//Debug.Log(marker.Value.transform.position);
-			//Debug.Log(Vector3.Distance(mousePos, markerPos));
+			Debug.Log(marker.Value.transform.position);
+			Debug.Log(Vector3.Distance(mousePos, markerPos));
 			if(Vector3.Distance(markerPos, mousePos) < 0.1f)
 			{
 				type = SelectedObjectType.Ship;
+				Debug.Log("Selected a ship");
 				return marker.Key.gameObject;
 			}
 		}

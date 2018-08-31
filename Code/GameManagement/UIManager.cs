@@ -136,7 +136,7 @@ public class UIManager
 		mousePos.y = Mathf.Clamp01(mousePos.y / Screen.height);
 		Vector3 worldPoint = GameManager.Inst.UIManager.UICamera.ViewportToWorldPoint(mousePos);
 		Debug.Log(mousePos + ", " + worldPoint);
-		return new Vector3(worldPoint.x, worldPoint.y, worldPoint.z);
+		return new Vector3(worldPoint.x, worldPoint.y, 0);
 	}
 
 	public Vector3 GetTargetScreenPos(Vector3 target)
