@@ -41,4 +41,10 @@ public class BTGetNewTask : BTLeaf
 		Debug.Log("BTGetNewTask: " + result);
 		return result;
 	}
+
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Get New Task");
+		return BTResult.Running;
+	}
 }

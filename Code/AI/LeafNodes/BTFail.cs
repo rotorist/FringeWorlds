@@ -20,4 +20,10 @@ public class BTFail : BTLeaf
 	{
 		return result;	
 	}
+
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Fail Action");
+		return BTResult.Running;
+	}
 }

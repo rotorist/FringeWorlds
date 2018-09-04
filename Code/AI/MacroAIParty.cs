@@ -62,6 +62,13 @@ public class MacroAIParty
 	public Loadout LeaderLoadout;
 
 	public Dictionary<string,BehaviorTree> TreeSet;
+
+	public MaxStack<string> RunningNodeHist;
+
+	public MacroAIParty()
+	{
+		RunningNodeHist = new MaxStack<string>(20);
+	}
 }
 
 

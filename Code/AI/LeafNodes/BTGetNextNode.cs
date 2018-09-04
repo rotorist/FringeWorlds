@@ -78,4 +78,10 @@ public class BTGetNextNode : BTLeaf
 		Debug.Log("BTGetNextNode: " + result + " for party " + MyParty.PartyNumber);
 		return result;
 	}
+
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Get Next Node");
+		return BTResult.Running;
+	}
 }

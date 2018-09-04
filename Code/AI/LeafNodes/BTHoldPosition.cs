@@ -17,7 +17,7 @@ public class BTHoldPosition : BTLeaf
 		if(velocity.magnitude > 0.05f)
 		{
 			MyAI.RB.AddForce(-1 * velocity);
-			return BTResult.Running;
+			return Running();
 		}
 		else
 		{
@@ -28,6 +28,12 @@ public class BTHoldPosition : BTLeaf
 	public override BTResult Exit (BTResult result)
 	{
 		return result;
+	}
+
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Hold Position");
+		return BTResult.Running;
 	}
 
 }

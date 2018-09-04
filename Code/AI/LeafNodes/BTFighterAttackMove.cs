@@ -68,7 +68,7 @@ public class BTFighterAttackMove : BTLeaf
 			_timer += deltaTime;
 			_prevDist = _targetDist;
 
-			return BTResult.Running;
+			return Running();
 		}
 		else
 		{
@@ -80,6 +80,12 @@ public class BTFighterAttackMove : BTLeaf
 	public override BTResult Exit (BTResult result)
 	{
 		return result;
+	}
+
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Fighter Attack Move");
+		return BTResult.Running;
 	}
 		
 

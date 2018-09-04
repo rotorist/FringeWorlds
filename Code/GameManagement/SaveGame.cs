@@ -10,5 +10,6 @@ public class SaveGame
 	public string SpawnStationID;
 	public StationType SpawnStationType;
 
+	public int LastUsedPartyNumber;
 	public List<MacroAIPartySaveData> AllParties;
 }

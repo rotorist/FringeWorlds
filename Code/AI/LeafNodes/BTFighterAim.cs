@@ -21,7 +21,7 @@ public class BTFighterAim : BTLeaf
 			Vector3 aimPoint = (Vector3)MyAI.Whiteboard.Parameters["AimPoint"];
 			if(aimPoint == Vector3.zero)
 			{
-				return Exit(BTResult.Running);
+				return Running();
 			}
 			if(aimPoint != Vector3.zero && Vector3.Angle(aimPoint - MyAI.MyShip.transform.position, MyAI.MyShip.transform.forward) > 25)
 			{
@@ -42,5 +42,11 @@ public class BTFighterAim : BTLeaf
 			MyAI.Whiteboard.Parameters["AimPoint"] = Vector3.zero;
 		}
 		return result;
+	}
+
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Fighter Aim");
+		return BTResult.Running;
 	}
 }

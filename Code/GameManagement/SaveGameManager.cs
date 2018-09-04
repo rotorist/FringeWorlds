@@ -11,7 +11,9 @@ public class SaveGameManager
 
 	public void CreateAnchorSave(StationBase station, StationType type)
 	{
-		Save();
+		CurrentSave = new SaveGame();
+
+		//create a regular save and then fill anchor with data
 
 		if(type == StationType.JumpGate)
 		{
@@ -31,24 +33,34 @@ public class SaveGameManager
 			CurrentSave.SpawnStationType = type;
 		}
 
+		SaveWorldData();
+
+
 		LevelAnchor anchor = GameObject.FindObjectOfType<LevelAnchor>();
 		anchor.SpawnSystem = CurrentSave.SpawnSystem;
 		anchor.ProfileName = GameManager.Inst.PlayerProgress.ProfileName;
 	}
 
-	public void CreateExitSave(StationBase station)
+	public void CreateSaveInStation(StationBase station)
 	{
 
 	}
 
-	public void Save()
+	public void SaveWorldData()
 	{
-		CurrentSave = new SaveGame();
+
+		//save npc manager
+		CurrentSave.LastUsedPartyNumber = GameManager.Inst.NPCManager.LastUsedPartyNumber;
 
 		//save all macroAI parties
 		CurrentSave.AllParties = new List<MacroAIPartySaveData>();
 		foreach(MacroAIParty party in GameManager.Inst.NPCManager.AllParties)
 		{
+			if(party.PartyNumber == 0)
+			{
+				continue;
+			}
+
 			MacroAIPartySaveData partyData = new MacroAIPartySaveData();
 			partyData.Destination = new SerVector3(party.Destination);
 			partyData.PartyNumber = party.PartyNumber;
@@ -119,7 +131,7 @@ public class SaveGameManager
 
 	}
 
-	public void Load(string profileName)
+	public SaveGame GetSave(string profileName)
 	{
 		CurrentSave = null;
 
@@ -134,13 +146,137 @@ public class SaveGameManager
 		}
 		else
 		{
-			return false;
+			return null;
 		}
 
 		CurrentSave = (SaveGame)bf.Deserialize(file);
 
-		//GameManager.Inst.PlayerControl.SpawnStationID = save.SpawnStationID;
-		//GameManager.Inst.PlayerControl.SpawnStationType = save.SpawnStationType;
+		GameManager.Inst.PlayerControl.SpawnStationID = CurrentSave.SpawnStationID;
+		GameManager.Inst.PlayerControl.SpawnStationType = CurrentSave.SpawnStationType;
+
+		GameManager.Inst.PlayerProgress.ProfileName = CurrentSave.ProfileName;
+
+		return CurrentSave;
+	}
+
+	public void LoadSave()
+	{
+		if(CurrentSave == null)
+		{
+			return;
+		}
+
+		GameManager.Inst.NPCManager.LastUsedPartyNumber = CurrentSave.LastUsedPartyNumber;
+
+		//loading all NPC and player parties
+		Debug.Log("Loading AI Parties, there are " + CurrentSave.AllParties.Count);
+		foreach(MacroAIPartySaveData partyData in CurrentSave.AllParties)
+		{
+			Debug.Log("Loading Party " + partyData.PartyNumber);
+			MacroAIParty party = new MacroAIParty();
+			party.FactionID = partyData.FactionID;
+			party.SpawnedShips = new List<ShipBase>();
+
+			//List<string> keyList = new List<string>(GameManager.Inst.WorldManager.AllSystems.Keys);
+			StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems[partyData.CurrentSystemID];
+			party.CurrentSystemID = currentSystem.ID;
+			party.DockedStationID = partyData.DockedStationID;
+			if(currentSystem.ID == GameManager.Inst.WorldManager.CurrentSystem.ID)
+			{
+				party.Location = new RelLoc(currentSystem.OriginPosition, partyData.Location.ConvertToVector3(), GameObject.Find("Origin").transform, 1);
+			}
+			else
+			{
+				party.Location = new RelLoc(currentSystem.OriginPosition, partyData.Location.ConvertToVector3(), null, 1);
+			}
+			party.PartyNumber = partyData.PartyNumber;
+
+			//generate loadout
+			party.LeaderLoadout = new Loadout(partyData.LeaderLoadout.ShipID, partyData.LeaderLoadout.ShipType);
+			party.LeaderLoadout.WeaponJoints = new Dictionary<string, string>();
+
+			for(int i=0; i<partyData.LeaderLoadout.WeaponJointNames.Count; i++)
+			{
+				party.LeaderLoadout.WeaponJoints.Add(partyData.LeaderLoadout.WeaponJointNames[i], partyData.LeaderLoadout.WeaponNames[i]);
+			}
+
+			party.FollowerLoadouts = new List<Loadout>();
+			foreach(LoadoutSaveData loadoutData in partyData.FollowerLoadouts)
+			{
+				Loadout loadout = new Loadout(loadoutData.ShipID, loadoutData.ShipType);
+				for(int i=0; i<loadoutData.WeaponJointNames.Count; i++)
+				{
+					loadout.WeaponJoints.Add(loadoutData.WeaponJointNames[i], loadoutData.WeaponNames[i]);
+				}
+				party.FollowerLoadouts.Add(loadout);
+			}
+				
+
+			if(partyData.CurrentTask != null)
+			{
+				MacroAITask task = new MacroAITask();
+				task.IsDestAStation = partyData.CurrentTask.IsDestAStation;
+				task.StayDuration = partyData.CurrentTask.StayDuration;
+				task.TaskType = partyData.CurrentTask.TaskType;
+
+				if(partyData.CurrentTask.TravelDestCoord != null)
+				{
+					if(currentSystem.ID == GameManager.Inst.WorldManager.CurrentSystem.ID)
+					{
+						task.TravelDestCoord = new RelLoc(currentSystem.OriginPosition, partyData.CurrentTask.TravelDestCoord.ConvertToVector3(), GameObject.Find("Origin").transform, 1);
+					}
+					else
+					{
+						task.TravelDestCoord = new RelLoc(currentSystem.OriginPosition, partyData.CurrentTask.TravelDestCoord.ConvertToVector3(), null, 1);
+					}
+				}
+				task.TravelDestNodeID = partyData.CurrentTask.TravelDestNodeID;
+				task.TravelDestSystemID = partyData.CurrentTask.TravelDestSystemID;
+				Debug.Log("Loading task type " + task.TaskType.ToString() + " " + task.TravelDestNodeID);
+				party.CurrentTask = task;
+
+				if(party.CurrentTask.TaskType == MacroAITaskType.Travel)
+				{
+					if(party.CurrentTask.IsDestAStation)
+					{
+						party.DestNode = GameManager.Inst.WorldManager.AllNavNodes[party.CurrentTask.TravelDestNodeID];
+					}
+					else
+					{
+						//party.DestNode = CreateTempNode(party.CurrentTask.TravelDestCoord, "tempdest", GameManager.Inst.WorldManager.AllSystems[party.CurrentTask.TravelDestSystemID]);
+						party.DestNode = GameManager.Inst.NPCManager.MacroAI.GetClosestNodeToLocation(party.CurrentTask.TravelDestCoord.RealPos, GameManager.Inst.WorldManager.AllSystems[party.CurrentTask.TravelDestSystemID]);
+					}
+				}
+
+			}
+
+
+			party.IsInTradelane = partyData.IsInTradelane;
+			party.MoveSpeed = partyData.MoveSpeed;
+			party.NextTwoNodes = new List<NavNode>();
+			foreach(string nodeID in partyData.NextTwoNodesIDs)
+			{
+				Debug.Log("Next node " + nodeID);
+				party.NextTwoNodes.Add(GameManager.Inst.WorldManager.AllNavNodes[nodeID]);
+			}
+			if(partyData.PrevNodeID != "")
+			{
+				party.PrevNode = GameManager.Inst.WorldManager.AllNavNodes[partyData.PrevNodeID];
+			}
+			party.TreeSet = new Dictionary<string, BehaviorTree>();
+			foreach(string treeSetName in partyData.TreeSetNames)
+			{
+				party.TreeSet.Add(treeSetName, GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree(treeSetName, null, party));
+			}
+
+
+			GameManager.Inst.NPCManager.AllParties.Add(party);
+		}
+	}
+
+	public void LoadSaveInStation()
+	{
+
 	}
 
 	public void LoadNewGame()

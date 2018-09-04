@@ -42,4 +42,10 @@ public class BTGetDestination : BTLeaf
 			Debug.Log("BTGetDestination: " + result);
 		return result;
 	}
+
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Get Destination");
+		return BTResult.Running;
+	}
 }

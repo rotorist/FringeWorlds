@@ -46,5 +46,10 @@ public class RelLoc
 		_origin = origin;
 	}
 
-
+	public RelLoc(Vector3 refPos, Vector3 disposition, Transform origin, int constructorID)
+	{
+		_refPos = refPos;
+		_disposition = disposition;
+		_origin = origin;
+	}
 }

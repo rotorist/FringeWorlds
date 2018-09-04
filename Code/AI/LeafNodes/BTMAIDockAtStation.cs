@@ -63,4 +63,15 @@ public class BTMAIDockAtStation : BTLeaf
 		
 		return result;
 	}
+
+	public override BTResult Running ()
+	{
+		string message = "MAIDockAtStation ";
+		if(MyParty.NextNode != null)
+		{
+			message += MyParty.NextNode.ID;
+		}
+		MyParty.RunningNodeHist.UniquePush(message);
+		return BTResult.Running;
+	}
 }

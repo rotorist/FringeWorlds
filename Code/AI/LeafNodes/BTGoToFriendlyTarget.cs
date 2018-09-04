@@ -27,7 +27,7 @@ public class BTGoToFriendlyTarget : BTLeaf
 			if(MyParty.SpawnedShipsLeader.IsInPortal && MyParty.SpawnedShipsLeader.InPortalStationType == StationType.Station)
 			{
 				//Debug.Log("leader is docking on a station, stop following ");
-				return BTResult.Running;
+				return Running();
 			}
 
 			Vector3 dest = target.transform.position;
@@ -36,7 +36,7 @@ public class BTGoToFriendlyTarget : BTLeaf
 				dest = MyParty.SpawnedShipsLeader.transform.TransformPoint(MyParty.Formation[MyAI.MyShip]);
 				MyAI.Whiteboard.Parameters["Destination"] = dest;
 				//Debug.Log("Going towards formation point ");
-				return BTResult.Running;
+				return Running();
 			}
 			else
 			{
@@ -51,7 +51,7 @@ public class BTGoToFriendlyTarget : BTLeaf
 				{
 					//Debug.Log("Going towards target ");
 					MyAI.Whiteboard.Parameters["Destination"] = dest;
-					return BTResult.Running;
+					return Running();
 				}
 			}
 		}
@@ -66,5 +66,11 @@ public class BTGoToFriendlyTarget : BTLeaf
 	{
 		//Debug.Log("Go to friendly " + result + " " + MyAI.MyShip.name);
 		return result;
+	}
+
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Go To Friendly Target");
+		return BTResult.Running;
 	}
 }

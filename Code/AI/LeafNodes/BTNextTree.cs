@@ -31,4 +31,10 @@ public class BTNextTree : BTLeaf
 		return result;
 	}
 
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Next Tree");
+		return BTResult.Running;
+	}
+
 }

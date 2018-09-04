@@ -33,7 +33,8 @@ public class BTChaseEnemy : BTLeaf
 				//Vector3 aimPoint = StaticUtility.FirstOrderIntercept(MyAI.MyShip.transform.position, MyAI.MyShip.RB.velocity,
 				//													30, target.transform.position, target.RB.velocity);
 				MyAI.Whiteboard.Parameters["AimPoint"] = Vector3.zero;
-				return BTResult.Running;
+
+				return Running();
 			}
 		}
 		else
@@ -47,6 +48,12 @@ public class BTChaseEnemy : BTLeaf
 	{
 		//Debug.Log("Chase enemy result " + result);
 		return result;
+	}
+
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Chase Enemy");
+		return BTResult.Running;
 	}
 
 }

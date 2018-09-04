@@ -317,6 +317,12 @@ public class BTCheck : BTLeaf
 		return result;
 	}
 
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Check");
+		return BTResult.Running;
+	}
+
 	private BTResult HasReachedDestination()
 	{
 		if(!MyParty.CurrentTask.IsDestAStation)

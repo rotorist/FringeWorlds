@@ -46,7 +46,7 @@ public class BTUndockStation : BTLeaf
 					}
 					else
 					{
-						return BTResult.Running;
+						return Running();
 					}
 				}
 				else
@@ -70,13 +70,13 @@ public class BTUndockStation : BTLeaf
 			else
 			{
 				//Debug.Log("BTUndock: running");
-				return BTResult.Running;
+				return Running();
 			}
 		}
 		else
 		{
 			//Debug.Log("BTUndock: running");
-			return BTResult.Running;
+			return Running();
 		}
 
 
@@ -86,5 +86,11 @@ public class BTUndockStation : BTLeaf
 	{
 		_undockSession = null;
 		return result;
+	}
+
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Undock Station");
+		return BTResult.Running;
 	}
 }

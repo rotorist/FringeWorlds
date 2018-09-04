@@ -6,7 +6,7 @@ using System.Linq;
 public class NPCManager
 {
 	public MacroAI MacroAI;
-
+	public int LastUsedPartyNumber;
 	public List<ShipBase> AllShips { get { return _allShips; } }
 	public List<MacroAIParty> AllParties { get { return _allParties; } }
 
@@ -65,7 +65,7 @@ public class NPCManager
 		{	
 			{fac1.ID, 0.5f},
 			{fac2.ID, 0.5f},
-			{fac3.ID, 0.0f},
+			{fac3.ID, 0.5f},
 			{fac4.ID, 0.5f},
 			{fac5.ID, 0.5f}
 		};
@@ -90,7 +90,7 @@ public class NPCManager
 
 		fac3.Relationships = new Dictionary<string, float>() 
 		{	
-			{facp.ID, 0.0f},
+			{facp.ID, 0.5f},
 			{fac1.ID, 0},
 			{fac2.ID, 1},
 			{fac4.ID, 1},
@@ -127,6 +127,7 @@ public class NPCManager
 		{
 			//MacroAI.GenerateParties();
 		}
+		Debug.Log("Generating test party");
 		MacroAI.GenerateTestParty("otu_civil_defense");
 		//MacroAI.GenerateTestParty("otu");
 	}

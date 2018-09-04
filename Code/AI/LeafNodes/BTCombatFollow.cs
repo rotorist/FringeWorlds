@@ -32,7 +32,7 @@ public class BTCombatFollow : BTLeaf
 				MyAI.Whiteboard.Parameters["Destination"] = _followTarget.transform.position;
 				MyAI.Whiteboard.Parameters["AimPoint"] = Vector3.zero;
 
-				return BTResult.Running;
+				return Running();
 			}
 			else
 			{
@@ -73,7 +73,7 @@ public class BTCombatFollow : BTLeaf
 
 			}
 
-			return BTResult.Running;
+			return Running();
 
 		}
 
@@ -86,6 +86,12 @@ public class BTCombatFollow : BTLeaf
 
 		_followTarget = null;
 		return result;
+	}
+
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Combat Follow");
+		return BTResult.Running;
 	}
 
 }

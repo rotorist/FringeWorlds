@@ -69,7 +69,7 @@ public class BTFighterEvade : BTLeaf
 
 		if(_evadeTimer < _evadeTimeout)
 		{
-			return BTResult.Running;
+			return Running();
 		}
 		else
 		{
@@ -85,5 +85,11 @@ public class BTFighterEvade : BTLeaf
 		MyAI.Whiteboard.Parameters["EvadeDir"] = Vector3.zero;
 		MyAI.Whiteboard.Parameters["IsThrusting"] = false;
 		return result;
+	}
+
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Fighter Evade");
+		return BTResult.Running;
 	}
 }

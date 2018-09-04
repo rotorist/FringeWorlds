@@ -11,6 +11,9 @@ public class AI : MonoBehaviour
 
 	public Faction MyFaction;
 	public MacroAIParty MyParty;
+	public int MyPartyNumber;
+
+	public MaxStack<string> RunningNodeHist;
 
 	//public ShipBase AttackTarget;
 	public Rigidbody RB;
@@ -70,6 +73,8 @@ public class AI : MonoBehaviour
 	// Use this for initialization
 	public virtual void Initialize(MacroAIParty party, Faction faction) 
 	{
+		RunningNodeHist = new MaxStack<string>(20);
+
 		AimSkill = 0.8f;
 		MyShip = transform.GetComponent<ShipBase>();
 		AvoidanceDetector = MyShip.MyReference.AvoidanceDetector;
@@ -85,6 +90,7 @@ public class AI : MonoBehaviour
 
 		MyParty = party;
 		MyFaction = faction;
+		MyPartyNumber = MyParty.PartyNumber;
 
 		TreeSet = new Dictionary<string, BehaviorTree>();
 		TreeSet.Add("BaseBehavior", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("BaseBehavior", this, party));

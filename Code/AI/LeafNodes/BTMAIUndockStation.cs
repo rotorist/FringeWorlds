@@ -38,4 +38,10 @@ public class BTMAIUndockStation : BTLeaf
 
 		return result;
 	}
+
+	public override BTResult Running ()
+	{
+		MyParty.RunningNodeHist.UniquePush("MAI Undock Station");
+		return BTResult.Running;
+	}
 }

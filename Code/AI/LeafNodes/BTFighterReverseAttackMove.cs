@@ -84,7 +84,7 @@ public class BTFighterReverseAttackMove : BTLeaf
 
 		_timer += deltaTime;
 
-		return BTResult.Running;
+		return Running();
 	}
 
 	public override BTResult Exit (BTResult result)
@@ -92,5 +92,11 @@ public class BTFighterReverseAttackMove : BTLeaf
 		MyAI.Whiteboard.Parameters["IsEngineKilled"] = false;
 		MyAI.Whiteboard.Parameters["IsThrusting"] = false;
 		return result;
+	}
+
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Fighter Reverse Attack");
+		return BTResult.Running;
 	}
 }

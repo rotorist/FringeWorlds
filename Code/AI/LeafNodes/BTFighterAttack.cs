@@ -34,7 +34,7 @@ public class BTFighterAttack : BTLeaf
 					}
 				}
 				//Debug.Log("Processing Fighter Attack");
-				return BTResult.Running;
+				return Running();
 			}
 			else
 			{
@@ -52,5 +52,11 @@ public class BTFighterAttack : BTLeaf
 	public override BTResult Exit (BTResult result)
 	{
 		return result;
+	}
+
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Fighter Attack");
+		return BTResult.Running;
 	}
 }

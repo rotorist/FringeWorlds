@@ -6,11 +6,10 @@ public class MacroAI
 {
 
 
-	private int _lastUsedPartyNumber;
+
 
 	public void Initialize()
 	{
-		_lastUsedPartyNumber = 1;
 		GameEventHandler.OnShipDeath -= OnShipDeath;
 		GameEventHandler.OnShipDeath += OnShipDeath;
 	}
@@ -28,8 +27,8 @@ public class MacroAI
 		party.DockedStationID = "planet_colombia_landing";
 		Transform origin = GameObject.Find("Origin").transform;
 		party.Location = new RelLoc(origin.position, currentStation.Location.RealPos, origin);
-		party.PartyNumber = _lastUsedPartyNumber + 1;
-		_lastUsedPartyNumber = party.PartyNumber;
+		party.PartyNumber = GameManager.Inst.NPCManager.LastUsedPartyNumber + 1;
+		GameManager.Inst.NPCManager.LastUsedPartyNumber = party.PartyNumber;
 
 		//generate loadout
 		party.LeaderLoadout = new Loadout("LightTransporter", ShipType.Transporter);
@@ -143,8 +142,8 @@ public class MacroAI
 		{
 			party.Location = new RelLoc(currentSystem.OriginPosition, currentStation.Location.RealPos, null);
 		}
-		party.PartyNumber = _lastUsedPartyNumber + 1;
-		_lastUsedPartyNumber = party.PartyNumber;
+		party.PartyNumber = GameManager.Inst.NPCManager.LastUsedPartyNumber + 1;
+		GameManager.Inst.NPCManager.LastUsedPartyNumber = party.PartyNumber;
 
 		//generate loadout
 		party.LeaderLoadout = new Loadout("LightTransporter", ShipType.Transporter);
@@ -661,6 +660,7 @@ public class MacroAI
 			task.TaskType = MacroAITaskType.Stay;
 			task.StayDuration = UnityEngine.Random.Range(8f, 15f);
 			party.WaitTimer = 0;
+			party.RunningNodeHist.UniquePush("Stay for " + task.StayDuration);
 			Debug.LogError("Party " + party.PartyNumber + " Task has been assigned to party: " + task.TaskType + " for " + task.StayDuration);
 
 		}

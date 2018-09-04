@@ -191,7 +191,7 @@ public class GameManager : MonoBehaviour
 				//load system from anchor save
 				Debug.Log("Loading from anchor!");
 				system = DBManager.XMLParserWorld.GenerateSystemScene(LevelAnchor.SpawnSystem);
-				SaveGameManager.Load(LevelAnchor.ProfileName);
+				SaveGameManager.GetSave(LevelAnchor.ProfileName);
 
 			}
 			else
@@ -214,9 +214,12 @@ public class GameManager : MonoBehaviour
 			if(LevelAnchor != null && !LevelAnchor.IsNewGame)
 			{
 				PlayerControl.SpawnPlayer();
+				SaveGameManager.LoadSave();
 			}
 
 			LevelAnchor.IsNewGame = false;
+
+
 
 		}
 		else if(SceneType == SceneType.SpaceTest)
@@ -255,12 +258,13 @@ public class GameManager : MonoBehaviour
 		{
 			UIManager = new UIManager();
 			UIManager.Initialize();
-		}
 
-		for(int i=0; i<10; i++)
-		{
-			//NPCManager.TestSpawn();
+			if(LevelAnchor != null && !LevelAnchor.IsNewGame)
+			{
+				SaveGameManager.LoadSave();
+			}
 		}
+			
 
 	}
 }

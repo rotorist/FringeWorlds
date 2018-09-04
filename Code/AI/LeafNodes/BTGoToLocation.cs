@@ -52,7 +52,7 @@ public class BTGoToLocation : BTLeaf
 			{
 				MyAI.Whiteboard.Parameters["Destination"] = MyParty.NextNode.Location.RealPos;
 				//Debug.Log("BTGoToLocation: running, going to next node");
-				return BTResult.Running;
+				return RunningNextNode(MyParty.NextNode.ID);
 			}
 		}
 		else if(Parameters[0] == "DestCoord")
@@ -93,7 +93,7 @@ public class BTGoToLocation : BTLeaf
 				{
 					MyAI.Whiteboard.Parameters["Destination"] = destCoord;
 					Debug.Log("BTGoToLocation: running, going to dest coord");
-					return BTResult.Running;
+					return RunningDestCoord(destCoord);
 				}
 			}
 			else
@@ -110,5 +110,23 @@ public class BTGoToLocation : BTLeaf
 	{
 		Debug.Log("BTGoToLocation: " + result);
 		return result;
+	}
+
+	public override BTResult Running ()
+	{
+		MyAI.RunningNodeHist.UniquePush("Go To Location");
+		return BTResult.Running;
+	}
+
+	private BTResult RunningDestCoord(Vector3 coord)
+	{
+		MyAI.RunningNodeHist.UniquePush("Go To Location " + coord.ToString());
+		return BTResult.Running;
+	}
+
+	private BTResult RunningNextNode(string nodeID)
+	{
+		MyAI.RunningNodeHist.UniquePush("Go To Location " + nodeID);
+		return BTResult.Running;
 	}
 }
