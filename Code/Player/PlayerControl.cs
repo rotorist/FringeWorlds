@@ -128,6 +128,19 @@ public class PlayerControl
 		PlayerAutopilot.Initialize(PlayerParty, GameManager.Inst.NPCManager.AllFactions["player"]);
 	}
 
+	public int GetWeaponGroupNumber(WeaponJoint joint)
+	{
+		for(int i=0; i<4; i++)
+		{
+			if(WeaponGroups[i].Contains(joint))
+			{
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
 	public void PerFrameUpdate()
 	{
 		if(GameManager.Inst.SceneType == SceneType.SpaceTest)
@@ -413,7 +426,7 @@ public class PlayerControl
 			else
 			{
 				
-				_throttle = Mathf.Clamp01(_throttle + 0.1f);
+				_throttle = Mathf.Clamp01(_throttle + 0.05f);
 				PlayerShip.MyReference.ExhaustController.setExhaustLength(_throttle);
 			}
 		}
@@ -425,7 +438,7 @@ public class PlayerControl
 			}
 			else
 			{
-				_throttle = Mathf.Clamp01(_throttle - 0.1f);
+				_throttle = Mathf.Clamp01(_throttle - 0.05f);
 				PlayerShip.MyReference.ExhaustController.setExhaustLength(_throttle);
 			}
 		}

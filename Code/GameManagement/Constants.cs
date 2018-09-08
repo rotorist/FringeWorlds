@@ -11,6 +11,7 @@ public class Constants : MonoBehaviour
 	public AnimationCurve ShieldProtectionCurve;
 	public AnimationCurve PlayerShieldProtectionCurve;
 	public AnimationCurve CameraFollowCurve;
+	public AnimationCurve MarkerEnlargeCurve;
 
 	public Dictionary<ShieldTech, Dictionary<DamageType, float>> ShieldDamageMultiplier;
 

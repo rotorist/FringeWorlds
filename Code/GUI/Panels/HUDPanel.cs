@@ -11,8 +11,8 @@ public class HUDPanel : PanelBase
 	public BarIndicator ShieldAmountIndicator;
 	public BarIndicator HullAmountIndicator;
 
-	public UISprite EngineThrottleBar;
-	public UISprite ThrusterBar;
+	public CurveIndicator ThrottleCurve;
+	public CurveIndicator ThrusterCurve;
 	public UILabel SpeedLabel;
 	public UILabel FALabel;
 	public UILabel MouseFlightLabel;
@@ -32,7 +32,7 @@ public class HUDPanel : PanelBase
 	public UIButton ItemsTab;
 
 
-
+	public Transform WeaponListAnchor;
 	public Transform ObjEntryAnchor;
 
 	public Dictionary<ShipBase, UISprite> UnselectedShipMarkers { get { return _unselectedShips; } }
@@ -44,6 +44,7 @@ public class HUDPanel : PanelBase
 	//private Dictionary<Item, UISprite> _unselectedItems;
 
 	private List<HUDListEntry> _allEntries;
+	private List<HUDWeaponEntry> _weaponEntries;
 
 	private SelectedHUDTab _selectedTab; 
 
@@ -55,6 +56,7 @@ public class HUDPanel : PanelBase
 
 		_unselectedShips = new Dictionary<ShipBase, UISprite>();
 		_allEntries = new List<HUDListEntry>();
+		_weaponEntries = new List<HUDWeaponEntry>();
 		for(int i=0; i<10; i++)
 		{
 			HUDListEntry entry = LoadHUDListEntry();
@@ -62,6 +64,8 @@ public class HUDPanel : PanelBase
 			_allEntries.Add(entry);
 		}
 		ClearTargetData();
+
+		LoadWeaponEntries();
 	}
 
 	public override void PerFrameUpdate ()
@@ -101,7 +105,7 @@ public class HUDPanel : PanelBase
 		_currentSelectMarker = o.GetComponent<SelectedObjMarker>();
 		o.transform.parent = transform;
 		o.transform.localScale = new Vector3(1, 1, 1);
-		_currentSelectMarker.Initialize(125f, description);
+		_currentSelectMarker.Initialize(100f, description);
 	}
 
 	public void OnSelectShip(ShipBase ship)
@@ -119,7 +123,7 @@ public class HUDPanel : PanelBase
 		_currentSelectMarker = o.GetComponent<SelectedObjMarker>();
 		o.transform.parent = transform;
 		o.transform.localScale = new Vector3(1, 1, 1);
-		_currentSelectMarker.Initialize(125f, ship.name);
+		_currentSelectMarker.Initialize(100f, ship.name);
 
 		ShipReference shipRef = ship.ShipModel.GetComponent<ShipReference>();
 		TargetShieldHolder.alpha = 1;
@@ -316,7 +320,8 @@ public class HUDPanel : PanelBase
 				continue;
 			}
 
-		
+			float distFromPlayer = Vector3.Distance(ship.transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position);
+			Debug.Log(distFromPlayer);
 			bool isMarkerHidden = false;
 			bool isMarkerTooFar = false;
 
@@ -369,8 +374,8 @@ public class HUDPanel : PanelBase
 					UISprite sprite = o.GetComponent<UISprite>();
 					sprite.MakePixelPerfect();
 					sprite.transform.parent = transform;
-					sprite.transform.localScale = new Vector3(1, 1, 1);
-					sprite.width = 30;
+					sprite.transform.localScale = new Vector3(0.15f, 0.15f, 0.15f);
+					sprite.width = 130;
 					_unselectedShips.Add(ship, sprite);
 				}
 
@@ -378,22 +383,32 @@ public class HUDPanel : PanelBase
 
 				//update position
 				_unselectedShips[ship].transform.localPosition = GameManager.Inst.UIManager.GetTargetScreenPos(ship.transform.position);
+				//update scale
+				float scale = GetUnselectedMarkerScale(distFromPlayer);
+				_unselectedShips[ship].width = (int)scale;
 			}
 		
 
 		}
 	}
 
+	private float GetUnselectedMarkerScale(float dist)
+	{
+		return 130 +  GameManager.Inst.Constants.MarkerEnlargeCurve.Evaluate((1 - Mathf.Clamp01(dist / 200))) * 200;
+	}
+
 	private void UpdateCenterHUD()
 	{
 		//engine throttle
 		float throttle = GameManager.Inst.PlayerControl.Throttle;
-		EngineThrottleBar.height = 20 + Mathf.CeilToInt(80f * throttle);
+		ThrottleCurve.SetValue(throttle);
+
 		//thruster fuel
 		Thruster thruster = GameManager.Inst.PlayerControl.PlayerShip.Thruster;
 		if(thruster != null)
 		{
-			ThrusterBar.height = 20 + Mathf.CeilToInt(80f * thruster.CurrentFuel / thruster.MaxFuel);
+			ThrusterCurve.SetValue(thruster.CurrentFuel / thruster.MaxFuel);
+			//ThrusterBar.height = 20 + Mathf.CeilToInt(80f * thruster.CurrentFuel / thruster.MaxFuel);
 		}
 
 		//ship speed
@@ -409,17 +424,17 @@ public class HUDPanel : PanelBase
 		//flight assist indicator
 		if(GameManager.Inst.PlayerControl.IsFAKilled)
 		{
-			FALabel.text = "";
+			FALabel.text = "NEWTONIAN";
 		}
 		else
 		{
-			FALabel.text = "FA";
+			FALabel.text = "ASSISTED";
 		}
 
 		//mouse flight indicator
 		if(GameManager.Inst.PlayerControl.IsMouseFlight)
 		{
-			MouseFlightLabel.text = "MAN";
+			MouseFlightLabel.text = "MANUAL";
 		}
 		else
 		{
@@ -462,6 +477,30 @@ public class HUDPanel : PanelBase
 					_allEntries[i].SetAlpha(0.5f);
 				}
 			}
+		}
+	}
+
+	private void LoadWeaponEntries()
+	{
+		int i = 0;
+		foreach(WeaponJoint joint in GameManager.Inst.PlayerControl.PlayerShip.MyReference.WeaponJoints)
+		{
+			GameObject o = GameObject.Instantiate(Resources.Load("HUDWeaponEntry")) as GameObject;
+			HUDWeaponEntry entry = o.GetComponent<HUDWeaponEntry>();
+			o.transform.parent = WeaponListAnchor;
+			o.transform.localPosition = new Vector3((int)(Mathf.Sqrt(1f - Mathf.Pow((5f - i) / 5f, 2)) * -9f), i * 42, 0);
+			o.transform.localEulerAngles = Vector3.zero;
+			o.transform.localScale = new Vector3(1, 1, 1);
+			_weaponEntries.Add(entry);
+			int groupNumber = GameManager.Inst.PlayerControl.GetWeaponGroupNumber(joint);
+			string weaponName = "";
+			if(joint.MountedWeapon != null)
+			{
+				weaponName = joint.MountedWeapon.name;
+			}
+			entry.UpdateEntry(groupNumber, weaponName);
+
+			i++;
 		}
 	}
 
