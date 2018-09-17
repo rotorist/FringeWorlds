@@ -6,21 +6,22 @@ using UnityEngine;
 public class HUDPanel : PanelBase
 {
 	public UISprite Pip;
+	public UISprite PipLine;
 	public UISprite ShieldIndicatorFront;
 	public UISprite ShieldIndicatorRear;
 	public BarIndicator ShieldAmountIndicator;
 	public BarIndicator HullAmountIndicator;
 
-	public CurveIndicator ThrottleCurve;
+	public CurveIndicator SpeedCurve;
 	public CurveIndicator ThrusterCurve;
 	public UILabel SpeedLabel;
+	public UILabel ThrottleLabel;
 	public UILabel FALabel;
 	public UILabel MouseFlightLabel;
 
-	public BarIndicator TargetShield;
-	public UISprite TargetShieldHolder;
-	public BarIndicator TargetHull;
-	public UISprite TargetHullHolder;
+	public UILabel TargetShieldValue;
+	public UILabel TargetHullValue;
+
 	public Transform HologramHolder3D;
 	public GameObject TargetHologram;
 	public UILabel TargetRepLabel;
@@ -57,10 +58,10 @@ public class HUDPanel : PanelBase
 		_unselectedShips = new Dictionary<ShipBase, UISprite>();
 		_allEntries = new List<HUDListEntry>();
 		_weaponEntries = new List<HUDWeaponEntry>();
-		for(int i=0; i<10; i++)
+		for(int i=0; i<13; i++)
 		{
 			HUDListEntry entry = LoadHUDListEntry();
-			entry.transform.localPosition = new Vector3(0, i * 20f, 0);
+			entry.transform.localPosition = new Vector3((Mathf.Sqrt(1f - Mathf.Pow(Mathf.Abs(6f - i) / 6f, 2)) * 9f), i * 32f, 0);
 			_allEntries.Add(entry);
 		}
 		ClearTargetData();
@@ -126,10 +127,8 @@ public class HUDPanel : PanelBase
 		_currentSelectMarker.Initialize(100f, ship.name);
 
 		ShipReference shipRef = ship.ShipModel.GetComponent<ShipReference>();
-		TargetShieldHolder.alpha = 1;
-		TargetShield.SetFillPercentage(ship.Shield.GetShieldPercentage());
-		TargetHullHolder.alpha = 1;
-		TargetHull.SetFillPercentage(ship.HullAmount / ship.HullCapacity);
+		TargetShieldValue.text = "SHLD " + (int)ship.Shield.Amount;
+		TargetHullValue.text = "HULL " + (int)ship.HullAmount;
 		GameObject hologram = GameObject.Instantiate(Resources.Load(ship.ShipModelID + "Hologram")) as GameObject;
 		TargetHologram = hologram;
 		hologram.transform.parent = HologramHolder3D;
@@ -209,10 +208,8 @@ public class HUDPanel : PanelBase
 			TargetHologram = null;
 		}
 
-		TargetShield.SetFillPercentage(0);
-		TargetShield.SetFillPercentage(0);
-		TargetShieldHolder.alpha = 0;
-		TargetHullHolder.alpha = 0;
+		TargetShieldValue.text = "";
+		TargetHullValue.text = "";
 		TargetDescLabel.text = "";
 		TargetRepLabel.text = "";
 	}
@@ -240,7 +237,15 @@ public class HUDPanel : PanelBase
 			Vector3 overlay = Camera.main.WorldToScreenPoint(aimPoint);
 			overlay = new Vector3(overlay.x - Screen.width/2f, overlay.y - Screen.height/2f, 0) * 0.65f;
 			Pip.transform.localPosition = GameManager.Inst.UIManager.GetTargetScreenPos(aimPoint);
-			Pip.alpha = 0.8f;
+			Pip.alpha = 1f;
+
+			if(_currentSelectMarker != null)
+			{
+				Vector3 los = _currentSelectMarker.Marker.transform.localPosition - Pip.transform.localPosition;
+				Quaternion rot = Quaternion.FromToRotation(PipLine.transform.right, los);
+				PipLine.transform.rotation = rot * PipLine.transform.rotation;
+				PipLine.width = (int)(los.magnitude);
+			}
 		}
 		else
 		{
@@ -293,6 +298,12 @@ public class HUDPanel : PanelBase
 		{
 			_currentSelectMarker.SetVisible(false);
 		}
+
+		ShipBase targetShip = GameManager.Inst.PlayerControl.TargetShip;
+		if(targetShip != null)
+		{
+			_currentSelectMarker.SetShieldAndHull(targetShip.Shield.GetShieldPercentage(), targetShip.HullAmount / targetShip.HullCapacity);
+		}
 	}
 
 	private void UpdateUnselectedMarkerPosition()
@@ -321,7 +332,7 @@ public class HUDPanel : PanelBase
 			}
 
 			float distFromPlayer = Vector3.Distance(ship.transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position);
-			Debug.Log(distFromPlayer);
+
 			bool isMarkerHidden = false;
 			bool isMarkerTooFar = false;
 
@@ -399,9 +410,9 @@ public class HUDPanel : PanelBase
 
 	private void UpdateCenterHUD()
 	{
-		//engine throttle
-		float throttle = GameManager.Inst.PlayerControl.Throttle;
-		ThrottleCurve.SetValue(throttle);
+		//speed
+		float speed = GameManager.Inst.PlayerControl.PlayerShip.RB.velocity.magnitude / GameManager.Inst.PlayerControl.PlayerShip.Engine.CruiseSpeed;
+		SpeedCurve.SetValue(speed);
 
 		//thruster fuel
 		Thruster thruster = GameManager.Inst.PlayerControl.PlayerShip.Thruster;
@@ -420,6 +431,10 @@ public class HUDPanel : PanelBase
 		{
 			SpeedLabel.text = Mathf.FloorToInt(GameManager.Inst.PlayerControl.PlayerShip.RB.velocity.magnitude * 100).ToString();
 		}
+
+		//throttle
+		float throttle = GameManager.Inst.PlayerControl.Throttle;
+		ThrottleLabel.text = ((int)(throttle * 100)).ToString() + "%";
 
 		//flight assist indicator
 		if(GameManager.Inst.PlayerControl.IsFAKilled)
@@ -448,8 +463,8 @@ public class HUDPanel : PanelBase
 		ShipBase targetShip = GameManager.Inst.PlayerControl.TargetShip;
 		if(targetShip != null)
 		{
-			TargetHull.SetFillPercentage(targetShip.HullAmount / targetShip.HullCapacity);
-			TargetShield.SetFillPercentage(targetShip.Shield.GetShieldPercentage());
+			TargetShieldValue.text = "SHLD " + (int)targetShip.Shield.Amount;
+			TargetHullValue.text = "HULL " + (int)targetShip.HullAmount;
 		}
 
 		//display surrounding objects
@@ -465,6 +480,7 @@ public class HUDPanel : PanelBase
 			{
 				//sort by distance from playership
 				List<ShipBase> sorted = allShips.OrderBy(x=>Vector3.Distance(x.transform.position, GameManager.Inst.PlayerControl.PlayerShip.transform.position)).ToList<ShipBase>();
+				sorted.Remove(GameManager.Inst.PlayerControl.PlayerShip);
 				int count = 10;
 				if(sorted.Count < count)
 				{
@@ -488,7 +504,7 @@ public class HUDPanel : PanelBase
 			GameObject o = GameObject.Instantiate(Resources.Load("HUDWeaponEntry")) as GameObject;
 			HUDWeaponEntry entry = o.GetComponent<HUDWeaponEntry>();
 			o.transform.parent = WeaponListAnchor;
-			o.transform.localPosition = new Vector3((int)(Mathf.Sqrt(1f - Mathf.Pow((5f - i) / 5f, 2)) * -9f), i * 42, 0);
+			o.transform.localPosition = new Vector3((Mathf.Sqrt(1f - Mathf.Pow(Mathf.Abs(5f - i) / 5f, 2)) * -9f), i * 42, 0);
 			o.transform.localEulerAngles = Vector3.zero;
 			o.transform.localScale = new Vector3(1, 1, 1);
 			_weaponEntries.Add(entry);

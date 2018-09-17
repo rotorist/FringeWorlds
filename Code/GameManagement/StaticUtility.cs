@@ -132,4 +132,16 @@ public class StaticUtility
 		else //determinant = 0; one intercept path, pretty much never happens
 			return Mathf.Max(-b/(2f*a), 0f); //don't shoot back in time
 	}
+
+	public static bool IsInArea(Vector3 targetPos, Vector3 center, Vector3 bounds)
+	{
+		if(targetPos.x > center.x - bounds.x && targetPos.x < center.x + bounds.x &&
+			targetPos.y > center.y - bounds.y && targetPos.y < center.y + bounds.y &&
+			targetPos.z > center.z - bounds.z && targetPos.z < center.z + bounds.z)
+		{
+			return true;
+		}
+
+		return false;
+	}
 }

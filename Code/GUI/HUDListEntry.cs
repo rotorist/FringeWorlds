@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class HUDListEntry : MonoBehaviour 
 {
-	//public UISprite HorLine;
-	//public UISprite VerLine;
+	public UISprite SeparatorLine;
 	public UILabel Description;
 	public UILabel Distance;
+
 
 	public void SetAlpha(float alpha)
 	{
@@ -15,6 +15,7 @@ public class HUDListEntry : MonoBehaviour
 		//VerLine.alpha = alpha;
 		Description.alpha = alpha;
 		Distance.alpha = alpha;
+		SeparatorLine.alpha = alpha;
 	}
 
 	public void SetColor(Color color)

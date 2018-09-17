@@ -9,8 +9,9 @@ public class WorldManager
 	public Sun [] Suns;
 	public Dictionary<string, StarSystemData> AllSystems { get { return _allSystems; } }
 	public Dictionary<string, NavNode> AllNavNodes { get { return _allNavNodes; } }
+	public AsteroidField CurrentAsteroidField;
 
-
+	private List<AsteroidField> _asteroidFields;
 	private Dictionary<string, StarSystemData> _allSystems;
 	private Dictionary<string, NavNode> _allNavNodes;
 
@@ -31,7 +32,13 @@ public class WorldManager
 			station.Initialize();
 		}
 
-
+		_asteroidFields = new List<AsteroidField>();
+		AsteroidField [] fields = GameObject.FindObjectsOfType<AsteroidField>();
+		foreach(AsteroidField field in fields)
+		{
+			field.Initialize();
+			_asteroidFields.Add(field);
+		}
 	}
 
 	public void PerFrameUpdate()
@@ -49,6 +56,11 @@ public class WorldManager
 		if(Input.GetKeyDown(KeyCode.F12))
 		{
 			GameManager.Inst.DBManager.XMLParserWorld.GenerateSystemXML();
+		}
+
+		if(_asteroidFields.Count > 0)
+		{
+			UpdateAsteroids();
 		}
 	}
 
@@ -79,6 +91,8 @@ public class WorldManager
 
 		return nodeList;
 	}
+
+
 
 
 	private void BuildNavMap()
@@ -117,6 +131,18 @@ public class WorldManager
 			{
 				//Debug.Log(neighborID);
 				node.Value.Neighbors.Add(_allNavNodes[neighborID]);
+			}
+		}
+	}
+
+	private void UpdateAsteroids()
+	{
+		Vector3 playerPos = GameManager.Inst.PlayerControl.PlayerShip.transform.position;
+		foreach(AsteroidField field in _asteroidFields)
+		{
+			if(StaticUtility.IsInArea(playerPos, field.transform.position, new Vector3(field.Size.x/2 + 2, field.Size.y/2 + 2, field.Size.z/2 + 2) * field.CellSize))
+			{
+				field.PerFrameUpdate();
 			}
 		}
 	}

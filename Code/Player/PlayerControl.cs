@@ -426,7 +426,7 @@ public class PlayerControl
 			else
 			{
 				
-				_throttle = Mathf.Clamp01(_throttle + 0.05f);
+				_throttle = Mathf.Clamp01(_throttle + 0.1f);
 				PlayerShip.MyReference.ExhaustController.setExhaustLength(_throttle);
 			}
 		}
@@ -438,7 +438,7 @@ public class PlayerControl
 			}
 			else
 			{
-				_throttle = Mathf.Clamp01(_throttle - 0.05f);
+				_throttle = Mathf.Clamp01(_throttle - 0.1f);
 				PlayerShip.MyReference.ExhaustController.setExhaustLength(_throttle);
 			}
 		}

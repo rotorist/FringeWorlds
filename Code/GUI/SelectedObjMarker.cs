@@ -7,6 +7,8 @@ public class SelectedObjMarker : MonoBehaviour
 	public UISprite Marker;
 	public UILabel Desc;
 	public UISprite MarkerLine;
+	public UISprite ShieldFill;
+	public UISprite HullFill;
 
 	private float _targetWidth;
 	private float _currentWidth;
@@ -61,6 +63,15 @@ public class SelectedObjMarker : MonoBehaviour
 			Marker.alpha = 0;
 			Desc.alpha = 0;
 			MarkerLine.alpha = 0;
+		}
+	}
+
+	public void SetShieldAndHull(float shieldPercent, float hullPercent)
+	{
+		if(ShieldFill != null && HullFill != null)
+		{
+			ShieldFill.width = (int)(10 + 35f * shieldPercent);
+			HullFill.width = (int)(10 + 35f * hullPercent);
 		}
 	}
 }
