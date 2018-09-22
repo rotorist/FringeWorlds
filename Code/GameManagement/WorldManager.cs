@@ -9,7 +9,7 @@ public class WorldManager
 	public Sun [] Suns;
 	public Dictionary<string, StarSystemData> AllSystems { get { return _allSystems; } }
 	public Dictionary<string, NavNode> AllNavNodes { get { return _allNavNodes; } }
-	public AsteroidField CurrentAsteroidField;
+	public List<AsteroidField> AsteroidFields { get { return _asteroidFields; } }
 
 	private List<AsteroidField> _asteroidFields;
 	private Dictionary<string, StarSystemData> _allSystems;
@@ -140,10 +140,9 @@ public class WorldManager
 		Vector3 playerPos = GameManager.Inst.PlayerControl.PlayerShip.transform.position;
 		foreach(AsteroidField field in _asteroidFields)
 		{
-			if(StaticUtility.IsInArea(playerPos, field.transform.position, new Vector3(field.Size.x/2 + 2, field.Size.y/2 + 2, field.Size.z/2 + 2) * field.CellSize))
-			{
-				field.PerFrameUpdate();
-			}
+			
+			field.PerFrameUpdate();
+
 		}
 	}
 }

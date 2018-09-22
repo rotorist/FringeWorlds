@@ -11,6 +11,7 @@ public class HUDPanel : PanelBase
 	public UISprite ShieldIndicatorRear;
 	public BarIndicator ShieldAmountIndicator;
 	public BarIndicator HullAmountIndicator;
+	public BarIndicator CruisePrepIndicator;
 
 	public CurveIndicator SpeedCurve;
 	public CurveIndicator ThrusterCurve;
@@ -74,6 +75,7 @@ public class HUDPanel : PanelBase
 		UpdatePipPosition();
 		UpdateShieldAmount();
 		UpdateHullAmount();
+		UpdateCruisePrep();
 		UpdateSelectMarkerPosition();
 		UpdateUnselectedMarkerPosition();
 		UpdateCenterHUD();
@@ -276,6 +278,20 @@ public class HUDPanel : PanelBase
 		float currentHull = GameManager.Inst.PlayerControl.PlayerShip.HullAmount;
 	
 		HullAmountIndicator.SetFillPercentage(currentHull / totalHull);
+	}
+
+	private void UpdateCruisePrep()
+	{
+		float prepPercent = GameManager.Inst.PlayerControl.PlayerShip.Engine.PrepPercent;
+		if(prepPercent <= 0 || prepPercent >= 0.99f)
+		{
+			CruisePrepIndicator.Frame.alpha = 0;
+		}
+		else
+		{
+			CruisePrepIndicator.Frame.alpha = 0.7f;
+		}
+		CruisePrepIndicator.SetFillPercentage(prepPercent);
 	}
 
 	private void UpdateSelectMarkerPosition()

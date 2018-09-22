@@ -15,7 +15,8 @@ public class AsteroidCell : MonoBehaviour
 	{
 		for(int i=0; i<ParentField.CellQuantity; i++)
 		{
-			GameObject o = GameObject.Instantiate(Resources.Load(ParentField.AsteroidID)) as GameObject;
+			GameObject o = GameObject.Instantiate(Resources.Load(ParentField.AsteroidID + "_" + UnityEngine.Random.Range(1, ParentField.AsteroidVariants+1))) as GameObject;
+			//GameObject o = GameObject.Instantiate(Resources.Load(ParentField.AsteroidID + "_1")) as GameObject;
 			Asteroids.Add(o.transform);
 			o.transform.parent = Container;
 			o.transform.localPosition = new Vector3(UnityEngine.Random.Range(-1 * ParentField.CellRadius, ParentField.CellRadius), UnityEngine.Random.Range(-1 * ParentField.CellRadius, ParentField.CellRadius), 
@@ -24,7 +25,7 @@ public class AsteroidCell : MonoBehaviour
 			{
 				o.transform.localEulerAngles = new Vector3(UnityEngine.Random.value * 180f, UnityEngine.Random.value * 180f, UnityEngine.Random.value * 180f);
 			}
-			float scale = UnityEngine.Random.Range(0.5f, 1f);
+			float scale = UnityEngine.Random.Range(0.4f, 0.7f);
 			o.transform.localScale *= scale;
 		}
 	}

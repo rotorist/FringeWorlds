@@ -11,6 +11,7 @@ public class PlayerControl
 
 	public ParticleSystem SpaceDust;
 	public ParticleSystem TradelaneDust;
+	public ParticleSystem AsteroidDust;
 
 	public Vector3 GimballTarget { get { return _gimballTarget; }}
 
@@ -86,6 +87,9 @@ public class PlayerControl
 
 		o = SpaceDust.transform.Find("TradelaneDust").gameObject;
 		TradelaneDust = o.GetComponent<ParticleSystem>();
+
+		o = SpaceDust.transform.Find("AsteroidDust").gameObject;
+		AsteroidDust = o.GetComponent<ParticleSystem>();
 
 		_isMouseFlight = true;
 
@@ -300,7 +304,18 @@ public class PlayerControl
 
 		}
 
-
+		if(Input.GetKeyDown(KeyCode.X))
+		{
+			if(!PlayerShip.Engine.IsCruising && !PlayerShip.Engine.IsPrepCruise)
+			{
+				_isFAKilled = false;
+				PlayerShip.Engine.StartCruisePrep();
+			}
+			else
+			{
+				PlayerShip.Engine.CancelCruise();
+			}
+		}
 
 
 		if(!Input.GetKey(KeyCode.LeftShift))
@@ -340,6 +355,7 @@ public class PlayerControl
 			if(Input.GetKey(KeyCode.W))
 			{
 				_thruster = 1;
+
 			}
 
 			if(Input.GetKey(KeyCode.S))
@@ -531,23 +547,64 @@ public class PlayerControl
 		if(!PlayerShip.IsInPortal)
 		{
 			//main engine
-			_forwardForce = _throttle * 1;
+			if(PlayerShip.Engine.IsCruising)
+			{
+				_forwardForce = 3;
+			}
+			else
+			{
+				_forwardForce = _throttle * 1;
+			}
+
 			float maxSpeed = PlayerShip.Engine.MaxSpeed;
 
 			//PlayerShip.MyReference.ExhaustController.setExhaustState(ExhaustState.Thruster);
 
-			if(_thruster != 0 || _isFAKilled)
+			//check if thruster is available
+			Thruster thruster = PlayerShip.Thruster;
+			if(thruster != null && !PlayerShip.Engine.IsCruising && !PlayerShip.Engine.IsPrepCruise)
 			{
-				maxSpeed = maxSpeed * 1.5f;
+				if(_thruster != 0 && ((!PlayerShip.Engine.IsThrusting && thruster.CurrentFuel > thruster.MaxFuel * 0.1f) || (PlayerShip.Engine.IsThrusting && thruster.CurrentFuel > 0)))
+				{
+					PlayerShip.Engine.IsThrusting = true;
+					PlayerShip.RB.AddForce(PlayerShip.transform.forward * _thruster * 10);
+					//strafe
+					if(thruster.CanStrafe)
+					{
+						PlayerShip.RB.AddForce(PlayerShip.transform.right * _strafeHor * 3);
+						PlayerShip.RB.AddForce(PlayerShip.transform.up * _strafeVer * -3);
+					}
+
+					float consumption = 0;
+					if(Mathf.Abs(_thruster) > 0)
+					{
+						consumption = thruster.ConsumptionRate;
+					}
+					else if(thruster.CanStrafe && (Mathf.Abs(_strafeHor) > 0 || Mathf.Abs(_strafeVer) > 0))
+					{
+						consumption = thruster.ConsumptionRate * 0.3f;
+					}
+
+					thruster.CurrentFuel = Mathf.Clamp(thruster.CurrentFuel - consumption * Time.fixedDeltaTime, 0, thruster.MaxFuel);
+				}
+				else
+				{
+					PlayerShip.Engine.IsThrusting = false;
+					thruster.CurrentFuel = Mathf.Clamp(thruster.CurrentFuel + thruster.RestoreRate * Time.fixedDeltaTime, 0, thruster.MaxFuel);
+
+				}
+
 			}
 
-			if(!_isFAKilled)
+			if(PlayerShip.Engine.IsCruising)
 			{
-				
-				maxSpeed = maxSpeed * _throttle;
+				PlayerShip.MyReference.ExhaustController.setExhaustState(ExhaustState.Cruise);
 			}
-
-			if(_thruster > 0)
+			else if(PlayerShip.Engine.IsPrepCruise)
+			{
+				PlayerShip.MyReference.ExhaustController.setExhaustState(ExhaustState.Idle);
+			}
+			else if(PlayerShip.Engine.IsThrusting)
 			{
 				PlayerShip.MyReference.ExhaustController.setExhaustState(ExhaustState.Thruster);
 			}
@@ -563,37 +620,30 @@ public class PlayerControl
 				}
 			}
 
-			if(velocity.magnitude < maxSpeed && !_isFAKilled)
+			if(_thruster != 0 || _isFAKilled)
+			{
+				maxSpeed = maxSpeed * 1.5f;
+			}
+
+			if(PlayerShip.Engine.IsCruising)
+			{
+				maxSpeed = PlayerShip.Engine.CruiseSpeed;
+			}
+
+			if(!_isFAKilled && !PlayerShip.Engine.IsCruising)
+			{
+				
+				maxSpeed = maxSpeed * _throttle;
+			}
+
+
+			if(velocity.magnitude < maxSpeed && !_isFAKilled && !PlayerShip.Engine.IsPrepCruise)
 			{
 				PlayerShip.RB.AddForce(PlayerShip.transform.forward * _forwardForce);
 			}
 
-			//thruster
-			Thruster thruster = PlayerShip.Thruster;
-			if(thruster != null)
-			{
-				if(thruster.CurrentFuel > 0)
-				{
-					PlayerShip.RB.AddForce(PlayerShip.transform.forward * _thruster * 10);
-				}
 
-				//strafe
-				if(thruster.CanStrafe && thruster.CurrentFuel > 0)
-				{
-					PlayerShip.RB.AddForce(PlayerShip.transform.right * _strafeHor * 3);
-					PlayerShip.RB.AddForce(PlayerShip.transform.up * _strafeVer * -3);
-				}
 
-				if(_thruster > 0 || (thruster.CanStrafe && (_strafeHor > 0 || _strafeVer > 0)))
-				{
-					thruster.CurrentFuel = Mathf.Clamp(thruster.CurrentFuel - thruster.ConsumptionRate * Time.fixedDeltaTime, 0, thruster.MaxFuel);
-				}
-				else
-				{
-					thruster.CurrentFuel = Mathf.Clamp(thruster.CurrentFuel + thruster.RestoreRate * Time.fixedDeltaTime, 0, thruster.MaxFuel);
-				}
-				
-			}
 
 			//drag
 
@@ -637,6 +687,8 @@ public class PlayerControl
 			//disable dust
 			ParticleSystem.EmissionModule sEmission = SpaceDust.emission;
 			sEmission.enabled = false;
+			ParticleSystem.EmissionModule aEmission = AsteroidDust.emission;
+			aEmission.enabled = false;
 			//show tradelane dust according to InPortalSpeed
 			if(PlayerShip.InPortalSpeed > 20)
 			{
@@ -663,12 +715,24 @@ public class PlayerControl
 			{
 				Quaternion rotation = Quaternion.LookRotation(velocity);
 				SpaceDust.transform.rotation = rotation;
-				ParticleSystem.MainModule newMain = SpaceDust.main;
-				newMain.startSpeed = velocity.magnitude * 8 * -1;
+				ParticleSystem.MainModule sDnewMain = SpaceDust.main;
+				sDnewMain.startSpeed = velocity.magnitude * 8 * -1;
 				SpaceDust.transform.position = PlayerShip.transform.position - SpaceDust.transform.forward * 20f;
 
-				ParticleSystem.EmissionModule emission = SpaceDust.emission;
-				emission.enabled = true;
+				ParticleSystem.EmissionModule sEmission = SpaceDust.emission;
+				sEmission.enabled = true;
+				ParticleSystem.EmissionModule aEmission = AsteroidDust.emission;
+				aEmission.enabled = true;
+				//find gradient from all asteroid fields
+				float gradient = 0;
+				foreach(AsteroidField field in GameManager.Inst.WorldManager.AsteroidFields)
+				{
+					if(field.Gradient > gradient)
+					{
+						gradient = field.Gradient;
+					}
+				}
+				aEmission.rateOverTime = Mathf.Lerp(2f, 12f, gradient);
 
 				_isDustSettled = false;
 			}
@@ -677,8 +741,10 @@ public class PlayerControl
 				if(!_isDustSettled)
 				{
 					SpaceDust.transform.position = PlayerShip.transform.position - SpaceDust.transform.forward * 20f;
-					ParticleSystem.EmissionModule emission = SpaceDust.emission;
-					emission.enabled = false;
+					ParticleSystem.EmissionModule sEmission = SpaceDust.emission;
+					sEmission.enabled = false;
+					ParticleSystem.EmissionModule aEmission = AsteroidDust.emission;
+					aEmission.enabled = false;
 					_isDustSettled = true;
 				}
 			}

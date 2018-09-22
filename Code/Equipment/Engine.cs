@@ -8,4 +8,46 @@ public class Engine : EquipmentBase
 	public float CruiseSpeed;
 	public float CruisePrepTime;
 
+	public bool IsThrusting;
+	public bool IsCruising;
+	public bool IsPrepCruise;
+
+	public float PrepPercent { get { return _cruisePrepTimer / CruisePrepTime; } }
+
+	private float _cruisePrepTimer;
+
+	void Update()
+	{
+		if(IsPrepCruise)
+		{
+			if(_cruisePrepTimer < CruisePrepTime)
+			{
+				_cruisePrepTimer += Time.deltaTime;
+			}
+			else
+			{
+				IsPrepCruise = false;
+				IsCruising = true;
+				IsThrusting = false;
+			}
+		}
+	}
+
+	public void StartCruisePrep()
+	{
+		if(!IsCruising && !IsPrepCruise)
+		{
+			_cruisePrepTimer = 0;
+			IsPrepCruise = true;
+			IsThrusting = false;
+		}
+	}
+
+	public void CancelCruise()
+	{
+		_cruisePrepTimer = 0;
+		IsPrepCruise = false;
+		IsCruising = false;
+	}
 }
+

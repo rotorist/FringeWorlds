@@ -77,6 +77,7 @@ public class ShipBase : MonoBehaviour
 
 
 
+
 	public virtual void EnableColliders()
 	{
 
@@ -117,6 +118,33 @@ public class ShipBase : MonoBehaviour
 		if(HullAmount <= 0 && GameManager.Inst.PlayerControl.PlayerShip != this)
 		{
 			OnDeath(this);
+		}
+	}
+
+	void OnCollisionEnter(Collision collision)
+	{
+		Debug.Log("I'm hitting " + collision.collider.name);
+	}
+
+	void OnParticleCollision(GameObject other)
+	{
+		ParticleSystem part = other.GetComponent<ParticleSystem>();
+		List<ParticleCollisionEvent> collisionEvents =  new List<ParticleCollisionEvent>();
+		int numCollisionEvents = part.GetCollisionEvents(this.gameObject, collisionEvents);
+
+		int i = 0;
+
+		while (i < numCollisionEvents)
+		{
+			Vector3 pos = collisionEvents[i].intersection;
+			Damage damage = new Damage();
+			damage.ShieldAmount = 10;
+			damage.HullAmount = 0;
+			damage.HitLocation = pos;
+			damage.DamageType = DamageType.Kinetic;
+
+			Shield.ProcessDamage(damage);
+			i++;
 		}
 	}
 }

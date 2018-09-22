@@ -5,8 +5,8 @@
 		_NormalGlobal ("Normal Map", 2D) = "bump" {}
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
-		_MinDistance ("Min Distance", Range(0, 300)) = 50
-		_MaxDistance ("Max Distance", Range(0, 300)) = 150
+		_MinDistance ("Min Distance", Range(0, 500)) = 50
+		_MaxDistance ("Max Distance", Range(0, 500)) = 150
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
@@ -14,7 +14,7 @@
 		
 		CGPROGRAM
 		// Physically based Standard lighting model, and enable shadows on all light types
-		#pragma surface surf Standard fullforwardshadows alpha:fade
+		#pragma surface surf Standard fullforwardshadows keepalpha alpha:fade
 
 		// Use shader model 3.0 target, to get nicer looking lighting
 		#pragma target 3.0
@@ -46,9 +46,13 @@
 			//float dist01Inv = 1 - ((dist - _MinDistance) / _MaxDistance);
 			float dist = distance(_WorldSpaceCameraPos, IN.worldPos);
 			float dist01Inv = 1;
-			if(dist >= _MaxDistance)
+			if(dist >= _MaxDistance * 4)
 			{
-				dist01Inv = 0;
+				dist01Inv = 0.01;
+			}
+			else if(dist >= _MaxDistance)
+			{
+				dist01Inv = (dist - _MaxDistance) / (_MaxDistance * 5 - _MaxDistance) * 0.1;
 			}
 			else if(dist <= _MinDistance)
 			{

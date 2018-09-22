@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class BarIndicator : MonoBehaviour 
 {
+	public UISprite Frame;
 	public UISprite Sprite;
 	public bool IsInstant;
 	public int MaxSize;

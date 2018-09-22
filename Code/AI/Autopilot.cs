@@ -6,6 +6,7 @@ public class Autopilot : AI
 {
 	public override void Initialize (MacroAIParty party, Faction faction)
 	{
+		RunningNodeHist = new MaxStack<string>(20);
 		MyShip = transform.GetComponent<ShipBase>();
 
 

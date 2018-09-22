@@ -10,7 +10,7 @@ public class StarSystem
 	public List<Planet> Planets;
 	public List<StationBase> Stations;
 	public List<Tradelane> Tradelanes;
-
+	public Color AmbientColor;
 
 
 	public StarSystem(string id, string displayName)

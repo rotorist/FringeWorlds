@@ -19,7 +19,7 @@ public class XMLParserWorld
 		StarSystem starSystem = new StarSystem(system.ID, system.DisplayName);
 		RenderSettings.skybox = Resources.Load<Material>(system.SkyboxName);
 		RenderSettings.ambientLight = system.AmbientColor;
-
+		starSystem.AmbientColor = system.AmbientColor;
 
 
 		foreach(SunData sunData in system.Suns)

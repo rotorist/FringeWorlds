@@ -73,6 +73,10 @@ public class ExhaustController : MonoBehaviour
 			{
 				exhaust = GameObject.Instantiate(Resources.Load("EngineFlameThruster")) as GameObject;
 			}
+			else if(state == ExhaustState.Cruise)
+			{
+				exhaust = GameObject.Instantiate(Resources.Load("EngineFlameCruise")) as GameObject;
+			}
 
 			exhaust.transform.parent = t;
 			exhaust.transform.localScale = FlameScale;
