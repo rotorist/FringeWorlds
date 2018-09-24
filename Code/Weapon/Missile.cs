@@ -66,7 +66,15 @@ public class Missile : Ammunition
 		//keep under max speed
 		if(_rigidbody.velocity.magnitude > MaxSpeed)
 		{
+
 			_rigidbody.AddForce(-1 * _rigidbody.velocity * 1);
+
+
+		}
+
+		if(_stage == MissileStage.Launched)
+		{
+			_rigidbody.AddForce(-1 * _rigidbody.velocity * 3.5f);
 		}
 
 
@@ -108,9 +116,22 @@ public class Missile : Ammunition
 
 	public override void OnCollisionEnter(Collision collision) 
 	{
-		Explode();
-		base.OnCollisionEnter(collision);
-		GameObject.Destroy(gameObject);
+		Debug.Log(collision.collider.name);
+		ShipReference hitShip = collision.collider.GetComponent<ShipReference>();
+
+		if(hitShip != null)
+		{
+			if(hitShip.ParentShip != Attacker)
+			{
+				Explode();
+				GameObject.Destroy(gameObject);
+			}
+		}
+		else
+		{
+			Explode();
+			GameObject.Destroy(gameObject);
+		}
 	}
 
 

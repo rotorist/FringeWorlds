@@ -564,7 +564,7 @@ public class PlayerControl
 			Thruster thruster = PlayerShip.Thruster;
 			if(thruster != null && !PlayerShip.Engine.IsCruising && !PlayerShip.Engine.IsPrepCruise)
 			{
-				if(_thruster != 0 && ((!PlayerShip.Engine.IsThrusting && thruster.CurrentFuel > thruster.MaxFuel * 0.1f) || (PlayerShip.Engine.IsThrusting && thruster.CurrentFuel > 0)))
+				if((_thruster != 0 || _strafeHor != 0 || _strafeVer != 0) && ((!PlayerShip.Engine.IsThrusting && thruster.CurrentFuel > thruster.MaxFuel * 0.1f) || (PlayerShip.Engine.IsThrusting && thruster.CurrentFuel > 0)))
 				{
 					PlayerShip.Engine.IsThrusting = true;
 					PlayerShip.RB.AddForce(PlayerShip.transform.forward * _thruster * 10);
@@ -648,9 +648,9 @@ public class PlayerControl
 			//drag
 
 			//Debug.Log(velocity.magnitude);
-			if(velocity.magnitude > maxSpeed)
+			if(velocity.magnitude > maxSpeed * 0.95f)
 			{
-				PlayerShip.RB.AddForce(-1 * velocity * 1);
+				PlayerShip.RB.AddForce(-1 * velocity * Mathf.Lerp(0, 1f, (velocity.magnitude - maxSpeed * 0.95f) / (maxSpeed * 0.05f)));
 			}
 			else
 			{
@@ -734,6 +734,17 @@ public class PlayerControl
 				}
 				aEmission.rateOverTime = Mathf.Lerp(2f, 12f, gradient);
 
+				if(velocity.magnitude > 4)
+				{
+					float velAngle = Vector3.Angle(PlayerShip.transform.forward, velocity);
+					float velocityGradient = Mathf.Clamp01((velocity.magnitude - 4) / 8);
+					PlayerShip.SetVortex(0.1f * gradient * (1 - Mathf.Clamp01(velAngle / 30f)) * velocityGradient, Mathf.Lerp(1.0f, 0.4f, velocityGradient));
+				}
+				else
+				{
+					PlayerShip.SetVortex(0, 0);
+				}
+
 				_isDustSettled = false;
 			}
 			else
@@ -747,6 +758,8 @@ public class PlayerControl
 					aEmission.enabled = false;
 					_isDustSettled = true;
 				}
+
+				PlayerShip.SetVortex(0, 0);
 			}
 		}
 	}

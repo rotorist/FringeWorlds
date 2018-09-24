@@ -15,5 +15,6 @@ public class ShipReference : MonoBehaviour
 	public Transform FPCameraAnchor;
 	public Vector3 CameraChasePoint;
 	public float CameraTilt;
-
+	public TrailRenderer VortexLeft;
+	public TrailRenderer VortexRight;
 }

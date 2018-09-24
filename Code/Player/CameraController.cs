@@ -17,7 +17,8 @@ public class CameraController : MonoBehaviour
 	private float _xFactor;
 	private float _yFactor;
 	private float _tiltFactor;
-
+	private float _prevForwardVel;
+	private float _prevAcceleration;
 
 	public void Initialize()
 	{
@@ -154,12 +155,30 @@ public class CameraController : MonoBehaviour
 		Quaternion lookRotation = Quaternion.LookRotation(playerShip.transform.forward, playerShip.transform.up);
 		transform.rotation = lookRotation;//Quaternion.Lerp(transform.rotation, lookRotation, deltaTime * 12);
 
-		float fovTarget = 0;
-		fovTarget += GameManager.Inst.PlayerControl.ThrusterForce * 1.5f;
+		float forwardVel = Vector3.Dot(playerShip.RB.velocity, playerShip.transform.forward);
+		float acceleration = (forwardVel - _prevForwardVel) / Time.fixedDeltaTime;
+		_prevForwardVel = forwardVel;
+		float fovTarget = Mathf.Clamp(acceleration / 4f, -1f, 1f);
+
+
+		_prevAcceleration = acceleration;
+
+
+		if(playerShip.Engine.IsThrusting)
+		{
+			if(fovTarget > 0)
+			{
+				fovTarget = 1;
+			}
+			else if(fovTarget < 0)
+			{
+				fovTarget = -1;
+			}
+		}
 
 		if(!playerShip.IsInPortal)
 		{
-			CloseCamera.fieldOfView = Mathf.Lerp(CloseCamera.fieldOfView, 65 + 10 * fovTarget, deltaTime * 3.5f);
+			CloseCamera.fieldOfView = Mathf.Lerp(CloseCamera.fieldOfView, 65 + 15 * fovTarget, deltaTime * 2.5f);
 			FarCamera.fieldOfView = CloseCamera.fieldOfView;
 		}
 	}

@@ -106,6 +106,22 @@ public class ShipBase : MonoBehaviour
 
 	}
 
+	public virtual void SetVortex(float width, float length)
+	{
+		if(MyReference.VortexLeft != null)
+		{
+			MyReference.VortexLeft.startWidth = width;
+			MyReference.VortexLeft.endWidth = width;
+			MyReference.VortexLeft.time = length;
+		}
+		if(MyReference.VortexRight != null)
+		{
+			MyReference.VortexRight.startWidth = width;
+			MyReference.VortexRight.endWidth = width;
+			MyReference.VortexRight.time = length;
+		}
+	}
+
 	public void ProcessHullDamage(Damage damage)
 	{
 		if(IsInPortal)
