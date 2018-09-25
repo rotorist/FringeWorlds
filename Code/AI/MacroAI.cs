@@ -40,6 +40,8 @@ public class MacroAI
 			{ "TurretRight", "Turret1" },
 		};
 
+
+
 		party.FollowerLoadouts = new List<Loadout>();
 		for(int i=0; i<UnityEngine.Random.Range(1, 5); i++)
 		{
@@ -49,7 +51,18 @@ public class MacroAI
 			{
 				{ "GimballLeft", "Gun1" },
 				{ "GimballRight", "Gun1" },
+				{ "GimballFront", "Class1Launcher1" },
 			};
+			Item item = new Item();
+			item.ID = "Class1Missile1";
+			item.DisplayName = "Seeker Missile";
+			item.Type = ItemType.Ammo;
+			item.CargoUnits = 2;
+			InvItemData itemData = new InvItemData();
+			itemData.Item = item;
+			itemData.Quantity = 2;
+			loadout.AmmoBayItems.Add(itemData);
+
 		}
 
 

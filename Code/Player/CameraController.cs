@@ -158,7 +158,7 @@ public class CameraController : MonoBehaviour
 		float forwardVel = Vector3.Dot(playerShip.RB.velocity, playerShip.transform.forward);
 		float acceleration = (forwardVel - _prevForwardVel) / Time.fixedDeltaTime;
 		_prevForwardVel = forwardVel;
-		float fovTarget = Mathf.Clamp(acceleration / 4f, -1f, 1f);
+		float fovTarget = Mathf.Clamp(acceleration / 4f, -0.5f, 1f);
 
 
 		_prevAcceleration = acceleration;
@@ -172,7 +172,7 @@ public class CameraController : MonoBehaviour
 			}
 			else if(fovTarget < 0)
 			{
-				fovTarget = -1;
+				fovTarget = -0.5f;
 			}
 		}
 

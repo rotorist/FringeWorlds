@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class Gun : Weapon
 {
-	public string ProjectileName;
+	public string ProjectilePrefab;
+	public string AmmoID;
+	public AIGunType AIGunType;
 
 	private float _coolDownTimer;
 	private bool _isCooledDown;
@@ -54,3 +56,11 @@ public class Gun : Weapon
 	}
 
 }
+
+public enum AIGunType
+{
+	ForShield = 1,
+	ForHull = 2,
+	ForBoth = 3,
+}
+

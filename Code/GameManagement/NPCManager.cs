@@ -65,7 +65,7 @@ public class NPCManager
 		{	
 			{fac1.ID, 0.5f},
 			{fac2.ID, 0.5f},
-			{fac3.ID, 0.5f},
+			{fac3.ID, 0.0f},
 			{fac4.ID, 0.5f},
 			{fac5.ID, 0.5f}
 		};
@@ -90,7 +90,7 @@ public class NPCManager
 
 		fac3.Relationships = new Dictionary<string, float>() 
 		{	
-			{facp.ID, 0.5f},
+			{facp.ID, 0.0f},
 			{fac1.ID, 0},
 			{fac2.ID, 1},
 			{fac4.ID, 1},
@@ -154,6 +154,8 @@ public class NPCManager
 		ship.Engine = shipModel.GetComponent<Engine>();
 		ship.Thruster = shipModel.GetComponent<Thruster>();
 		ship.Scanner = shipModel.GetComponent<Scanner>();
+		ship.Storage = shipModel.GetComponent<ShipStorage>();
+		ship.Storage.Initialize();
 		ship.MyLoadout = loadout;
 	}
 
@@ -163,8 +165,7 @@ public class NPCManager
 
 		BuildShip(ship, loadout, factionID, party);
 
-		AI ai = ship.GetComponent<AI>();
-		ai.Initialize(party, _allFactions[factionID]);
+
 
 		//load weapons
 		foreach(WeaponJoint joint in ship.MyReference.WeaponJoints)
@@ -178,6 +179,21 @@ public class NPCManager
 				}
 			}
 		}
+
+		//load ammo bay
+		ship.Storage.AmmoBayItems = new Dictionary<string, InvItemData>();
+		foreach(InvItemData item in loadout.AmmoBayItems)
+		{
+			ship.Storage.AmmoBayItems.Add(item.Item.ID, item);
+		}
+		ship.Storage.CargoBayItems = new Dictionary<string, InvItemData>();
+		foreach(InvItemData item in loadout.CargoBayItems)
+		{
+			ship.Storage.CargoBayItems.Add(item.Item.ID, item);
+		}
+
+		AI ai = ship.GetComponent<AI>();
+		ai.Initialize(party, _allFactions[factionID]);
 
 		return ship;
 	}
@@ -204,6 +220,18 @@ public class NPCManager
 					joint.LoadWeapon(jointSetup.Value);
 				}
 			}
+		}
+
+		//load ammo bay
+		ship.Storage.AmmoBayItems = new Dictionary<string, InvItemData>();
+		foreach(InvItemData item in loadout.AmmoBayItems)
+		{
+			ship.Storage.AmmoBayItems.Add(item.Item.ID, item);
+		}
+		ship.Storage.CargoBayItems = new Dictionary<string, InvItemData>();
+		foreach(InvItemData item in loadout.CargoBayItems)
+		{
+			ship.Storage.CargoBayItems.Add(item.Item.ID, item);
 		}
 
 		return ship;

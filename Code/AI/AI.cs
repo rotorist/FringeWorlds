@@ -19,8 +19,11 @@ public class AI : MonoBehaviour
 	public Rigidbody RB;
 	public Whiteboard Whiteboard;
 	public AvoidanceDetector AvoidanceDetector;
+	public AIWeaponControl WeaponControl;
 
 	public float AimSkill;//0 to 1
+	public bool IsEngineKilled;
+	public bool IsThrusting;
 
 	public Dictionary<string,BehaviorTree> TreeSet;
 
@@ -44,6 +47,7 @@ public class AI : MonoBehaviour
 				Turn();
 				UpdateAimError();
 				UpdateSensor();
+				WeaponControl.PerFrameUpdate();
 				if(Whiteboard.Parameters["TargetEnemy"] != null)
 				{
 					AvoidanceDetector.State = AvoidanceState.Combat;
@@ -92,6 +96,9 @@ public class AI : MonoBehaviour
 		MyFaction = faction;
 		MyPartyNumber = MyParty.PartyNumber;
 
+		WeaponControl = new AIWeaponControl();
+		WeaponControl.Initialize(this);
+
 		TreeSet = new Dictionary<string, BehaviorTree>();
 		TreeSet.Add("BaseBehavior", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("BaseBehavior", this, party));
 		TreeSet.Add("Travel", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("Travel", this, party));
@@ -131,7 +138,8 @@ public class AI : MonoBehaviour
 			_isEngineKilled = (bool)Whiteboard.Parameters["IsEngineKilled"];
 			Vector3 dest = (Vector3)Whiteboard.Parameters["Destination"];
 
-
+			IsEngineKilled = _isEngineKilled;
+			IsThrusting = (bool)Whiteboard.Parameters["IsThrusting"];
 
 			bool isStopping = false;
 			if(dest == Vector3.zero)
@@ -156,7 +164,7 @@ public class AI : MonoBehaviour
 			}
 
 			float force = 5;
-			if((bool)Whiteboard.Parameters["IsThrusting"])
+			if(IsThrusting)
 			{
 				force = 14;
 
@@ -166,7 +174,7 @@ public class AI : MonoBehaviour
 			force *= Mathf.Lerp(0.4f, 1f, Mathf.Clamp01(los.magnitude / 10));
 
 
-			if(!_isEngineKilled)
+			if(!_isEngineKilled || IsThrusting)
 			{
 				if(Vector3.Angle(MyShip.transform.forward, los) < 30 || los.magnitude < 10f || isStopping)
 				{
@@ -174,7 +182,7 @@ public class AI : MonoBehaviour
 				}
 			}
 
-			if((bool)Whiteboard.Parameters["IsThrusting"])
+			if(IsThrusting)
 			{
 				if(MyShip.MyReference.ExhaustController != null)
 				{

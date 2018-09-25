@@ -12,6 +12,7 @@ public class Weapon : MonoBehaviour
 	public WeaponRotationType RotationType;
 	public int MaxMagazine;
 	public int Magazine;
+	public float ReloadTime;
 	public float GimballMax;
 	public float GimballMin;
 

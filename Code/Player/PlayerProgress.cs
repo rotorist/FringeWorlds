@@ -25,6 +25,15 @@ public class PlayerProgress
 			{ "GimballRight", "Class2Gun1" },
 			{ "GimballFront", "Class1Launcher1" },
 		};
+		Item item = new Item();
+		item.ID = "Class1Missile1";
+		item.DisplayName = "Seeker Missile";
+		item.Type = ItemType.Ammo;
+		item.CargoUnits = 2;
+		InvItemData itemData = new InvItemData();
+		itemData.Item = item;
+		itemData.Quantity = 5;
+		ActiveLoadout.AmmoBayItems.Add(itemData);
 
 		ProfileName = "Kurt";
 	}

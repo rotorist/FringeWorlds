@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class Launcher : Weapon 
 {
-	
-	public string ProjectileName;
+	public AILauncherType AILauncherType;
+	public string ProjectilePrefab;
+	public string AmmoID;
 
 	private float _coolDownTimer;
 	private bool _isCooledDown;
@@ -36,37 +37,49 @@ public class Launcher : Weapon
 	{
 		if(_isCooledDown)
 		{
-
-			GameObject o = GameObject.Instantiate(Resources.Load("Class1Missile1")) as GameObject;
-			Missile missile = o.GetComponent<Missile>();
-
-			Rigidbody target = null;
-			if(ParentShip == GameManager.Inst.PlayerControl.PlayerShip)
+			//check if storage has it
+			if(ParentShip.Storage.TakeAmmo(AmmoID, 1))
 			{
-				if(GameManager.Inst.PlayerControl.TargetShip != null)
-				{
-					target = GameManager.Inst.PlayerControl.TargetShip.RB;
-				}
-			}
-			else
-			{
-				ShipBase currentTarget = (ShipBase)ParentShip.MyAI.Whiteboard.Parameters["TargetEnemy"];
-				if(currentTarget != null)
-				{
-					target = currentTarget.RB;
-				}
-			}
-			missile.Initialize(target);
-			missile.Attacker = this.ParentShip;
-			missile.transform.position = Barrel.transform.position + Barrel.transform.forward * 1f;
-			Vector3 lookTarget = Barrel.transform.position + Barrel.transform.forward * 100;
-			missile.transform.LookAt(lookTarget);
-			missile.Fire(this.ParentShip, missile.transform.forward * 9f + ParentShip.RB.velocity);
 
-			_isCooledDown = false;
-			_coolDownTimer = 0;
+				GameObject o = GameObject.Instantiate(Resources.Load(ProjectilePrefab)) as GameObject;
+				Missile missile = o.GetComponent<Missile>();
+
+				Rigidbody target = null;
+				if(ParentShip == GameManager.Inst.PlayerControl.PlayerShip)
+				{
+					if(GameManager.Inst.PlayerControl.TargetShip != null)
+					{
+						target = GameManager.Inst.PlayerControl.TargetShip.RB;
+					}
+				}
+				else
+				{
+					ShipBase currentTarget = (ShipBase)ParentShip.MyAI.Whiteboard.Parameters["TargetEnemy"];
+					if(currentTarget != null)
+					{
+						target = currentTarget.RB;
+					}
+				}
+				missile.Initialize(target);
+				missile.Attacker = this.ParentShip;
+				missile.transform.position = Barrel.transform.position + Barrel.transform.forward * 1f;
+				Vector3 lookTarget = Barrel.transform.position + Barrel.transform.forward * 100;
+				missile.transform.LookAt(lookTarget);
+				missile.Fire(this.ParentShip, missile.transform.forward * 9f + ParentShip.RB.velocity);
+
+				_isCooledDown = false;
+				_coolDownTimer = 0;
+			}
 		}
 	}
 
 
+}
+
+public enum AILauncherType
+{
+	ForShield = 1,
+	ForHull = 2,
+	ForBoth = 3,
+	EngineDisruptor = 10,
 }

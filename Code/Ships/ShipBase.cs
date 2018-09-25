@@ -16,6 +16,7 @@ public class ShipBase : MonoBehaviour
 	public ShieldBase Shield;
 	public Thruster Thruster;
 	public Scanner Scanner;
+	public ShipStorage Storage;
 
 	public float TorqueModifier = 1;
 	public float HullCapacity;
@@ -139,7 +140,7 @@ public class ShipBase : MonoBehaviour
 
 	void OnCollisionEnter(Collision collision)
 	{
-		Debug.Log("I'm hitting " + collision.collider.name);
+		//Debug.Log("I'm hitting " + collision.collider.name);
 	}
 
 	void OnParticleCollision(GameObject other)
