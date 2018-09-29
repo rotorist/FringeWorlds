@@ -67,6 +67,11 @@ public class AIWeaponControl
 
 	public void FireLaunchers(AILauncherSelection selection)
 	{
+		if(Launchers.Count <= 0)
+		{
+			return;
+		}
+
 		if(selection == AILauncherSelection.Random)
 		{
 			Launchers[UnityEngine.Random.Range(0, Launchers.Count)].Fire();

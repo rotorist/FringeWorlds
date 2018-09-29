@@ -120,6 +120,11 @@ public class BTCheck : BTLeaf
 				result = BTResult.Fail;
 			}
 			break;
+		case "IsIncomingMissile":
+			{
+				result = AreThereIncomingMissiles();
+			}
+			break;
 		case "IsTargetInAttackFov":
 			{
 				ShipBase target = (ShipBase)MyAI.Whiteboard.Parameters[Parameters[0]];
@@ -321,6 +326,18 @@ public class BTCheck : BTLeaf
 	{
 		MyAI.RunningNodeHist.UniquePush("Check");
 		return BTResult.Running;
+	}
+
+	private BTResult AreThereIncomingMissiles()
+	{
+		if(MyAI.MyShip.IncomingMissiles.Count > 0)
+		{
+			return BTResult.Success;
+		}
+		else
+		{
+			return BTResult.Fail;
+		}
 	}
 
 	private BTResult HasReachedDestination()

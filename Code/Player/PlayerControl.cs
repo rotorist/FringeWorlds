@@ -63,8 +63,7 @@ public class PlayerControl
 
 	private Transform _testSphere;
 
-
-	private Launcher _testLauncher;
+	private float _cmTimer;
 
 
 	public void Initialize()
@@ -92,7 +91,7 @@ public class PlayerControl
 		AsteroidDust = o.GetComponent<ParticleSystem>();
 
 		_isMouseFlight = true;
-
+		_cmTimer = 4f;
 
 
 		GameManager.Inst.NPCManager.AllShips.Add(PlayerShip);
@@ -161,6 +160,11 @@ public class PlayerControl
 		UpdateMouseInput();
 		UpdateWeaponAim();
 
+
+		if(_cmTimer < 3f)
+		{
+			_cmTimer += Time.deltaTime;
+		}
 	}
 
 	public void FixedFrameUpdate()
@@ -273,6 +277,12 @@ public class PlayerControl
 		if(Input.GetKeyDown(KeyCode.V))
 		{
 			GameManager.Inst.CameraController.SetView(!GameManager.Inst.CameraController.IsFirstPerson);
+		}
+
+		//countermeasure
+		if(Input.GetKeyDown(KeyCode.C))
+		{
+			DropCountermeasure();
 		}
 	}
 
@@ -854,6 +864,8 @@ public class PlayerControl
 
 	private void SelectObject()
 	{
+		GameManager.Inst.UIManager.HUDPanel.OnClearSelectedObject();
+
 		SelectedObjectType type = SelectedObjectType.Unknown;
 		GameObject go = GameManager.Inst.CursorManager.SelectObject(out type);
 		TargetShip = null;
@@ -966,6 +978,23 @@ public class PlayerControl
 
 
 		}
+	}
+
+	private void DropCountermeasure()
+	{
+		if(_cmTimer >= 3f)
+		{
+			GameObject cm = GameObject.Instantiate(Resources.Load("CountermeasureEffect")) as GameObject;
+			cm.transform.parent = PlayerShip.transform;
+			cm.transform.localPosition = Vector3.zero;
+			cm.transform.localEulerAngles = Vector3.zero;
+			cm.transform.localScale = new Vector3(1, 1, 1);
+			cm.transform.parent = null;
+			CounterMeasureFlares flares = cm.GetComponentInChildren<CounterMeasureFlares>();
+			flares.InitialVelocity = PlayerShip.RB.velocity;
+			PlayerShip.CurrentCountermeasure = cm;
+		}
+
 	}
 
 

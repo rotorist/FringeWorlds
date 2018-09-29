@@ -44,12 +44,13 @@ public class Launcher : Weapon
 				GameObject o = GameObject.Instantiate(Resources.Load(ProjectilePrefab)) as GameObject;
 				Missile missile = o.GetComponent<Missile>();
 
-				Rigidbody target = null;
+				ShipBase target = null;
 				if(ParentShip == GameManager.Inst.PlayerControl.PlayerShip)
 				{
 					if(GameManager.Inst.PlayerControl.TargetShip != null)
 					{
-						target = GameManager.Inst.PlayerControl.TargetShip.RB;
+						target = GameManager.Inst.PlayerControl.TargetShip;
+						GameManager.Inst.PlayerControl.TargetShip.IncomingMissiles.Add(missile.gameObject);
 					}
 				}
 				else
@@ -57,7 +58,8 @@ public class Launcher : Weapon
 					ShipBase currentTarget = (ShipBase)ParentShip.MyAI.Whiteboard.Parameters["TargetEnemy"];
 					if(currentTarget != null)
 					{
-						target = currentTarget.RB;
+						target = currentTarget;
+						currentTarget.IncomingMissiles.Add(missile.gameObject);
 					}
 				}
 				missile.Initialize(target);

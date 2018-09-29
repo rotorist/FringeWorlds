@@ -30,6 +30,10 @@ public class ShipBase : MonoBehaviour
 	public float InPortalSpeed;
 	public string DockedStationID;
 
+	public List<GameObject> IncomingMissiles;
+	public GameObject CurrentCountermeasure;
+
+
 	public Loadout MyLoadout;
 
 	public virtual void Hide()

@@ -36,13 +36,16 @@ public class HUDPanel : PanelBase
 
 	public Transform WeaponListAnchor;
 	public Transform ObjEntryAnchor;
+	public Transform OffScreenTargetsAnchor;
 
 	public Dictionary<ShipBase, UISprite> UnselectedShipMarkers { get { return _unselectedShips; } }
 
 	private Transform _selectedObject;
 	private SelectedObjMarker _currentSelectMarker;
+	private UISprite _currentSelectMarkerOffScreen;
 
 	private Dictionary<ShipBase, UISprite> _unselectedShips;
+	private Dictionary<ShipBase, UISprite> _unselectedShipsOffScreen;
 	//private Dictionary<Item, UISprite> _unselectedItems;
 
 	private List<HUDListEntry> _allEntries;
@@ -57,6 +60,7 @@ public class HUDPanel : PanelBase
 		GameEventHandler.OnShipDeath += OnShipDeath;
 
 		_unselectedShips = new Dictionary<ShipBase, UISprite>();
+		_unselectedShipsOffScreen = new Dictionary<ShipBase, UISprite>();
 		_allEntries = new List<HUDListEntry>();
 		_weaponEntries = new List<HUDWeaponEntry>();
 		for(int i=0; i<13; i++)
@@ -191,8 +195,13 @@ public class HUDPanel : PanelBase
 		{
 			GameObject.Destroy(_unselectedShips[ship].gameObject);
 			_unselectedShips.Remove(ship);
-		}
 
+		}
+		if(_unselectedShipsOffScreen.ContainsKey(ship))
+		{
+			GameObject.Destroy(_unselectedShipsOffScreen[ship].gameObject);
+			_unselectedShipsOffScreen.Remove(ship);
+		}
 
 	}
 
@@ -223,30 +232,39 @@ public class HUDPanel : PanelBase
 
 	private void UpdatePipPosition()
 	{
+		
 		if(GameManager.Inst.PlayerControl.TargetShip != null)
 		{
-			ShipBase target = GameManager.Inst.PlayerControl.TargetShip;
-			ShipBase myShip = GameManager.Inst.PlayerControl.PlayerShip;
-			Vector3 aimPoint = StaticUtility.FirstOrderIntercept(myShip.transform.position, myShip.RB.velocity,
-				30, target.transform.position, target.RB.velocity);
-			Vector3 viewPos = GameManager.Inst.UIManager.UICamera.WorldToViewportPoint(aimPoint);
-			Vector3 screenPos = GameManager.Inst.UIManager.UICamera.ViewportToScreenPoint(viewPos);
-			//float multiplier = 1;//(float)GameManager.Inst.UIManager.Root.manualHeight / (float)Screen.height;
-
-
-			//Pip.transform.OverlayPosition(aimPoint, GameManager.Inst.MainCamera, GameManager.Inst.UIManager.UICamera);
-			//Vector3 overlay = NGUIMath.WorldToLocalPoint(aimPoint, GameManager.Inst.MainCamera, GameManager.Inst.UIManager.UICamera, Pip.transform);
-			Vector3 overlay = Camera.main.WorldToScreenPoint(aimPoint);
-			overlay = new Vector3(overlay.x - Screen.width/2f, overlay.y - Screen.height/2f, 0) * 0.65f;
-			Pip.transform.localPosition = GameManager.Inst.UIManager.GetTargetScreenPos(aimPoint);
-			Pip.alpha = 1f;
-
-			if(_currentSelectMarker != null)
+			float targetshipAngle = Vector3.Angle(Camera.main.transform.forward, (GameManager.Inst.PlayerControl.TargetShip.transform.position - Camera.main.transform.position));
+			if(targetshipAngle > 50)
 			{
-				Vector3 los = _currentSelectMarker.Marker.transform.localPosition - Pip.transform.localPosition;
-				Quaternion rot = Quaternion.FromToRotation(PipLine.transform.right, los);
-				PipLine.transform.rotation = rot * PipLine.transform.rotation;
-				PipLine.width = (int)(los.magnitude);
+				Pip.alpha = 0;
+			}
+			else
+			{
+				ShipBase target = GameManager.Inst.PlayerControl.TargetShip;
+				ShipBase myShip = GameManager.Inst.PlayerControl.PlayerShip;
+				Vector3 aimPoint = StaticUtility.FirstOrderIntercept(myShip.transform.position, myShip.RB.velocity,
+					30, target.transform.position, target.RB.velocity);
+				Vector3 viewPos = GameManager.Inst.UIManager.UICamera.WorldToViewportPoint(aimPoint);
+				Vector3 screenPos = GameManager.Inst.UIManager.UICamera.ViewportToScreenPoint(viewPos);
+				//float multiplier = 1;//(float)GameManager.Inst.UIManager.Root.manualHeight / (float)Screen.height;
+
+
+				//Pip.transform.OverlayPosition(aimPoint, GameManager.Inst.MainCamera, GameManager.Inst.UIManager.UICamera);
+				//Vector3 overlay = NGUIMath.WorldToLocalPoint(aimPoint, GameManager.Inst.MainCamera, GameManager.Inst.UIManager.UICamera, Pip.transform);
+				Vector3 overlay = Camera.main.WorldToScreenPoint(aimPoint);
+				overlay = new Vector3(overlay.x - Screen.width/2f, overlay.y - Screen.height/2f, 0) * 0.65f;
+				Pip.transform.localPosition = GameManager.Inst.UIManager.GetTargetScreenPos(aimPoint);
+				Pip.alpha = 1f;
+
+				if(_currentSelectMarker != null)
+				{
+					Vector3 los = _currentSelectMarker.Marker.transform.localPosition - Pip.transform.localPosition;
+					Quaternion rot = Quaternion.FromToRotation(PipLine.transform.right, los);
+					PipLine.transform.rotation = rot * PipLine.transform.rotation;
+					PipLine.width = (int)(los.magnitude);
+				}
 			}
 		}
 		else
@@ -299,20 +317,55 @@ public class HUDPanel : PanelBase
 		if(_currentSelectMarker != null && _selectedObject != null)
 		{
 			float angle = Vector3.Angle(Camera.main.transform.forward, (_selectedObject.transform.position - Camera.main.transform.position));
-			if(angle < 90)
+			if(angle < 60)
 			{
 				_currentSelectMarker.transform.localPosition = GameManager.Inst.UIManager.GetTargetScreenPos(_selectedObject.transform.position);
 				_currentSelectMarker.SetVisible(true);
-
+				if(_currentSelectMarkerOffScreen != null)
+				{
+					_currentSelectMarkerOffScreen.alpha = 0;
+				}
 			}
 			else
 			{
 				_currentSelectMarker.SetVisible(false);
+				if(_currentSelectMarkerOffScreen == null)
+				{
+					GameObject o = GameObject.Instantiate(Resources.Load("SelectedOffScreenShipMarker")) as GameObject;
+					UISprite sprite = o.GetComponent<UISprite>();
+					sprite.MakePixelPerfect();
+					sprite.transform.parent = OffScreenTargetsAnchor;
+					sprite.transform.localScale = new Vector3(1, 1, 1);
+					sprite.width = 50;
+					sprite.depth = 10;
+					_currentSelectMarkerOffScreen = sprite;
+				}
+
+				_currentSelectMarkerOffScreen.alpha = 1;
+				//update position
+				Vector3 distToPlayer = Camera.main.transform.InverseTransformPoint(_selectedObject.transform.position);
+				distToPlayer = new Vector3(distToPlayer.x, distToPlayer.y, 0).normalized;
+				_currentSelectMarkerOffScreen.transform.localPosition = distToPlayer * 300f;
+				//update rotation
+				float angleFromLeft = Vector3.Angle(distToPlayer, new Vector3(-1, 0, 0));
+				float angleFromTop = Vector3.Angle(distToPlayer, new Vector3(0, 1, 0));
+				if(angleFromTop <= 90)
+				{
+					angleFromLeft *= -1;
+				}
+				_currentSelectMarkerOffScreen.transform.localEulerAngles = new Vector3(0, 0, angleFromLeft);
 			}
 		}
-		else if(_currentSelectMarker != null && _selectedObject == null)
+		else if(_selectedObject == null)
 		{
-			_currentSelectMarker.SetVisible(false);
+			if(_currentSelectMarker != null)
+			{
+				_currentSelectMarker.SetVisible(false);
+			}
+			if(_currentSelectMarkerOffScreen != null)
+			{
+				_currentSelectMarkerOffScreen.alpha = 0;
+			}
 		}
 
 		ShipBase targetShip = GameManager.Inst.PlayerControl.TargetShip;
@@ -339,6 +392,17 @@ public class HUDPanel : PanelBase
 
 		}
 
+		Dictionary<ShipBase, UISprite> _unselectedShipsOffScreenCopy = new Dictionary<ShipBase, UISprite>(_unselectedShipsOffScreen);
+		foreach(KeyValuePair<ShipBase, UISprite> marker in _unselectedShipsOffScreenCopy)
+		{
+			if(!GameManager.Inst.NPCManager.AllShips.Contains(marker.Key))
+			{
+				_unselectedShipsOffScreen.Remove(marker.Key);
+				GameObject.Destroy(marker.Value.gameObject);
+			}
+
+		}
+
 
 		foreach(ShipBase ship in GameManager.Inst.NPCManager.AllShips)
 		{
@@ -351,6 +415,7 @@ public class HUDPanel : PanelBase
 
 			bool isMarkerHidden = false;
 			bool isMarkerTooFar = false;
+			bool isMarkerOffScreen = false;
 
 			if(ship == GameManager.Inst.PlayerControl.TargetShip)
 			{
@@ -361,35 +426,73 @@ public class HUDPanel : PanelBase
 			{
 				isMarkerHidden = true;
 			}
-
-			if(Vector3.Distance(ship.transform.position, playerShip.transform.position) > 200)
+				
+			if(distFromPlayer > 200)
 			{
 				isMarkerHidden = true;
 				isMarkerTooFar = true;
 			}
 			else
 			{
-				if(Vector3.Angle(playerShip.transform.forward, ship.transform.position - playerShip.transform.position) > 90)
+				if(Vector3.Angle(Camera.main.transform.forward, ship.transform.position - Camera.main.transform.position) > 60)
 				{
 					isMarkerHidden = true;
+					isMarkerOffScreen = true;
 				}
 			}
 
 			if(isMarkerHidden)
 			{
-				if(_unselectedShips.ContainsKey(ship))
+				Debug.Log("marker should be hidden for " + ship.name);
+				if(isMarkerTooFar || ship == GameManager.Inst.PlayerControl.TargetShip)
 				{
-					if(isMarkerTooFar)
+					//destroy it
+					if(_unselectedShips.ContainsKey(ship))
 					{
-						//destroy it
 						GameObject.Destroy(_unselectedShips[ship].gameObject);
 						_unselectedShips.Remove(ship);
 					}
-					else
+					if(_unselectedShipsOffScreen.ContainsKey(ship))
+					{
+						GameObject.Destroy(_unselectedShipsOffScreen[ship].gameObject);
+						_unselectedShipsOffScreen.Remove(ship);
+					}
+				}
+				else if(isMarkerOffScreen)
+				{
+					if(_unselectedShips.ContainsKey(ship))
 					{
 						_unselectedShips[ship].alpha = 0;
 					}
+					//load marker
+					if(!_unselectedShipsOffScreen.ContainsKey(ship))
+					{
+						GameObject o = GameObject.Instantiate(Resources.Load("UnselectedOffScreenShipMarker")) as GameObject;
+						UISprite sprite = o.GetComponent<UISprite>();
+						sprite.MakePixelPerfect();
+						sprite.transform.parent = OffScreenTargetsAnchor;
+						sprite.transform.localScale = new Vector3(1, 1, 1);
+						sprite.width = 35;
+						sprite.depth = 0;
+						_unselectedShipsOffScreen.Add(ship, sprite);
+					}
+
+					_unselectedShipsOffScreen[ship].alpha = Mathf.Clamp(1 - Mathf.Clamp01(distFromPlayer / 100f), 0.3f, 1);
+					//update position
+					Vector3 distToPlayer = Camera.main.transform.InverseTransformPoint(ship.transform.position);
+					distToPlayer = new Vector3(distToPlayer.x, distToPlayer.y, 0).normalized;
+					_unselectedShipsOffScreen[ship].transform.localPosition = distToPlayer * 300f;
+					//update rotation
+					float angleFromLeft = Vector3.Angle(distToPlayer, new Vector3(-1, 0, 0));
+					float angleFromTop = Vector3.Angle(distToPlayer, new Vector3(0, 1, 0));
+					if(angleFromTop <= 90)
+					{
+						angleFromLeft *= -1;
+					}
+					_unselectedShipsOffScreen[ship].transform.localEulerAngles = new Vector3(0, 0, angleFromLeft);
+
 				}
+
 
 			}
 			else
@@ -404,6 +507,12 @@ public class HUDPanel : PanelBase
 					sprite.transform.localScale = new Vector3(0.15f, 0.15f, 0.15f);
 					sprite.width = 130;
 					_unselectedShips.Add(ship, sprite);
+				}
+
+				if(_unselectedShipsOffScreen.ContainsKey(ship))
+				{
+					//hide it
+					_unselectedShipsOffScreen[ship].alpha = 0;
 				}
 
 				_unselectedShips[ship].alpha = 0.8f;
@@ -471,6 +580,9 @@ public class HUDPanel : PanelBase
 		{
 			MouseFlightLabel.text = "AUTO";
 		}
+
+
+
 	}
 
 	private void UpdateRightHUD()

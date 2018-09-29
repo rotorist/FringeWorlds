@@ -419,6 +419,9 @@ public class AI : MonoBehaviour
 			TargetShip = null;
 		}
 
+		//check if any incoming missiles are already destroyed
+		MyShip.IncomingMissiles.RemoveAll(GameObject => GameObject == null);
+
 		if(MyShip.Scanner != null)
 		{
 			//check if current target enemy is still valid or within range
@@ -497,6 +500,8 @@ public class AI : MonoBehaviour
 		}
 
 		_targetLockTimer = Mathf.Clamp(_targetLockTimer - Time.deltaTime, 0, 60);
+
+
 	}
 
 	private void UpdateAimError()

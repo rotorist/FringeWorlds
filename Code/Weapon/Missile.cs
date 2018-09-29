@@ -6,17 +6,19 @@ public class Missile : Ammunition
 {
 	public float TTL;
 
-	public Rigidbody Target;
+	public ShipBase Target;
 	public float MaxSpeed;
 	public Transform EngineFlameHolder;
 	public ParticleSystem Smoke;
 
+	public MissileStage Stage { get { return _stage; } }
 
 	private MissileStage _stage;
 	private Rigidbody _rigidbody;
 	private Vector3 _initialVelocity;
 	private float _force;
 	private float _age;
+
 
 	void FixedUpdate () 
 	{
@@ -37,8 +39,18 @@ public class Missile : Ammunition
 			}
 			else
 			{
+				Vector3 targetPos = Target.transform.position;
+				if(Target.CurrentCountermeasure != null)
+				{
+					CounterMeasureFlares flares = Target.CurrentCountermeasure.GetComponentInChildren<CounterMeasureFlares>();
+					if(flares != null && flares.IsEffective)
+					{
+						targetPos += flares.MissileDeviation;
+					}
+				}
+
 				Vector3 aimPoint = StaticUtility.FirstOrderIntercept(transform.position, _rigidbody.velocity,
-					_rigidbody.velocity.magnitude, Target.transform.position, Target.velocity);
+					_rigidbody.velocity.magnitude, targetPos, Target.RB.velocity);
 				Vector3 los = aimPoint - transform.position;
 
 				if(Vector3.Angle(los, transform.forward) < 10)
@@ -87,7 +99,7 @@ public class Missile : Ammunition
 
 	}
 
-	public void Initialize(Rigidbody target)
+	public void Initialize(ShipBase target)
 	{
 		_stage = MissileStage.None;
 		Target = target;
