@@ -63,6 +63,16 @@ public class MacroAI
 			itemData.Quantity = 2;
 			loadout.AmmoBayItems.Add(itemData);
 
+			Item item2 = new Item();
+			item2.ID = "LongDurationCM";
+			item2.DisplayName = "Long Duration Countermeasure";
+			item2.Type = ItemType.Ammo;
+			item2.CargoUnits = 2;
+			InvItemData itemData2 = new InvItemData();
+			itemData2.Item = item2;
+			itemData2.Quantity = 2;
+			loadout.AmmoBayItems.Add(itemData2);
+
 		}
 
 

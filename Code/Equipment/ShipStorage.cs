@@ -34,4 +34,16 @@ public class ShipStorage : MonoBehaviour
 
 		return false;
 	}
+
+	public int GetAmmoCount(string itemID)
+	{
+		if(AmmoBayItems.ContainsKey(itemID))
+		{
+			return AmmoBayItems[itemID].Quantity;
+		}
+		else
+		{
+			return 0;
+		}
+	}
 }

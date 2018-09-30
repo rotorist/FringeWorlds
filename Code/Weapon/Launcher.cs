@@ -6,7 +6,7 @@ public class Launcher : Weapon
 {
 	public AILauncherType AILauncherType;
 	public string ProjectilePrefab;
-	public string AmmoID;
+
 
 	private float _coolDownTimer;
 	private bool _isCooledDown;

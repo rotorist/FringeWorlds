@@ -13,6 +13,7 @@ public class BTDropCountermeasure : BTLeaf
 
 	public override BTResult Process ()
 	{
+		
 		//check if missile is present and is close
 		GameObject closeMissile = null;
 		foreach(GameObject missile in MyAI.MyShip.IncomingMissiles)
@@ -31,16 +32,22 @@ public class BTDropCountermeasure : BTLeaf
 
 		if(currentCM == null && closeMissile != null && closeMissile.GetComponent<Missile>().Stage == MissileStage.Chasing)
 		{
-			
-			GameObject cm = GameObject.Instantiate(Resources.Load("CountermeasureEffect")) as GameObject;
-			cm.transform.parent = MyAI.MyShip.transform;
-			cm.transform.localPosition = Vector3.zero;
-			cm.transform.localEulerAngles = Vector3.zero;
-			cm.transform.localScale = new Vector3(1, 1, 1);
-			cm.transform.parent = null;
-			MyAI.MyShip.CurrentCountermeasure = cm;
+			if(MyAI.MyShip.Storage.TakeAmmo("LongDurationCM", 1))
+			{
+				GameObject cm = GameObject.Instantiate(Resources.Load("CountermeasureEffect")) as GameObject;
+				cm.transform.parent = MyAI.MyShip.transform;
+				cm.transform.localPosition = Vector3.zero;
+				cm.transform.localEulerAngles = Vector3.zero;
+				cm.transform.localScale = new Vector3(1, 1, 1);
+				cm.transform.parent = null;
+				MyAI.MyShip.CurrentCountermeasure = cm;
 
-			return Exit(BTResult.Success);
+				return Exit(BTResult.Success);
+			}
+			else
+			{
+				return Exit(BTResult.Fail);
+			}
 		}
 		else
 		{

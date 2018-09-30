@@ -5,7 +5,7 @@ using UnityEngine;
 public class Gun : Weapon
 {
 	public string ProjectilePrefab;
-	public string AmmoID;
+
 	public AIGunType AIGunType;
 
 	private float _coolDownTimer;
@@ -48,7 +48,7 @@ public class Gun : Weapon
 			projectile.transform.position = Barrel.transform.position + Barrel.transform.forward * 2;
 			Vector3 target = Barrel.transform.position + Barrel.transform.forward * 100;
 			projectile.transform.LookAt(target);
-			projectile.Fire(projectile.transform.forward * 30 + ParentShip.RB.velocity, Range, this.ParentShip);
+			projectile.Fire(projectile.transform.forward * 50 + ParentShip.RB.velocity, Range, this.ParentShip);
 
 			_isCooledDown = false;
 			_coolDownTimer = 0;

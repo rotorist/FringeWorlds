@@ -21,8 +21,8 @@ public class PlayerProgress
 		ActiveLoadout = new Loadout("Spitfire", ShipType.Fighter);
 		ActiveLoadout.WeaponJoints = new Dictionary<string, string>()
 		{
-			{ "GimballLeft", "Class2Gun1" },
-			{ "GimballRight", "Class2Gun1" },
+			{ "GimballLeft", "Class1Gun1" },
+			{ "GimballRight", "Class1Gun1" },
 			{ "GimballFront", "Class1Launcher1" },
 		};
 		Item item = new Item();
@@ -32,8 +32,18 @@ public class PlayerProgress
 		item.CargoUnits = 2;
 		InvItemData itemData = new InvItemData();
 		itemData.Item = item;
-		itemData.Quantity = 5;
+		itemData.Quantity = 8;
 		ActiveLoadout.AmmoBayItems.Add(itemData);
+
+		Item item2 = new Item();
+		item2.ID = "LongDurationCM";
+		item2.DisplayName = "Long Duration Countermeasure";
+		item2.Type = ItemType.Ammo;
+		item2.CargoUnits = 2;
+		InvItemData itemData2 = new InvItemData();
+		itemData2.Item = item2;
+		itemData2.Quantity = 10;
+		ActiveLoadout.AmmoBayItems.Add(itemData2);
 
 		ProfileName = "Kurt";
 	}

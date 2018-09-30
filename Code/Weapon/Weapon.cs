@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour 
 {
+	public string DisplayName;
 	public ShipBase ParentShip;
 	public float FireRate;
 	public float Range;
@@ -15,6 +16,7 @@ public class Weapon : MonoBehaviour
 	public float ReloadTime;
 	public float GimballMax;
 	public float GimballMin;
+	public string AmmoID;
 
 	public virtual void Rebuild()
 	{

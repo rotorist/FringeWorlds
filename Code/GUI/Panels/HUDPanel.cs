@@ -37,8 +37,11 @@ public class HUDPanel : PanelBase
 	public Transform WeaponListAnchor;
 	public Transform ObjEntryAnchor;
 	public Transform OffScreenTargetsAnchor;
+	public Transform WarningsAnchor;
 
 	public Dictionary<ShipBase, UISprite> UnselectedShipMarkers { get { return _unselectedShips; } }
+
+	public UISprite MissileWarning;
 
 	private Transform _selectedObject;
 	private SelectedObjMarker _currentSelectMarker;
@@ -54,6 +57,10 @@ public class HUDPanel : PanelBase
 	private SelectedHUDTab _selectedTab; 
 
 
+	private List<UISprite> _fastWarnings;
+	private float _fastWarningTimer;
+	private int _fastWarningState;
+
 	public override void Initialize ()
 	{
 		GameEventHandler.OnShipDeath -= OnShipDeath;
@@ -63,6 +70,7 @@ public class HUDPanel : PanelBase
 		_unselectedShipsOffScreen = new Dictionary<ShipBase, UISprite>();
 		_allEntries = new List<HUDListEntry>();
 		_weaponEntries = new List<HUDWeaponEntry>();
+		_fastWarnings = new List<UISprite>();
 		for(int i=0; i<13; i++)
 		{
 			HUDListEntry entry = LoadHUDListEntry();
@@ -84,7 +92,8 @@ public class HUDPanel : PanelBase
 		UpdateUnselectedMarkerPosition();
 		UpdateCenterHUD();
 		UpdateRightHUD();
-
+		UpdateWarnings();
+		UpdateWeaponEntries();
 	}
 
 	public override void Show ()
@@ -245,7 +254,7 @@ public class HUDPanel : PanelBase
 				ShipBase target = GameManager.Inst.PlayerControl.TargetShip;
 				ShipBase myShip = GameManager.Inst.PlayerControl.PlayerShip;
 				Vector3 aimPoint = StaticUtility.FirstOrderIntercept(myShip.transform.position, myShip.RB.velocity,
-					30, target.transform.position, target.RB.velocity);
+					50, target.transform.position, target.RB.velocity);
 				Vector3 viewPos = GameManager.Inst.UIManager.UICamera.WorldToViewportPoint(aimPoint);
 				Vector3 screenPos = GameManager.Inst.UIManager.UICamera.ViewportToScreenPoint(viewPos);
 				//float multiplier = 1;//(float)GameManager.Inst.UIManager.Root.manualHeight / (float)Screen.height;
@@ -443,7 +452,6 @@ public class HUDPanel : PanelBase
 
 			if(isMarkerHidden)
 			{
-				Debug.Log("marker should be hidden for " + ship.name);
 				if(isMarkerTooFar || ship == GameManager.Inst.PlayerControl.TargetShip)
 				{
 					//destroy it
@@ -624,6 +632,99 @@ public class HUDPanel : PanelBase
 		}
 	}
 
+	private void UpdateWarnings()
+	{
+		//missile
+		if(GameManager.Inst.PlayerControl.PlayerShip.IncomingMissiles.Count > 0)
+		{
+			foreach(GameObject missile in GameManager.Inst.PlayerControl.PlayerShip.IncomingMissiles)
+			{
+				if(Vector3.Angle(missile.transform.forward, (GameManager.Inst.PlayerControl.PlayerShip.transform.position - missile.transform.position)) < 80)
+				{
+					if(!_fastWarnings.Contains(MissileWarning))
+					{
+						MissileWarning.alpha = 1;
+						_fastWarnings.Add(MissileWarning);
+						break;
+					}
+				}
+				else
+				{
+					if(_fastWarnings.Contains(MissileWarning))
+					{
+						_fastWarnings.Remove(MissileWarning);
+						MissileWarning.alpha = 0;
+					}
+				}
+			}
+
+		}
+		else
+		{
+			if(_fastWarnings.Contains(MissileWarning))
+			{
+				_fastWarnings.Remove(MissileWarning);
+				MissileWarning.alpha = 0;
+			}
+		}
+
+		foreach(UISprite warning in _fastWarnings)
+		{
+			if(_fastWarningState == 1)
+			{
+				if(_fastWarningTimer < 0.5f)
+				{
+					warning.alpha = 1;
+				}
+				else
+				{
+					_fastWarningState = 0;
+					_fastWarningTimer = 0;
+				}
+			}
+			else
+			{
+				if(_fastWarningTimer < 0.25f)
+				{
+					warning.alpha = 0;
+				}
+				else
+				{
+					_fastWarningState = 1;
+					_fastWarningTimer = 0;
+				}
+			}
+		}
+
+		if(_fastWarnings.Count <= 0)
+		{
+			_fastWarningState = 0;
+		}
+
+		_fastWarningTimer += Time.deltaTime;
+	}
+
+	private void UpdateWeaponEntries()
+	{
+		foreach(HUDWeaponEntry entry in _weaponEntries)
+		{
+			if(entry.MonitoredWeapon != null)
+			{
+				int ammoCount = 0;
+				if(entry.MonitoredWeapon.AmmoID != "")
+				{
+					ammoCount = GameManager.Inst.PlayerControl.PlayerShip.Storage.GetAmmoCount(entry.MonitoredWeapon.AmmoID);
+
+				}
+				else
+				{
+					ammoCount = -1;
+				}
+				entry.UpdateAmmoCount(ammoCount);
+			}
+		}
+	}
+
 	private void LoadWeaponEntries()
 	{
 		int i = 0;
@@ -636,16 +737,22 @@ public class HUDPanel : PanelBase
 			o.transform.localEulerAngles = Vector3.zero;
 			o.transform.localScale = new Vector3(1, 1, 1);
 			_weaponEntries.Add(entry);
+
 			int groupNumber = GameManager.Inst.PlayerControl.GetWeaponGroupNumber(joint);
 			string weaponName = "";
 			if(joint.MountedWeapon != null)
 			{
-				weaponName = joint.MountedWeapon.name;
+				weaponName = joint.MountedWeapon.DisplayName;
+				entry.MonitoredWeapon = joint.MountedWeapon;
 			}
-			entry.UpdateEntry(groupNumber, weaponName);
+
+			entry.UpdateEntry(groupNumber, weaponName, -1);
 
 			i++;
 		}
+
+		//countermeasure
+
 	}
 
 

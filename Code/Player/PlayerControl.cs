@@ -165,6 +165,9 @@ public class PlayerControl
 		{
 			_cmTimer += Time.deltaTime;
 		}
+
+		//check if any incoming missiles are already destroyed
+		PlayerShip.IncomingMissiles.RemoveAll(GameObject => GameObject == null);
 	}
 
 	public void FixedFrameUpdate()
@@ -984,15 +987,18 @@ public class PlayerControl
 	{
 		if(_cmTimer >= 3f)
 		{
-			GameObject cm = GameObject.Instantiate(Resources.Load("CountermeasureEffect")) as GameObject;
-			cm.transform.parent = PlayerShip.transform;
-			cm.transform.localPosition = Vector3.zero;
-			cm.transform.localEulerAngles = Vector3.zero;
-			cm.transform.localScale = new Vector3(1, 1, 1);
-			cm.transform.parent = null;
-			CounterMeasureFlares flares = cm.GetComponentInChildren<CounterMeasureFlares>();
-			flares.InitialVelocity = PlayerShip.RB.velocity;
-			PlayerShip.CurrentCountermeasure = cm;
+			if(PlayerShip.Storage.TakeAmmo("LongDurationCM", 1))
+			{
+				GameObject cm = GameObject.Instantiate(Resources.Load("CountermeasureEffect")) as GameObject;
+				cm.transform.parent = PlayerShip.transform;
+				cm.transform.localPosition = Vector3.zero;
+				cm.transform.localEulerAngles = Vector3.zero;
+				cm.transform.localScale = new Vector3(1, 1, 1);
+				cm.transform.parent = null;
+				CounterMeasureFlares flares = cm.GetComponentInChildren<CounterMeasureFlares>();
+				flares.InitialVelocity = PlayerShip.RB.velocity;
+				PlayerShip.CurrentCountermeasure = cm;
+			}
 		}
 
 	}

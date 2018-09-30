@@ -61,7 +61,7 @@ public class Missile : Ammunition
 				else
 				{
 					//AddLookTorque(los);
-					Vector3 lookDir = Vector3.RotateTowards(transform.forward, los, 2f * Time.fixedDeltaTime, 0f);
+					Vector3 lookDir = Vector3.RotateTowards(transform.forward, los, 1f * Time.fixedDeltaTime, 0f);
 					transform.rotation = Quaternion.LookRotation(lookDir);
 					_force = 3f;
 				}
@@ -72,7 +72,7 @@ public class Missile : Ammunition
 
 
 			Vector3 driftVelocity = _rigidbody.velocity - Vector3.Dot(_rigidbody.velocity, transform.forward) * transform.forward;
-			_rigidbody.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * 2f);
+			_rigidbody.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * 1f);
 		}
 
 		//keep under max speed
