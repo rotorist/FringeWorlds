@@ -146,6 +146,7 @@ public class NPCManager
 		ship.ShipModelID = shipModelID;
 		ship.MyReference = shipModel.GetComponent<ShipReference>();
 		ship.MyReference.ParentShip = ship;
+		ship.MyReference.Defensives = new List<Defensive>();
 		ship.Shield = ship.MyReference.Shield.GetComponent<ShieldBase>();
 		ship.Shield.Initialize();
 		ship.Shield.ParentShip = ship;
@@ -177,6 +178,19 @@ public class NPCManager
 				{
 					joint.LoadWeapon(jointSetup.Value);
 				}
+			}
+		}
+
+		for(int i=0; i<loadout.Defensives.Count; i++)
+		{
+			if(loadout.Defensives[i] == DefensiveType.Countermeasure)
+			{
+				CMDispenser dispenser = new CMDispenser();
+				dispenser.ParentShip = ship;
+				dispenser.AmmoID = loadout.DefensiveAmmoIDs[i];
+				dispenser.Type = DefensiveType.Countermeasure;
+				ship.MyReference.Defensives.Add(dispenser);
+
 			}
 		}
 
@@ -219,6 +233,19 @@ public class NPCManager
 				{
 					joint.LoadWeapon(jointSetup.Value);
 				}
+			}
+		}
+
+		for(int i=0; i<loadout.Defensives.Count; i++)
+		{
+			if(loadout.Defensives[i] == DefensiveType.Countermeasure)
+			{
+				CMDispenser dispenser = new CMDispenser();
+				dispenser.ParentShip = ship;
+				dispenser.AmmoID = loadout.DefensiveAmmoIDs[i];
+				dispenser.Type = DefensiveType.Countermeasure;
+				ship.MyReference.Defensives.Add(dispenser);
+
 			}
 		}
 

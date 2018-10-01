@@ -708,20 +708,19 @@ public class HUDPanel : PanelBase
 	{
 		foreach(HUDWeaponEntry entry in _weaponEntries)
 		{
-			if(entry.MonitoredWeapon != null)
-			{
-				int ammoCount = 0;
-				if(entry.MonitoredWeapon.AmmoID != "")
-				{
-					ammoCount = GameManager.Inst.PlayerControl.PlayerShip.Storage.GetAmmoCount(entry.MonitoredWeapon.AmmoID);
 
-				}
-				else
-				{
-					ammoCount = -1;
-				}
-				entry.UpdateAmmoCount(ammoCount);
+			int ammoCount = 0;
+			if(entry.AmmoID != "")
+			{
+				ammoCount = GameManager.Inst.PlayerControl.PlayerShip.Storage.GetAmmoCount(entry.AmmoID);
+
 			}
+			else
+			{
+				ammoCount = -1;
+			}
+			entry.UpdateAmmoCount(ammoCount);
+
 		}
 	}
 
@@ -743,7 +742,7 @@ public class HUDPanel : PanelBase
 			if(joint.MountedWeapon != null)
 			{
 				weaponName = joint.MountedWeapon.DisplayName;
-				entry.MonitoredWeapon = joint.MountedWeapon;
+				entry.AmmoID = joint.MountedWeapon.AmmoID;
 			}
 
 			entry.UpdateEntry(groupNumber, weaponName, -1);
@@ -752,7 +751,30 @@ public class HUDPanel : PanelBase
 		}
 
 		//countermeasure
+		foreach(Defensive d in GameManager.Inst.PlayerControl.PlayerShip.MyReference.Defensives)
+		{
+			GameObject o = GameObject.Instantiate(Resources.Load("HUDWeaponEntry")) as GameObject;
+			HUDWeaponEntry entry = o.GetComponent<HUDWeaponEntry>();
+			o.transform.parent = WeaponListAnchor;
+			o.transform.localPosition = new Vector3((Mathf.Sqrt(1f - Mathf.Pow(Mathf.Abs(5f - i) / 5f, 2)) * -9f), i * 42, 0);
+			o.transform.localEulerAngles = Vector3.zero;
+			o.transform.localScale = new Vector3(1, 1, 1);
+			_weaponEntries.Add(entry);
 
+			int groupNumber = -1;
+			string weaponName = "";
+
+			if(d.Type == DefensiveType.Countermeasure)
+			{
+				weaponName = "Countermeasure Dispenser";
+			}
+
+			entry.AmmoID = d.AmmoID;
+
+			entry.UpdateEntry(groupNumber, weaponName, -1);
+
+			i++;
+		}
 	}
 
 

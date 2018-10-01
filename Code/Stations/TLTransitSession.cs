@@ -319,7 +319,7 @@ public class TLTransitSession : DockSessionBase
 				else
 				{
 					Vector3 pos = CurrentTrigger.transform.TransformPoint(ship.MyAI.MyParty.Formation[ship]);
-					Debug.LogError(pos);
+					//Debug.LogError(pos);
 					PassengerTargetPositions.Add(ship, new RelLoc(origin.position, pos, origin));
 				}
 			}

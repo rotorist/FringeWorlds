@@ -39,7 +39,8 @@ public class MacroAI
 			{ "TurretLeft", "Turret1" },
 			{ "TurretRight", "Turret1" },
 		};
-
+		party.LeaderLoadout.Defensives = new List<DefensiveType>();
+		party.LeaderLoadout.DefensiveAmmoIDs = new List<string>();
 
 
 		party.FollowerLoadouts = new List<Loadout>();
@@ -53,6 +54,15 @@ public class MacroAI
 				{ "GimballRight", "Gun1" },
 				{ "GimballFront", "Class1Launcher1" },
 			};
+			loadout.Defensives = new List<DefensiveType>()
+			{
+				DefensiveType.Countermeasure,
+			};
+			loadout.DefensiveAmmoIDs = new List<string>()
+			{
+				"LongDurationCM",
+			};
+
 			Item item = new Item();
 			item.ID = "Class1Missile1";
 			item.DisplayName = "Seeker Missile";

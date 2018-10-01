@@ -11,6 +11,8 @@ public class ShipReference : MonoBehaviour
 	public ShipType ShipType;
 	public AvoidanceDetector AvoidanceDetector;
 	public List<WeaponJoint> WeaponJoints;
+	public List<Defensive> Defensives;
+	public int MaxDefensives;
 	public ExhaustController ExhaustController;
 	public Transform FPCameraAnchor;
 	public Vector3 CameraChasePoint;

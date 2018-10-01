@@ -635,7 +635,7 @@ public class PlayerControl
 
 			if(_thruster != 0 || _isFAKilled)
 			{
-				maxSpeed = maxSpeed * 1.5f;
+				maxSpeed = PlayerShip.Thruster.MaxSpeed;
 			}
 
 			if(PlayerShip.Engine.IsCruising)
@@ -674,7 +674,8 @@ public class PlayerControl
 			if(!_isFAKilled || _thruster != 0)
 			{
 				Vector3 driftVelocity = velocity - Vector3.Dot(velocity, PlayerShip.transform.forward) * PlayerShip.transform.forward;
-				PlayerShip.RB.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * 1f);
+				float assistLevel = Mathf.Clamp(1 - Mathf.Clamp01(PlayerShip.RB.velocity.magnitude / maxSpeed), 0.35f, 1);
+				PlayerShip.RB.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * assistLevel);
 			}
 
 		}
@@ -987,17 +988,13 @@ public class PlayerControl
 	{
 		if(_cmTimer >= 3f)
 		{
-			if(PlayerShip.Storage.TakeAmmo("LongDurationCM", 1))
+			foreach(Defensive d in PlayerShip.MyReference.Defensives)
 			{
-				GameObject cm = GameObject.Instantiate(Resources.Load("CountermeasureEffect")) as GameObject;
-				cm.transform.parent = PlayerShip.transform;
-				cm.transform.localPosition = Vector3.zero;
-				cm.transform.localEulerAngles = Vector3.zero;
-				cm.transform.localScale = new Vector3(1, 1, 1);
-				cm.transform.parent = null;
-				CounterMeasureFlares flares = cm.GetComponentInChildren<CounterMeasureFlares>();
-				flares.InitialVelocity = PlayerShip.RB.velocity;
-				PlayerShip.CurrentCountermeasure = cm;
+				if(d.Type == DefensiveType.Countermeasure)
+				{
+					CMDispenser cm = (CMDispenser)d;
+					cm.DropCountermeasure();
+				}
 			}
 		}
 

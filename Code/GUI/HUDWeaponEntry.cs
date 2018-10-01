@@ -7,13 +7,20 @@ public class HUDWeaponEntry : MonoBehaviour
 	public UILabel WeaponGroupLabel;
 	public UILabel WeaponNameLabel;
 	public UILabel AmmoLabel;
-	public Weapon MonitoredWeapon;
+	public string AmmoID;
 
 
 
 	public void UpdateEntry(int groupNumber, string weaponName, int ammoCount)
 	{
-		WeaponGroupLabel.text = groupNumber.ToString();
+		if(groupNumber < 0)
+		{
+			WeaponGroupLabel.text = "";
+		}
+		else
+		{
+			WeaponGroupLabel.text = groupNumber.ToString();
+		}
 		WeaponNameLabel.text = weaponName;
 
 		UpdateAmmoCount(ammoCount);

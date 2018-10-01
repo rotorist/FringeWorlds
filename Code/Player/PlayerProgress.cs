@@ -25,6 +25,14 @@ public class PlayerProgress
 			{ "GimballRight", "Class1Gun1" },
 			{ "GimballFront", "Class1Launcher1" },
 		};
+		ActiveLoadout.Defensives = new List<DefensiveType>()
+		{
+			DefensiveType.Countermeasure,
+		};
+		ActiveLoadout.DefensiveAmmoIDs = new List<string>()
+		{
+			"LongDurationCM",
+		};
 		Item item = new Item();
 		item.ID = "Class1Missile1";
 		item.DisplayName = "Seeker Missile";

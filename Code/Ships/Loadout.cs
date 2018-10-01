@@ -7,6 +7,8 @@ public class Loadout
 	public string ShipID;
 	public ShipType ShipType;
 	public Dictionary<string, string> WeaponJoints;
+	public List<DefensiveType> Defensives;
+	public List<string> DefensiveAmmoIDs;
 	public List<InvItemData> AmmoBayItems;
 	public List<InvItemData> CargoBayItems;
 
@@ -29,6 +31,8 @@ public class LoadoutSaveData
 	public ShipType ShipType;
 	public List<string> WeaponJointNames;
 	public List<string> WeaponNames;
+	public List<DefensiveType> Defensives;
+	public List<string> DefensiveAmmoIDs;
 	public List<InvItemData> AmmoBayItems;
 	public List<InvItemData> CargoBayItems;
 

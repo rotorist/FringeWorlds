@@ -32,27 +32,22 @@ public class BTDropCountermeasure : BTLeaf
 
 		if(currentCM == null && closeMissile != null && closeMissile.GetComponent<Missile>().Stage == MissileStage.Chasing)
 		{
-			if(MyAI.MyShip.Storage.TakeAmmo("LongDurationCM", 1))
+			foreach(Defensive d in MyAI.MyShip.MyReference.Defensives)
 			{
-				GameObject cm = GameObject.Instantiate(Resources.Load("CountermeasureEffect")) as GameObject;
-				cm.transform.parent = MyAI.MyShip.transform;
-				cm.transform.localPosition = Vector3.zero;
-				cm.transform.localEulerAngles = Vector3.zero;
-				cm.transform.localScale = new Vector3(1, 1, 1);
-				cm.transform.parent = null;
-				MyAI.MyShip.CurrentCountermeasure = cm;
-
-				return Exit(BTResult.Success);
-			}
-			else
-			{
-				return Exit(BTResult.Fail);
+				if(d.Type == DefensiveType.Countermeasure)
+				{
+					CMDispenser dispenser = (CMDispenser)d;
+					dispenser.DropCountermeasure();
+					return Exit(BTResult.Success);
+				}
 			}
 		}
 		else
 		{
 			return Exit(BTResult.Fail);
 		}
+
+		return Exit(BTResult.Success);
 
 	}
 
