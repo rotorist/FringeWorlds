@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
 	public PlayerProgress PlayerProgress;
 	public Camera MainCamera;
 	public CameraController CameraController;
+	public CameraShaker CameraShaker;
 
 	public MaterialManager MaterialManager;
 	public DBManager DBManager;
@@ -32,6 +33,8 @@ public class GameManager : MonoBehaviour
 	public ShipBase ShipForTesting;
 
 	public LevelAnchor LevelAnchor;
+
+	public int MaxTimeScale = 1;
 
 	// Use this for initialization
 	void Start () 

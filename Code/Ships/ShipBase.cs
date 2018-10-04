@@ -82,7 +82,6 @@ public class ShipBase : MonoBehaviour
 
 
 
-
 	public virtual void EnableColliders()
 	{
 
@@ -142,6 +141,20 @@ public class ShipBase : MonoBehaviour
 		}
 	}
 
+	public float GetMaxWeaponRange()
+	{
+		float range = 0;
+		foreach(WeaponJoint joint in MyReference.WeaponJoints)
+		{
+			if(joint.MountedWeapon.Range > range)
+			{
+				range = joint.MountedWeapon.Range;
+			}
+		}
+
+		return range;
+	}
+
 	void OnCollisionEnter(Collision collision)
 	{
 		//Debug.Log("I'm hitting " + collision.collider.name);
@@ -168,6 +181,7 @@ public class ShipBase : MonoBehaviour
 			i++;
 		}
 	}
+		
 }
 
 public enum ShipType

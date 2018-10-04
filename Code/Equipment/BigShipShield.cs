@@ -58,12 +58,30 @@ public class BigShipShield : ShieldBase
 		//get multiplier
 		float multiplier = StaticUtility.GetShieldDamageMultiplier(this.Tech, damage.DamageType); 
 		Amount = Mathf.Clamp(Amount - damage.ShieldAmount * multiplier, 0, TotalCapacity);
-		Debug.Log(multiplier + ", " + damage.ShieldAmount + ", " + Amount);
+		//Debug.Log(multiplier + ", " + damage.ShieldAmount + ", " + Amount);
 
 		float damageEval = 1;
-		if(Amount > 0)
+		if(Amount > TotalCapacity * 0.1f)
 		{
-			damageEval = 0;
+			if(damage.DamageType == DamageType.Shock)
+			{
+				damageEval = 0.6f;
+			}
+			else
+			{
+				damageEval = 0;
+			}
+		}
+		else if(Amount > 0)
+		{
+			if(damage.DamageType == DamageType.Shock)
+			{
+				damageEval = 1;
+			}
+			else
+			{
+				damageEval = Mathf.Clamp01(1 - Amount / (TotalCapacity * 0.1f));
+			}
 		}
 		else
 		{

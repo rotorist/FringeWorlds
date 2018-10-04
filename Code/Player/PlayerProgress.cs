@@ -11,13 +11,17 @@ public class PlayerProgress
 	{
 		/*
 		ActiveLoadout = new Loadout("Trimaran", ShipType.Transporter);
+
 		ActiveLoadout.WeaponJoints = new Dictionary<string, string>()
 		{
 			{ "TurretLeft", "Class1Turret1" },
 			{ "TurretRight", "Class1Turret1" },
 			{ "TurretTop", "Class3Turret1" },
+			{ "GimballLeft", "Class2Gun1" },
+			{ "GimballRight", "Class2Gun1" },
 		}; 
-*/
+		*/
+
 		ActiveLoadout = new Loadout("Spitfire", ShipType.Fighter);
 		ActiveLoadout.WeaponJoints = new Dictionary<string, string>()
 		{
@@ -25,6 +29,8 @@ public class PlayerProgress
 			{ "GimballRight", "Class1Gun1" },
 			{ "GimballFront", "Class1Launcher1" },
 		};
+
+
 		ActiveLoadout.Defensives = new List<DefensiveType>()
 		{
 			DefensiveType.Countermeasure,
@@ -40,7 +46,7 @@ public class PlayerProgress
 		item.CargoUnits = 2;
 		InvItemData itemData = new InvItemData();
 		itemData.Item = item;
-		itemData.Quantity = 8;
+		itemData.Quantity = 12;
 		ActiveLoadout.AmmoBayItems.Add(itemData);
 
 		Item item2 = new Item();

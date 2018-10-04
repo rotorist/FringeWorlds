@@ -72,7 +72,7 @@ public class Missile : Ammunition
 
 
 			Vector3 driftVelocity = _rigidbody.velocity - Vector3.Dot(_rigidbody.velocity, transform.forward) * transform.forward;
-			_rigidbody.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * 1f);
+			_rigidbody.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * 2f);
 		}
 
 		//keep under max speed
@@ -103,11 +103,11 @@ public class Missile : Ammunition
 	{
 		_stage = MissileStage.None;
 		Target = target;
-		MaxSpeed = 30;
+		MaxSpeed = 20;
 		Damage = new Damage();
 		Damage.DamageType = DamageType.Shock;
-		Damage.ShieldAmount = 5;
-		Damage.HullAmount = 80;
+		Damage.ShieldAmount = 500;
+		Damage.HullAmount = 800;
 		_rigidbody = transform.GetComponent<Rigidbody>();
 	}
 
@@ -135,6 +135,18 @@ public class Missile : Ammunition
 		{
 			if(hitShip.ParentShip != Attacker)
 			{
+				Debug.Log("Sending damage " + Damage.ShieldAmount + " to " + hitShip.ParentShip.name);
+				Damage.HitLocation = collision.contacts[0].point;
+				Damage = hitShip.ParentShip.Shield.ProcessDamage(Damage);
+				Debug.Log("Hull amount " + Damage.HullAmount);
+				if(Damage.HullAmount <= 1f)
+				{
+					Explode();
+					GameObject.Destroy(this.gameObject);
+					return;
+				}
+
+				hitShip.ParentShip.ProcessHullDamage(Damage);
 				Explode();
 				GameObject.Destroy(gameObject);
 			}

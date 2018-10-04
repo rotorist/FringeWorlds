@@ -87,13 +87,21 @@ public class FighterShield : ShieldBase
 		*/
 
 		float damageEval = 1;
-		if(ParentShip != GameManager.Inst.PlayerControl.PlayerShip)
+		if(damage.DamageType == DamageType.Shock)
 		{
-			damageEval = Mathf.Clamp01(GameManager.Inst.Constants.ShieldProtectionCurve.Evaluate(shieldFill));
+			damageEval = 1f;
 		}
 		else
 		{
-			damageEval = Mathf.Clamp01(GameManager.Inst.Constants.PlayerShieldProtectionCurve.Evaluate(shieldFill));
+			if(ParentShip != GameManager.Inst.PlayerControl.PlayerShip)
+			{
+				damageEval = Mathf.Clamp01(GameManager.Inst.Constants.ShieldProtectionCurve.Evaluate(shieldFill));
+			}
+			else
+			{
+				GameManager.Inst.CameraShaker.TriggerScreenShake(0.07f, 0.015f, false);
+				damageEval = Mathf.Clamp01(GameManager.Inst.Constants.PlayerShieldProtectionCurve.Evaluate(shieldFill));
+			}
 		}
 
 		processedDamage.ShieldAmount = 0;

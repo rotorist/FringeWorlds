@@ -7,6 +7,7 @@ public class HUDPanel : PanelBase
 {
 	public UISprite Pip;
 	public UISprite PipLine;
+	public UISprite PipCenter;
 	public UISprite ShieldIndicatorFront;
 	public UISprite ShieldIndicatorRear;
 	public BarIndicator ShieldAmountIndicator;
@@ -266,6 +267,15 @@ public class HUDPanel : PanelBase
 				overlay = new Vector3(overlay.x - Screen.width/2f, overlay.y - Screen.height/2f, 0) * 0.65f;
 				Pip.transform.localPosition = GameManager.Inst.UIManager.GetTargetScreenPos(aimPoint);
 				Pip.alpha = 1f;
+
+				if(Vector3.Distance(aimPoint, GameManager.Inst.PlayerControl.PlayerShip.transform.position) > GameManager.Inst.PlayerControl.PlayerShip.GetMaxWeaponRange())
+				{
+					PipCenter.alpha = 0;
+				}
+				else
+				{
+					PipCenter.alpha = 1;
+				}
 
 				if(_currentSelectMarker != null)
 				{

@@ -31,16 +31,36 @@ public class MacroAI
 		GameManager.Inst.NPCManager.LastUsedPartyNumber = party.PartyNumber;
 
 		//generate loadout
-		party.LeaderLoadout = new Loadout("LightTransporter", ShipType.Transporter);
+		party.LeaderLoadout = new Loadout("Trimaran", ShipType.Transporter);
 		party.LeaderLoadout.WeaponJoints = new Dictionary<string, string>()
 		{
-			{ "GimballLeft", "Gun1" },
-			{ "GimballRight", "Gun1" },
-			{ "TurretLeft", "Turret1" },
-			{ "TurretRight", "Turret1" },
+			{ "TurretLeft", "Class1Turret1" },
+			{ "TurretRight", "Class1Turret1" },
+			{ "TurretTop", "Class3Turret1" },
+			{ "GimballLeft", "Class2Gun1" },
+			{ "GimballRight", "Class2Gun1" },
 		};
-		party.LeaderLoadout.Defensives = new List<DefensiveType>();
-		party.LeaderLoadout.DefensiveAmmoIDs = new List<string>();
+
+		party.LeaderLoadout.Defensives = new List<DefensiveType>()
+		{
+			DefensiveType.Countermeasure,
+		};
+		party.LeaderLoadout.DefensiveAmmoIDs = new List<string>()
+		{
+			"LongDurationCM",
+		};
+
+
+		Item item2 = new Item();
+		item2.ID = "LongDurationCM";
+		item2.DisplayName = "Long Duration Countermeasure";
+		item2.Type = ItemType.Ammo;
+		item2.CargoUnits = 2;
+		InvItemData itemData2 = new InvItemData();
+		itemData2.Item = item2;
+		itemData2.Quantity = UnityEngine.Random.Range(1, 3);
+		party.LeaderLoadout.AmmoBayItems.Add(itemData2);
+
 
 
 		party.FollowerLoadouts = new List<Loadout>();
@@ -50,8 +70,8 @@ public class MacroAI
 			party.FollowerLoadouts.Add(loadout);
 			loadout.WeaponJoints = new Dictionary<string, string>()
 			{
-				{ "GimballLeft", "Gun1" },
-				{ "GimballRight", "Gun1" },
+				{ "GimballLeft", "Class2Gun1" },
+				{ "GimballRight", "Class2Gun1" },
 				{ "GimballFront", "Class1Launcher1" },
 			};
 			loadout.Defensives = new List<DefensiveType>()
@@ -63,6 +83,7 @@ public class MacroAI
 				"LongDurationCM",
 			};
 
+
 			Item item = new Item();
 			item.ID = "Class1Missile1";
 			item.DisplayName = "Seeker Missile";
@@ -73,15 +94,18 @@ public class MacroAI
 			itemData.Quantity = 2;
 			loadout.AmmoBayItems.Add(itemData);
 
-			Item item2 = new Item();
-			item2.ID = "LongDurationCM";
-			item2.DisplayName = "Long Duration Countermeasure";
-			item2.Type = ItemType.Ammo;
-			item2.CargoUnits = 2;
-			InvItemData itemData2 = new InvItemData();
-			itemData2.Item = item2;
-			itemData2.Quantity = 2;
-			loadout.AmmoBayItems.Add(itemData2);
+			if(UnityEngine.Random.value > 0.4f)
+			{
+				item2 = new Item();
+				item2.ID = "LongDurationCM";
+				item2.DisplayName = "Long Duration Countermeasure";
+				item2.Type = ItemType.Ammo;
+				item2.CargoUnits = 2;
+				itemData2 = new InvItemData();
+				itemData2.Item = item2;
+				itemData2.Quantity = UnityEngine.Random.Range(1, 3);
+				loadout.AmmoBayItems.Add(itemData2);
+			}
 
 		}
 

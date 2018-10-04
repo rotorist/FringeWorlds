@@ -37,6 +37,7 @@ public class PlayerControl
 	public float RollForce { get { return _rollForce; } }
 	public float ForwardForce { get { return _forwardForce; } }
 	public float ThrusterForce { get { return _thruster; } }
+	public bool IsGamePaused { get { return Time.timeScale <= 0; } }
 
 	private Vector2 _mousePosNorm;
 	private float _yawForce;
@@ -297,6 +298,10 @@ public class PlayerControl
 		if(Input.GetKeyDown(KeyCode.Tab))
 		{
 			_isFAKilled = !_isFAKilled;
+			if(_isFAKilled)
+			{
+				PlayerShip.Engine.CancelCruise();
+			}
 		}
 
 		if(Input.GetKeyDown(KeyCode.Space))
@@ -475,26 +480,28 @@ public class PlayerControl
 
 
 		//firing weapon
-
-		if(Input.GetMouseButton(0))
+		if(!PlayerShip.Engine.IsCruising && !PlayerShip.Engine.IsPrepCruise)
 		{
-			foreach(WeaponJoint joint in WeaponGroups[0])
+			if(Input.GetMouseButton(0))
 			{
-				if(joint.MountedWeapon != null && joint.ControlMode == TurretControlMode.Manual)
+				foreach(WeaponJoint joint in WeaponGroups[0])
 				{
-					joint.MountedWeapon.Fire();
+					if(joint.MountedWeapon != null && joint.ControlMode == TurretControlMode.Manual)
+					{
+						joint.MountedWeapon.Fire();
+					}
 				}
+					
 			}
-				
-		}
 
-		if(Input.GetMouseButton(1))
-		{
-			foreach(WeaponJoint joint in WeaponGroups[1])
+			if(Input.GetMouseButton(1))
 			{
-				if(joint.MountedWeapon != null && joint.ControlMode == TurretControlMode.Manual)
+				foreach(WeaponJoint joint in WeaponGroups[1])
 				{
-					joint.MountedWeapon.Fire();
+					if(joint.MountedWeapon != null && joint.ControlMode == TurretControlMode.Manual)
+					{
+						joint.MountedWeapon.Fire();
+					}
 				}
 			}
 		}
@@ -581,6 +588,10 @@ public class PlayerControl
 				{
 					PlayerShip.Engine.IsThrusting = true;
 					PlayerShip.RB.AddForce(PlayerShip.transform.forward * _thruster * 10);
+					if(_thruster > 0)
+					{
+						GameManager.Inst.CameraShaker.TriggerScreenShake(0.15f, 0.0065f, true);
+					}
 					//strafe
 					if(thruster.CanStrafe)
 					{
@@ -633,7 +644,7 @@ public class PlayerControl
 				}
 			}
 
-			if(_thruster != 0 || _isFAKilled)
+			if(thruster != null && (_thruster != 0 || _isFAKilled))
 			{
 				maxSpeed = PlayerShip.Thruster.MaxSpeed;
 			}
@@ -671,7 +682,7 @@ public class PlayerControl
 			}
 
 			//flight assist
-			if(!_isFAKilled || _thruster != 0)
+			if((!_isFAKilled || _thruster != 0) && maxSpeed > 0)
 			{
 				Vector3 driftVelocity = velocity - Vector3.Dot(velocity, PlayerShip.transform.forward) * PlayerShip.transform.forward;
 				float assistLevel = Mathf.Clamp(1 - Mathf.Clamp01(PlayerShip.RB.velocity.magnitude / maxSpeed), 0.35f, 1);

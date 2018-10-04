@@ -37,12 +37,11 @@ public class Gun : Weapon
 	{
 		if(_isCooledDown)
 		{
-
-			GameObject o = GameObject.Instantiate(Resources.Load("Projectile")) as GameObject;
+			GameObject o = GameObject.Instantiate(Resources.Load(ProjectilePrefab)) as GameObject;
 			Projectile projectile = o.GetComponent<Projectile>();
 			projectile.Damage = new Damage();
 			projectile.Damage.DamageType = DamageType.Photon;
-			projectile.Damage.ShieldAmount = 25;
+			projectile.Damage.ShieldAmount = 20;
 			projectile.Damage.HullAmount = 30;
 
 			projectile.transform.position = Barrel.transform.position + Barrel.transform.forward * 2;

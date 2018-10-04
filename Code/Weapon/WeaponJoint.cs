@@ -18,7 +18,7 @@ public class WeaponJoint : MonoBehaviour
 			&& MountedWeapon.RotationType == WeaponRotationType.Turret && ParentShip.DockedStationID == "" && !ParentShip.IsInPortal)
 		{
 			UpdateTarget();
-			if(Target != null)
+			if(Target != null && !ParentShip.Engine.IsCruising)
 			{
 				
 				MountedWeapon.Fire();

@@ -79,7 +79,7 @@ public class AI : MonoBehaviour
 	{
 		RunningNodeHist = new MaxStack<string>(20);
 
-		AimSkill = 0.8f;
+		AimSkill = UnityEngine.Random.Range(0.6f, 1f);
 		MyShip = transform.GetComponent<ShipBase>();
 		AvoidanceDetector = MyShip.MyReference.AvoidanceDetector;
 		AvoidanceDetector.ParentShip = MyShip;
