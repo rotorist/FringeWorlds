@@ -13,6 +13,7 @@ public class FadePanel : PanelBase
 
 	public override void Initialize ()
 	{
+		base.Initialize();
 		_fadeSpeed = 0;
 		_isFadingOut = false;
 	}
@@ -20,6 +21,7 @@ public class FadePanel : PanelBase
 	public override void PerFrameUpdate ()
 	{
 		UpdateFadeInFadeOut();
+
 	}
 
 	public override void Show ()

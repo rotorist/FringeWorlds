@@ -152,7 +152,7 @@ public class GameManager : MonoBehaviour
 
 		if(SceneType == SceneType.Space)
 		{
-			
+			Debug.Log("Loading space scene");
 
 
 			NPCManager = new NPCManager();
@@ -209,6 +209,7 @@ public class GameManager : MonoBehaviour
 			WorldManager.CurrentSystem = system;
 			WorldManager.Initialize();
 
+			Debug.Log("About to create the player");
 			PlayerControl.CreatePlayerParty();
 			PlayerControl.LoadPlayerShip();
 

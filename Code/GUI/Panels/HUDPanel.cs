@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class HUDPanel : PanelBase
 {
+	public UILabel ControlsLabel;
+
 	public UISprite Pip;
 	public UISprite PipLine;
 	public UISprite PipCenter;
@@ -64,6 +66,8 @@ public class HUDPanel : PanelBase
 
 	public override void Initialize ()
 	{
+		base.Initialize();
+
 		GameEventHandler.OnShipDeath -= OnShipDeath;
 		GameEventHandler.OnShipDeath += OnShipDeath;
 
@@ -100,6 +104,7 @@ public class HUDPanel : PanelBase
 	public override void Show ()
 	{
 		base.Show();
+
 	}
 
 	public override void Hide ()
@@ -215,8 +220,15 @@ public class HUDPanel : PanelBase
 
 	}
 
+	public void OnPauseGame()
+	{
+		ControlsLabel.alpha = 1;
+	}
 
-
+	public void OnUnpauseGame()
+	{
+		ControlsLabel.alpha = 0;
+	}
 
 
 

@@ -8,7 +8,7 @@ public class PanelBase : MonoBehaviour
 
 	public virtual void Initialize()
 	{
-
+		IsActive = true;
 	}
 
 	public virtual void PerFrameUpdate()

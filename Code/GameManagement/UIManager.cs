@@ -38,9 +38,7 @@ public class UIManager
 			HUDPanel = UICamera.transform.Find("HUDPanel").GetComponent<HUDPanel>();
 			HUDPanel.Initialize();
 
-
 			_panels.Add(HUDPanel);
-
 		}
 		else if(GameManager.Inst.SceneType == SceneType.SpaceTest)
 		{

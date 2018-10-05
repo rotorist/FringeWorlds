@@ -106,10 +106,12 @@ public class PlayerControl
 		GameEventHandler.OnShipDeath -= OnNPCDeath;
 		GameEventHandler.OnShipDeath += OnNPCDeath;
 
+		Debug.Log("Initializing player control DONE");
 	}
 
 	public void LoadPlayerShip()
 	{
+		Debug.Log("Loading player ship");
 		PlayerShip.RB.inertiaTensor = new Vector3(1, 1, 1);
 
 		//use player loadout to spawn player ship here
@@ -122,14 +124,17 @@ public class PlayerControl
 		PlayerShip.MyReference.ExhaustController.setExhaustState(ExhaustState.Normal);
 		PlayerShip.MyReference.ExhaustController.setExhaustLength(_throttle);
 
+		Debug.Log("Loading player ship DONE");
 	}
 
 	public void CreatePlayerParty()
 	{
+		Debug.Log("Creating player party");
 		//create MacroAIParty for player
 		PlayerParty = GameManager.Inst.NPCManager.MacroAI.GeneratePlayerParty();
 		PlayerAutopilot = PlayerShip.GetComponent<Autopilot>();
 		PlayerAutopilot.Initialize(PlayerParty, GameManager.Inst.NPCManager.AllFactions["player"]);
+		Debug.Log("Creating player party DONE");
 	}
 
 	public int GetWeaponGroupNumber(WeaponJoint joint)
@@ -196,6 +201,19 @@ public class PlayerControl
 		
 	}
 
+	public void PauseGame(bool isPaused)
+	{
+		if(isPaused)
+		{
+			Time.timeScale = 0;
+			GameManager.Inst.UIManager.HUDPanel.OnPauseGame();
+		}
+		else
+		{
+			Time.timeScale = 1;
+			GameManager.Inst.UIManager.HUDPanel.OnUnpauseGame();
+		}
+	}
 
 	public void OnNPCDeath(ShipBase ship)
 	{
@@ -309,15 +327,17 @@ public class PlayerControl
 			_isMouseFlight = !_isMouseFlight;
 		}
 
-		if(Input.GetKeyDown(KeyCode.LeftAlt))
+		if(Input.GetKeyDown(KeyCode.LeftAlt) || Input.GetKeyDown(KeyCode.Escape))
 		{
 			if(Time.timeScale == 0)
 			{
 				Time.timeScale = 1;
+				GameManager.Inst.UIManager.HUDPanel.OnUnpauseGame();
 			}
 			else
 			{
 				Time.timeScale = 0;
+				GameManager.Inst.UIManager.HUDPanel.OnPauseGame();
 			}
 
 		}
@@ -557,15 +577,12 @@ public class PlayerControl
 
 	private void UpdateShipMovement()
 	{
-		
-
-
-
 		Vector3 velocity = PlayerShip.RB.velocity;
 
 		//if is in portal just stop the ship
 		if(!PlayerShip.IsInPortal)
 		{
+			
 			//main engine
 			if(PlayerShip.Engine.IsCruising)
 			{
@@ -610,6 +627,7 @@ public class PlayerControl
 					}
 
 					thruster.CurrentFuel = Mathf.Clamp(thruster.CurrentFuel - consumption * Time.fixedDeltaTime, 0, thruster.MaxFuel);
+
 				}
 				else
 				{

@@ -12,6 +12,7 @@ public class UIStateMachine
 		UIManager = GameManager.Inst.UIManager;
 		if(sceneType == SceneType.Space)
 		{
+			UIManager.HideAllPanels();
 			State = new UIStateUndocking(this);
 			Cursor.lockState = CursorLockMode.Locked;
 			Cursor.lockState = CursorLockMode.None;
@@ -65,7 +66,7 @@ public class UIStateInFlight : UIStateBase
 		SM.UIManager.HideAllPanels();
 		SM.UIManager.HUDPanel.Show();
 
-
+		GameManager.Inst.PlayerControl.PauseGame(true);
 
 		//subscribe events
 		UIEventHandler.OnBeginDocking -= OnBeginDocking;
