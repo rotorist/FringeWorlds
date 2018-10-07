@@ -538,22 +538,22 @@ public class PlayerControl
 			return;
 		}
 
+
+
 		Vector3 angularVelocity = PlayerShip.transform.InverseTransformDirection(PlayerShip.RB.angularVelocity);
-		float engineKillBonus = _isFAKilled ? 2f : 1f;
+		float engineKillBonus = _isFAKilled ? 1.2f : 1f;
 
 		//Yaw
 		float maxYawRate = 1.2f;
-		if(Mathf.Abs(angularVelocity.y) < maxYawRate * engineKillBonus)
-		{
-			PlayerShip.RB.AddTorque(PlayerShip.transform.up * _yawForce * PlayerShip.TorqueModifier, ForceMode.Acceleration);
-		}
+
+		PlayerShip.RB.AddTorque(PlayerShip.transform.up * _yawForce * PlayerShip.TorqueModifier * engineKillBonus, ForceMode.Acceleration);
+
 
 		//Pitch
 		float maxPitchRate = 2f;
-		if(Mathf.Abs(angularVelocity.x) < maxPitchRate * engineKillBonus)
-		{
-			PlayerShip.RB.AddTorque(PlayerShip.transform.right * _pitchForce * PlayerShip.TorqueModifier);
-		}
+
+		PlayerShip.RB.AddTorque(PlayerShip.transform.right * _pitchForce * PlayerShip.TorqueModifier * engineKillBonus, ForceMode.Acceleration);
+
 
 		//Roll is based on key press A and D and it lerps to 0
 		float maxRollRate = 2f;

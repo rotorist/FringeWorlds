@@ -222,12 +222,12 @@ public class HUDPanel : PanelBase
 
 	public void OnPauseGame()
 	{
-		ControlsLabel.alpha = 1;
+		//ControlsLabel.alpha = 1;
 	}
 
 	public void OnUnpauseGame()
 	{
-		ControlsLabel.alpha = 0;
+		//ControlsLabel.alpha = 0;
 	}
 
 

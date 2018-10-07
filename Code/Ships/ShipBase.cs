@@ -18,7 +18,7 @@ public class ShipBase : MonoBehaviour
 	public Scanner Scanner;
 	public ShipStorage Storage;
 
-	public float TorqueModifier = 1;
+	public float TorqueModifier;
 	public float HullCapacity;
 	public float HullAmount;
 	public float TotalPowerCapacity;

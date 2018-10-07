@@ -66,7 +66,7 @@ public class UIStateInFlight : UIStateBase
 		SM.UIManager.HideAllPanels();
 		SM.UIManager.HUDPanel.Show();
 
-		GameManager.Inst.PlayerControl.PauseGame(true);
+		//GameManager.Inst.PlayerControl.PauseGame(true);
 
 		//subscribe events
 		UIEventHandler.OnBeginDocking -= OnBeginDocking;

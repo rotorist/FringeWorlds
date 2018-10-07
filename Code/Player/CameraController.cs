@@ -155,13 +155,13 @@ public class CameraController : MonoBehaviour
 		Quaternion lookRotation = Quaternion.LookRotation(playerShip.transform.forward, playerShip.transform.up);
 		transform.rotation = lookRotation;//Quaternion.Lerp(transform.rotation, lookRotation, deltaTime * 12);
 
-		float forwardVel = Vector3.Dot(playerShip.RB.velocity, playerShip.transform.forward);
-		float acceleration = (forwardVel - _prevForwardVel) / Time.fixedDeltaTime;
-		_prevForwardVel = forwardVel;
-		float fovTarget = Mathf.Clamp(acceleration / 3f, -0.5f, 1f);
+		//float forwardVel = Vector3.Dot(playerShip.RB.velocity, playerShip.transform.forward);
+		//float acceleration = (forwardVel - _prevForwardVel) / Time.fixedDeltaTime;
+		//_prevForwardVel = forwardVel;
+		float fovTarget = 0;//Mathf.Clamp(acceleration / 3f, -0.5f, 1f);
 
 
-		_prevAcceleration = acceleration;
+		//_prevAcceleration = acceleration;
 
 		if(playerShip.Engine.IsCruising)
 		{
