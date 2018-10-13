@@ -6,6 +6,7 @@ public class SelectedObjMarker : MonoBehaviour
 {
 	public UISprite Marker;
 	public UILabel Desc;
+	public UILabel DescDupe;
 	public UISprite MarkerLine;
 	public UISprite ShieldFill;
 	public UISprite HullFill;
@@ -39,6 +40,8 @@ public class SelectedObjMarker : MonoBehaviour
 		Marker.width = Mathf.CeilToInt(width * 0.2f);
 		Desc.text = desc;
 		Desc.alpha = 0;
+		DescDupe.text = desc;
+		DescDupe.alpha = 0;
 
 		_isLabelReadyToShow = false;
 		_maxAlpha = Marker.alpha;
@@ -55,6 +58,7 @@ public class SelectedObjMarker : MonoBehaviour
 			if(_isLabelReadyToShow)
 			{
 				Desc.alpha = 1f;
+				DescDupe.alpha = 1f;
 				MarkerLine.alpha = _maxLineAlpha;
 			}
 		}
@@ -62,6 +66,7 @@ public class SelectedObjMarker : MonoBehaviour
 		{
 			Marker.alpha = 0;
 			Desc.alpha = 0;
+			DescDupe.alpha = 1;
 			MarkerLine.alpha = 0;
 		}
 	}

@@ -68,9 +68,13 @@ public class UIStateInFlight : UIStateBase
 
 		//GameManager.Inst.PlayerControl.PauseGame(true);
 
+		InputEventHandler.Instance.InputState = InputState.InFlight;
+
 		//subscribe events
 		UIEventHandler.OnBeginDocking -= OnBeginDocking;
 		UIEventHandler.OnBeginDocking += OnBeginDocking;
+		UIEventHandler.OnOpenKeyBindingPanel -= OnOpenKeyBindingPanel;
+		UIEventHandler.OnOpenKeyBindingPanel += OnOpenKeyBindingPanel;
 
 
 	}
@@ -78,6 +82,7 @@ public class UIStateInFlight : UIStateBase
 	public override void EndState()
 	{
 		UIEventHandler.OnBeginDocking -= OnBeginDocking;
+		UIEventHandler.OnOpenKeyBindingPanel -= OnOpenKeyBindingPanel;
 	}
 
 	public void OnBeginDocking()
@@ -86,7 +91,11 @@ public class UIStateInFlight : UIStateBase
 		SM.State = new UIStateDocking(SM);
 	}
 
-
+	public void OnOpenKeyBindingPanel()
+	{
+		EndState();
+		SM.State = new UIStateKeyBinding(SM);
+	}
 
 }
 
@@ -107,6 +116,8 @@ public class UIStateDocking : UIStateBase
 		SM.UIManager.HideAllPanels();
 		SM.UIManager.FadePanel.Show();
 
+		InputEventHandler.Instance.InputState = InputState.InFlight;
+
 		if(GameManager.Inst.SceneType == SceneType.Space || GameManager.Inst.SceneType == SceneType.SpaceTest)
 		{
 			UIEventHandler.OnFadeOutDone -= OnFadeOutDone;
@@ -119,6 +130,8 @@ public class UIStateDocking : UIStateBase
 			UIEventHandler.OnFadeInDone -= OnFadeInDone;
 			UIEventHandler.OnFadeInDone += OnFadeInDone;
 		}
+
+
 	}
 
 	public override void EndState()
@@ -162,6 +175,8 @@ public class UIStateUndocking : UIStateBase
 		SM.UIManager.HideAllPanels();
 		SM.UIManager.FadePanel.Show();
 
+		InputEventHandler.Instance.InputState = InputState.InFlight;
+
 		if(GameManager.Inst.SceneType == SceneType.Station)
 		{
 			UIEventHandler.OnFadeOutDone -= OnFadeOutDone;
@@ -174,6 +189,8 @@ public class UIStateUndocking : UIStateBase
 			UIEventHandler.OnWhiteFadeInDone -= OnWhiteFadeInDone;
 			UIEventHandler.OnWhiteFadeInDone += OnWhiteFadeInDone;
 		}
+
+
 	}
 
 	public override void EndState()
@@ -201,6 +218,43 @@ public class UIStateUndocking : UIStateBase
 	}
 }
 
+
+public class UIStateKeyBinding : UIStateBase
+{
+	public UIStateKeyBinding(UIStateMachine sm)
+	{
+		Name = "UIStateKeyBinding";
+		SM = sm;
+		BeginState();
+	}
+
+	public override void BeginState ()
+	{
+		SM.UIManager.HideAllPanels();
+		SM.UIManager.KeyBindingPanel.Show();
+		SM.UIManager.FadePanel.Show();
+
+		SM.UIManager.FadePanel.BlackBG.alpha = 0.7f;
+
+		InputEventHandler.Instance.InputState = InputState.UI;
+
+		UIEventHandler.OnCloseKeyBindingPanel -= OnCloseKeyBindingPanel;
+		UIEventHandler.OnCloseKeyBindingPanel += OnCloseKeyBindingPanel;
+	}
+
+	public override void EndState ()
+	{
+		SM.UIManager.FadePanel.BlackBG.alpha = 0;
+		UIEventHandler.OnCloseKeyBindingPanel -= OnCloseKeyBindingPanel;
+	}
+
+	public void OnCloseKeyBindingPanel()
+	{
+		EndState();
+		SM.State = new UIStateInFlight(SM);
+	}
+}
+
 public class UIStateInStation : UIStateBase
 {
 	public UIStateInStation(UIStateMachine sm)
@@ -217,10 +271,14 @@ public class UIStateInStation : UIStateBase
 		SM.UIManager.HideAllPanels();
 		SM.UIManager.StationHUDPanel.Show();
 
+		InputEventHandler.Instance.InputState = InputState.DockedUI;
+
 		UIEventHandler.OnOpenRepairWindow -= OnOpenRepairWindow;
 		UIEventHandler.OnOpenRepairWindow += OnOpenRepairWindow;
 		UIEventHandler.OnBeginUndocking -= OnBeginUndocking;
 		UIEventHandler.OnBeginUndocking += OnBeginUndocking;
+
+
 	}
 
 	public override void EndState()
@@ -243,6 +301,7 @@ public class UIStateInStation : UIStateBase
 	}
 }
 
+
 public class UIStateRepair : UIStateBase
 {
 	public UIStateRepair(UIStateMachine sm)
@@ -257,6 +316,8 @@ public class UIStateRepair : UIStateBase
 		SM.UIManager.HideAllPanels();
 		SM.UIManager.StationHUDPanel.Show();
 		SM.UIManager.RepairPanel.Show();
+
+		InputEventHandler.Instance.InputState = InputState.DockedUI;
 
 		UIEventHandler.OnCloseStationWindows -= OnCloseWindow;
 		UIEventHandler.OnCloseStationWindows += OnCloseWindow;

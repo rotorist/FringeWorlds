@@ -12,14 +12,17 @@ public class Station : StationBase
 
 	void FixedUpdate()
 	{
-		List<DockingSession> sessionsCopy = new List<DockingSession>(_dockingSessions);
-		foreach(DockingSession session in sessionsCopy)
+		if(_dockingSessions != null)
 		{
-			session.UpdateDockingSession();
-			if(session.Stage == DockingSessionStage.Docked || session.Requester == null)
+			List<DockingSession> sessionsCopy = new List<DockingSession>(_dockingSessions);
+			foreach(DockingSession session in sessionsCopy)
 			{
-				//remove the session, close the gate
-				_dockingSessions.Remove(session);
+				session.UpdateDockingSession();
+				if(session.Stage == DockingSessionStage.Docked || session.Requester == null)
+				{
+					//remove the session, close the gate
+					_dockingSessions.Remove(session);
+				}
 			}
 		}
 	}

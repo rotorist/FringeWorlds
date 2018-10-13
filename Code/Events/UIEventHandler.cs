@@ -44,6 +44,9 @@ public class UIEventHandler
 	public static event GeneralUIEventDelegate OnCloseStationWindows;
 	public static event GeneralUIEventDelegate OnOpenRepairWindow;
 
+	public static event GeneralUIEventDelegate OnOpenKeyBindingPanel;
+	public static event GeneralUIEventDelegate OnCloseKeyBindingPanel;
+
 
 	public void TriggerBeginDocking()
 	{
@@ -108,6 +111,22 @@ public class UIEventHandler
 		if(OnOpenRepairWindow != null)
 		{
 			OnOpenRepairWindow();
+		}
+	}
+
+	public void TriggerOpenKeyBindingPanel()
+	{
+		if(OnOpenKeyBindingPanel != null)
+		{
+			OnOpenKeyBindingPanel();
+		}
+	}
+
+	public void TriggerCloseKeyBindingPanel()
+	{
+		if(OnCloseKeyBindingPanel != null)
+		{
+			OnCloseKeyBindingPanel();
 		}
 	}
 

@@ -11,6 +11,7 @@ public class UIManager
 
 	public HUDPanel HUDPanel;
 	public FadePanel FadePanel;
+	public KeyBindingPanel KeyBindingPanel;
 
 	public StationHUDPanel StationHUDPanel;
 	public RepairPanel RepairPanel;
@@ -39,6 +40,10 @@ public class UIManager
 			HUDPanel.Initialize();
 
 			_panels.Add(HUDPanel);
+
+			KeyBindingPanel = UICamera.transform.Find("KeyBindingPanel").GetComponent<KeyBindingPanel>();
+			KeyBindingPanel.Initialize();
+			_panels.Add(KeyBindingPanel);
 		}
 		else if(GameManager.Inst.SceneType == SceneType.SpaceTest)
 		{
@@ -63,8 +68,7 @@ public class UIManager
 		_panels.Add(FadePanel);
 
 		UIZoom = 1;
-
-
+		
 		UIStateMachine = new UIStateMachine();
 		UIStateMachine.Initialize(GameManager.Inst.SceneType);
 	}

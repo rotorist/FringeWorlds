@@ -4,8 +4,35 @@ using UnityEngine;
 
 public class KeyBinding
 {
-	public Dictionary<UserInputs, KeyCode> Controls;
+	public Dictionary<UserInputs, KeyInput> Controls;
 
+	public KeyBinding()
+	{
+		Controls = new Dictionary<UserInputs, KeyInput>();
+
+	}
+}
+
+public class KeyInput
+{
+	public bool IsFnSet;
+	public KeyCode FnKey;
+	public KeyCode Key;
+
+	public bool Eval()
+	{
+		if(IsFnSet && Input.GetKey(FnKey) && Input.GetKeyDown(Key))
+		{
+			return true;
+		}
+
+		if(!IsFnSet && Input.GetKeyDown(Key))
+		{
+			return true;
+		}
+
+		return false;
+	}
 }
 
 public enum UserInputs
@@ -30,4 +57,6 @@ public enum UserInputs
 	ThrottleUp,
 	ThrottleDown,
 
+
+	None,
 }

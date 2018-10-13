@@ -18,6 +18,8 @@ public class InputEventHandler
 		}
 	}
 
+	public InputState InputState;
+
 	public void OnUnloadScene()
 	{
 		
@@ -35,6 +37,7 @@ public class InputEventHandler
 
 	public void PerFrameUpdate()
 	{
+		/*
 		if(GameManager.Inst.SceneType == SceneType.Space || GameManager.Inst.SceneType == SceneType.SpaceTest)
 		{
 			UpdateInSpaceInput();
@@ -43,12 +46,15 @@ public class InputEventHandler
 		{
 			UpdateInStationInput();
 		}
+		*/
+
+		UpdateInput();
 	}
 
 
 	private void UpdateInSpaceInput()
 	{
-
+		
 	}
 
 	private void UpdateInStationInput()
@@ -58,4 +64,46 @@ public class InputEventHandler
 			UIEventHandler.Instance.TriggerCloseStationWindows();
 		}
 	}
+
+	private void UpdateInput()
+	{
+		switch(InputState)
+		{
+		case InputState.SpaceTest:
+			GameManager.Inst.PlayerControl.UpdateSpaceTestInput();
+			break;
+
+		case InputState.InFlight:
+			GameManager.Inst.PlayerControl.UpdateInFlightKeyInput();
+			break;
+
+		case InputState.Autopilot:
+			GameManager.Inst.PlayerControl.UpdateAutopilotKeyInput();
+			break;
+
+		case InputState.UI:
+			GameManager.Inst.PlayerControl.UpdateUIKeyInput();
+			break;
+
+		case InputState.DockedUI:
+			UpdateInStationInput();
+			break;
+
+		case InputState.KeyBindingEnter:
+
+			break;
+
+		}
+	}
+}
+
+public enum InputState
+{
+	SpaceTest,
+	InFlight,
+	Autopilot,
+	UI,
+	DockedUI,
+	KeyBindingEnter,
+
 }

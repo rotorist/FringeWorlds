@@ -54,21 +54,24 @@ public class GameManager : MonoBehaviour
 			CursorManager.PerFrameUpdate();
 			NPCManager.PerFrameUpdate();
 			WorldManager.PerFrameUpdate();
+			UIManager.PerFrameUpdate();
+			CameraController.PerFrameUpdate();
 		}
 		else if(SceneType == SceneType.SpaceTest)
 		{
 			PlayerControl.PerFrameUpdate();
-			CursorManager.PerFrameUpdate();
-			NPCManager.PerFrameUpdate();
-			WorldManager.PerFrameUpdate();
+			//CursorManager.PerFrameUpdate();
+			//NPCManager.PerFrameUpdate();
+			//WorldManager.PerFrameUpdate();
 		}
 		else if(SceneType == SceneType.Station)
 		{
-			
+			UIManager.PerFrameUpdate();
+			CameraController.PerFrameUpdate();
 		}
 
-		CameraController.PerFrameUpdate();
-		UIManager.PerFrameUpdate();
+
+
 		InputEventHandler.Instance.PerFrameUpdate();
 
 
@@ -92,7 +95,7 @@ public class GameManager : MonoBehaviour
 		else if(SceneType == SceneType.SpaceTest)
 		{
 			PlayerControl.FixedFrameUpdate();
-			CameraController.PerFrameFixedUpdate();
+			//CameraController.PerFrameFixedUpdate();
 		}
 
 
@@ -232,7 +235,7 @@ public class GameManager : MonoBehaviour
 			NPCManager.Initialize();
 
 			UIManager = new UIManager();
-			UIManager.Initialize();
+			//UIManager.Initialize();
 
 			CursorManager = new CursorManager();
 			CursorManager.Initialize();
@@ -241,7 +244,7 @@ public class GameManager : MonoBehaviour
 			PlayerControl.Initialize();
 
 			WorldManager = new WorldManager();
-			WorldManager.Initialize();
+			//WorldManager.Initialize();
 
 			/*
 			GameObject [] npcs = GameObject.FindGameObjectsWithTag("NPC");

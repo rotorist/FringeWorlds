@@ -10,11 +10,13 @@ public class DBManager
 {
 	public XMLParserBT XMLParserBT;
 	public XMLParserWorld XMLParserWorld;
+	public UserPrefDataHandler UserPrefDataHandler;
 
 	public void Initialize()
 	{
 		XMLParserBT = new XMLParserBT();
 		XMLParserWorld = new XMLParserWorld();
+		UserPrefDataHandler = new UserPrefDataHandler();
 	}
 
 

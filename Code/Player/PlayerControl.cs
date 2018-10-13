@@ -6,6 +6,8 @@ public class PlayerControl
 {
 	public ShipBase PlayerShip;
 
+	public KeyBinding KeyBinding;
+
 	public string SpawnStationID;
 	public StationType SpawnStationType;
 
@@ -69,6 +71,9 @@ public class PlayerControl
 
 	public void Initialize()
 	{
+		KeyBinding = new KeyBinding();
+		KeyBinding.Controls = GameManager.Inst.DBManager.UserPrefDataHandler.GetKeyBindings();
+
 		Debug.Log("Initializing player control");
 		GameObject o = GameObject.Find("PlayerShip");
 
@@ -152,20 +157,32 @@ public class PlayerControl
 
 	public void PerFrameUpdate()
 	{
+		/*
 		if(GameManager.Inst.SceneType == SceneType.SpaceTest)
 		{
+			UpdateCommandKeyInput();
 			return;
 		}
 
-		if(!IsAutopilot)
+		if(GameManager.Inst.UIManager.HUDPanel.IsActive)
 		{
-			UpdateMovementKeyInput();
-		}
-		PlayerAutopilot.APUpdate();
-		UpdateCommandKeyInput();
-		UpdateMouseInput();
-		UpdateWeaponAim();
 
+			if(!IsAutopilot)
+			{
+				UpdateMovementKeyInput();
+			}
+			PlayerAutopilot.APUpdate();
+			UpdateCommandKeyInput();
+			UpdateMouseInput();
+
+		}
+		else
+		{
+			UpdateUIKeyInput();
+		}
+		*/
+
+		UpdateWeaponAim();
 
 		if(_cmTimer < 3f)
 		{
@@ -257,9 +274,47 @@ public class PlayerControl
 			PlayerParty.CurrentTLSession.Stage = TLSessionStage.Cancelling;
 
 		}
+
+		InputEventHandler.Instance.InputState = InputState.InFlight;
 	}
 
-	public void UpdateCommandKeyInput()
+	public void UpdateSpaceTestInput()
+	{
+		if(Input.GetKeyDown(KeyCode.F12))
+		{
+			GameManager.Inst.DBManager.XMLParserWorld.GenerateSystemXML();
+		}
+
+	}
+
+	public void UpdateUIKeyInput()
+	{
+		if(Input.GetKeyDown(KeyCode.F10))
+		{
+			if(GameManager.Inst.UIManager.KeyBindingPanel.IsActive)
+			{
+				UIEventHandler.Instance.TriggerCloseKeyBindingPanel();
+				Time.timeScale = 1;
+				GameManager.Inst.UIManager.HUDPanel.OnUnpauseGame();
+			}
+		}
+	}
+
+
+	public void UpdateAutopilotKeyInput()
+	{
+		if(Input.GetKeyDown(KeyCode.Escape))
+		{
+			if(IsAutopilot)
+			{
+				CancelAutopilot();
+
+			}
+		}
+	}
+
+
+	public void UpdateInFlightKeyInput()
 	{
 		//select
 		if(Input.GetKeyDown(KeyCode.F))
@@ -276,17 +331,35 @@ public class PlayerControl
 		//cancel
 		if(Input.GetKeyDown(KeyCode.Escape))
 		{
-			if(IsAutopilot)
+
+			if(CurrentTradelaneSession != null)
 			{
-				CancelAutopilot();
+				CurrentTradelaneSession.Stage = TLSessionStage.Cancelling;
 			}
-			else
+
+		}
+
+		if(Input.GetKeyDown(KeyCode.F10))
+		{
+			if(!GameManager.Inst.UIManager.KeyBindingPanel.IsActive)
 			{
-				if(CurrentTradelaneSession != null)
-				{
-					CurrentTradelaneSession.Stage = TLSessionStage.Cancelling;
-				}
+				UIEventHandler.Instance.TriggerOpenKeyBindingPanel();
+				Time.timeScale = 0;
+				GameManager.Inst.UIManager.HUDPanel.OnPauseGame();
 			}
+		}
+
+
+
+		//toggle view
+		if(Input.GetKeyDown(KeyCode.V))
+		{
+			GameManager.Inst.CameraController.SetView(!GameManager.Inst.CameraController.IsFirstPerson);
+		}
+
+		if(PlayerShip.IsInPortal)
+		{
+			return;
 		}
 
 		//autopilot goto
@@ -295,21 +368,7 @@ public class PlayerControl
 			AutopilotGoTo();
 		}
 
-		//toggle view
-		if(Input.GetKeyDown(KeyCode.V))
-		{
-			GameManager.Inst.CameraController.SetView(!GameManager.Inst.CameraController.IsFirstPerson);
-		}
-
-		//countermeasure
-		if(Input.GetKeyDown(KeyCode.C))
-		{
-			DropCountermeasure();
-		}
-	}
-
-	public void UpdateMovementKeyInput()
-	{
+		//movement
 		float rollSpeed = 1;
 		float rollStopSpeed = 4;
 
@@ -327,20 +386,6 @@ public class PlayerControl
 			_isMouseFlight = !_isMouseFlight;
 		}
 
-		if(Input.GetKeyDown(KeyCode.LeftAlt) || Input.GetKeyDown(KeyCode.Escape))
-		{
-			if(Time.timeScale == 0)
-			{
-				Time.timeScale = 1;
-				GameManager.Inst.UIManager.HUDPanel.OnUnpauseGame();
-			}
-			else
-			{
-				Time.timeScale = 0;
-				GameManager.Inst.UIManager.HUDPanel.OnPauseGame();
-			}
-
-		}
 
 		if(Input.GetKeyDown(KeyCode.X))
 		{
@@ -358,7 +403,7 @@ public class PlayerControl
 
 		if(!Input.GetKey(KeyCode.LeftShift))
 		{
-			
+
 			//rolling
 			if(Input.GetKey(KeyCode.A))
 			{
@@ -446,15 +491,8 @@ public class PlayerControl
 		}
 
 
-	}
 
-	private void UpdateMouseInput()
-	{
-		if(PlayerShip.IsInPortal)
-		{
-			return;
-		}
-
+		//Mouse input
 		//get mouse position
 		Vector2 mousePos = Input.mousePosition;
 		if(_isMouseFlight)
@@ -475,11 +513,11 @@ public class PlayerControl
 		{
 			if(Input.GetKey(KeyCode.LeftControl))
 			{
-				
+
 			}
 			else
 			{
-				
+
 				_throttle = Mathf.Clamp01(_throttle + 0.1f);
 				PlayerShip.MyReference.ExhaustController.setExhaustLength(_throttle);
 			}
@@ -488,7 +526,7 @@ public class PlayerControl
 		{
 			if(Input.GetKey(KeyCode.LeftControl))
 			{
-				
+
 			}
 			else
 			{
@@ -511,7 +549,7 @@ public class PlayerControl
 						joint.MountedWeapon.Fire();
 					}
 				}
-					
+
 			}
 
 			if(Input.GetMouseButton(1))
@@ -526,7 +564,21 @@ public class PlayerControl
 			}
 		}
 
+
+		//weapon
+		//countermeasure
+		if(Input.GetKeyDown(KeyCode.C))
+		{
+			DropCountermeasure();
+		}
+
+
+
+
+
 	}
+
+
 
 	private void UpdateShipRotation()
 	{
@@ -586,7 +638,7 @@ public class PlayerControl
 			//main engine
 			if(PlayerShip.Engine.IsCruising)
 			{
-				_forwardForce = 3;
+				_forwardForce = 5;
 			}
 			else
 			{
@@ -688,11 +740,15 @@ public class PlayerControl
 
 
 			//drag
-
+			float drag = -0.2f;
+			if(_thruster != 0)
+			{
+				drag = -1f;
+			}
 			//Debug.Log(velocity.magnitude);
 			if(velocity.magnitude > maxSpeed * 0.95f)
 			{
-				PlayerShip.RB.AddForce(-1 * velocity * Mathf.Lerp(0, 1f, (velocity.magnitude - maxSpeed * 0.95f) / (maxSpeed * 0.05f)));
+				PlayerShip.RB.AddForce(drag * velocity * Mathf.Lerp(0, 1f, (velocity.magnitude - maxSpeed * 0.95f) / (maxSpeed * 0.05f)));
 			}
 			else
 			{
@@ -703,7 +759,7 @@ public class PlayerControl
 			if((!_isFAKilled || _thruster != 0) && maxSpeed > 0)
 			{
 				Vector3 driftVelocity = velocity - Vector3.Dot(velocity, PlayerShip.transform.forward) * PlayerShip.transform.forward;
-				float assistLevel = Mathf.Clamp(1 - Mathf.Clamp01(PlayerShip.RB.velocity.magnitude / maxSpeed), 0.35f, 1);
+				float assistLevel = Mathf.Clamp(1 - Mathf.Clamp01(PlayerShip.RB.velocity.magnitude / maxSpeed), 0.5f, 1);
 				PlayerShip.RB.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * assistLevel);
 			}
 
@@ -1007,6 +1063,8 @@ public class PlayerControl
 				Debug.Log("Autopilot dest node " + PlayerParty.DestNode.ID);
 				PlayerAutopilot.Activate();
 				_isMouseFlight = false;
+
+				InputEventHandler.Instance.InputState = InputState.Autopilot;
 			}
 
 

@@ -53,10 +53,7 @@ public class WorldManager
 
 
 
-		if(Input.GetKeyDown(KeyCode.F12))
-		{
-			GameManager.Inst.DBManager.XMLParserWorld.GenerateSystemXML();
-		}
+
 
 		if(_asteroidFields.Count > 0)
 		{
