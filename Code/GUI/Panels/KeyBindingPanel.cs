@@ -20,11 +20,7 @@ public class KeyBindingPanel : PanelBase
 
 	public override void PerFrameUpdate ()
 	{
-		if(Input.GetKeyDown(KeyCode.Escape))
-		{
-			KeyInput input = new KeyInput();
-			OnKeyBindingSet(input);
-		}
+		
 	}
 
 	public override void Hide ()
@@ -49,20 +45,49 @@ public class KeyBindingPanel : PanelBase
 				_pendingInput = KeyBindingButtonIndexes[i];
 				NGUITools.SetActive(SetKeyWindow, true);
 				SetKeyWindow.GetComponent<VerticalExpandWindow>().Show();
+				InputEventHandler.Instance.InputState = InputState.KeyBindingEnter;
+				foreach(UIButton button in KeyBindingButtons)
+				{
+					Collider collider = button.GetComponent<Collider>();
+					collider.enabled = false;
+				}
+				return;
 			}
 		}
 	}
 
 	public void OnKeyBindingSet(KeyInput input)
 	{
-		
-		GameManager.Inst.PlayerControl.KeyBinding.Controls[_pendingInput] = input;
+		if(input.Key != KeyCode.None)
+		{
+			GameManager.Inst.PlayerControl.KeyBinding.Controls[_pendingInput] = input;
+		}
+
 		SetKeyWindow.GetComponent<VerticalExpandWindow>().Hide();
 		_pendingInput = UserInputs.None;
-
+		InputEventHandler.Instance.InputState = InputState.UI;
 		RefreshKeyBindings();
+		foreach(UIButton button in KeyBindingButtons)
+		{
+			Collider collider = button.GetComponent<Collider>();
+			collider.enabled = true;
+		}
+		return;
 	}
 
+	public void OnKeyBindingSave()
+	{
+		GameManager.Inst.DBManager.UserPrefDataHandler.SaveKeyBindings(GameManager.Inst.PlayerControl.KeyBinding.Controls);
+		UIEventHandler.Instance.TriggerCloseKeyBindingPanel();
+		Time.timeScale = 1;
+		GameManager.Inst.UIManager.HUDPanel.OnUnpauseGame();
+	}
+
+	public void OnRestoreDefaultBindings()
+	{
+		GameManager.Inst.PlayerControl.KeyBinding.Controls = GameManager.Inst.DBManager.UserPrefDataHandler.GetKeyBindings(true);
+		RefreshKeyBindings();
+	}
 
 
 	private void RefreshKeyBindings()
@@ -71,7 +96,7 @@ public class KeyBindingPanel : PanelBase
 		{
 			UILabel buttonText = KeyBindingButtons[i].GetComponent<UILabel>();
 			KeyInput input = GameManager.Inst.PlayerControl.KeyBinding.Controls[KeyBindingButtonIndexes[i]];
-			if(input.IsFnSet)
+			if(input.FnKey != KeyCode.None)
 			{
 				buttonText.text = input.FnKey.ToString() + "+" + input.Key.ToString();
 			}

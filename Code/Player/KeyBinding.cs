@@ -15,18 +15,17 @@ public class KeyBinding
 
 public class KeyInput
 {
-	public bool IsFnSet;
 	public KeyCode FnKey;
 	public KeyCode Key;
 
 	public bool Eval()
 	{
-		if(IsFnSet && Input.GetKey(FnKey) && Input.GetKeyDown(Key))
+		if(FnKey != KeyCode.None && Input.GetKey(FnKey) && Input.GetKeyDown(Key))
 		{
 			return true;
 		}
 
-		if(!IsFnSet && Input.GetKeyDown(Key))
+		if(FnKey == KeyCode.None && Input.GetKeyDown(Key))
 		{
 			return true;
 		}

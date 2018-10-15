@@ -72,7 +72,7 @@ public class PlayerControl
 	public void Initialize()
 	{
 		KeyBinding = new KeyBinding();
-		KeyBinding.Controls = GameManager.Inst.DBManager.UserPrefDataHandler.GetKeyBindings();
+		KeyBinding.Controls = GameManager.Inst.DBManager.UserPrefDataHandler.GetKeyBindings(false);
 
 		Debug.Log("Initializing player control");
 		GameObject o = GameObject.Find("PlayerShip");
@@ -299,6 +299,7 @@ public class PlayerControl
 			}
 		}
 	}
+
 
 
 	public void UpdateAutopilotKeyInput()
@@ -638,11 +639,11 @@ public class PlayerControl
 			//main engine
 			if(PlayerShip.Engine.IsCruising)
 			{
-				_forwardForce = 5;
+				_forwardForce = 3;
 			}
 			else
 			{
-				_forwardForce = _throttle * 1;
+				_forwardForce = _throttle * 3;
 			}
 
 			float maxSpeed = PlayerShip.Engine.MaxSpeed;

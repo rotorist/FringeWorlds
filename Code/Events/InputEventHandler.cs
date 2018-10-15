@@ -1,6 +1,9 @@
-﻿using System.Collections;
+﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Linq;
+using System.IO;
+using System;
 
 public class InputEventHandler
 {
@@ -63,6 +66,63 @@ public class InputEventHandler
 		{
 			UIEventHandler.Instance.TriggerCloseStationWindows();
 		}
+
+
+
+
+
+	}
+
+	private void UpdateKeyBindingInput()
+	{
+		KeyInput input = new KeyInput();
+
+		if(Input.GetKeyDown(KeyCode.Escape))
+		{
+			
+			GameManager.Inst.UIManager.KeyBindingPanel.OnKeyBindingSet(input);
+			return;
+		}
+
+
+		List<KeyCode> controlKeys = new List<KeyCode>()
+		{
+			KeyCode.LeftAlt,
+			KeyCode.RightAlt,
+			KeyCode.AltGr,
+			KeyCode.LeftControl,
+			KeyCode.RightControl,
+			KeyCode.LeftShift,
+			KeyCode.RightShift
+		};
+
+		foreach(KeyCode code in controlKeys)
+		{
+			if(Input.GetKey(code))
+			{
+				input.FnKey = code;
+			}
+			if(Input.GetKeyUp(code))
+			{
+				input.FnKey = KeyCode.None;
+				input.Key = code;
+				GameManager.Inst.UIManager.KeyBindingPanel.OnKeyBindingSet(input);
+				return;
+			}
+		}
+
+		foreach(KeyCode code in Enum.GetValues(typeof(KeyCode)))
+		{
+			if (Input.GetKeyDown(code))
+			{
+				if(!controlKeys.Contains(code))
+				{
+					input.Key = code;
+					GameManager.Inst.UIManager.KeyBindingPanel.OnKeyBindingSet(input);
+					return;
+				}
+			}
+		}
 	}
 
 	private void UpdateInput()
@@ -90,7 +150,7 @@ public class InputEventHandler
 			break;
 
 		case InputState.KeyBindingEnter:
-
+			UpdateKeyBindingInput();
 			break;
 
 		}
