@@ -87,13 +87,15 @@ public class InputEventHandler
 
 		List<KeyCode> controlKeys = new List<KeyCode>()
 		{
+			/*
 			KeyCode.LeftAlt,
 			KeyCode.RightAlt,
 			KeyCode.AltGr,
 			KeyCode.LeftControl,
 			KeyCode.RightControl,
+			*/
 			KeyCode.LeftShift,
-			KeyCode.RightShift
+			KeyCode.RightShift,
 		};
 
 		foreach(KeyCode code in controlKeys)

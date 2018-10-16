@@ -318,7 +318,7 @@ public class PlayerControl
 	public void UpdateInFlightKeyInput()
 	{
 		//select
-		if(Input.GetKeyDown(KeyCode.F))
+		if(KeyBinding.Controls[UserInputs.Select].Eval())
 		{
 			SelectObject();
 		}
@@ -340,7 +340,7 @@ public class PlayerControl
 
 		}
 
-		if(Input.GetKeyDown(KeyCode.F10))
+		if(KeyBinding.Controls[UserInputs.Pause].Eval())
 		{
 			if(!GameManager.Inst.UIManager.KeyBindingPanel.IsActive)
 			{
@@ -373,7 +373,7 @@ public class PlayerControl
 		float rollSpeed = 1;
 		float rollStopSpeed = 4;
 
-		if(Input.GetKeyDown(KeyCode.Tab))
+		if(KeyBinding.Controls[UserInputs.FlightAssist].Eval())
 		{
 			_isFAKilled = !_isFAKilled;
 			if(_isFAKilled)
@@ -382,13 +382,13 @@ public class PlayerControl
 			}
 		}
 
-		if(Input.GetKeyDown(KeyCode.Space))
+		if(KeyBinding.Controls[UserInputs.MouseFlight].Eval())
 		{
 			_isMouseFlight = !_isMouseFlight;
 		}
 
 
-		if(Input.GetKeyDown(KeyCode.X))
+		if(KeyBinding.Controls[UserInputs.Cruise].Eval())
 		{
 			if(!PlayerShip.Engine.IsCruising && !PlayerShip.Engine.IsPrepCruise)
 			{
@@ -402,95 +402,111 @@ public class PlayerControl
 		}
 
 
-		if(!Input.GetKey(KeyCode.LeftShift))
+
+
+		//rolling
+		if(KeyBinding.Controls[UserInputs.RollLeft].EvalKeyDown())
 		{
-
-			//rolling
-			if(Input.GetKey(KeyCode.A))
+			if(_rollValue < 0)
 			{
-				if(_rollValue < 0)
-				{
-					_rollValue = Mathf.Clamp(_rollValue + Time.deltaTime * rollSpeed * (1 + 2 * (_rollValue * -1)), -1, 1);
-				}
-				else
-				{
-					_rollValue = Mathf.Clamp(_rollValue + Time.deltaTime * rollSpeed, -1, 1);
-				}
+				_rollValue = Mathf.Clamp(_rollValue + Time.deltaTime * rollSpeed * (1 + 2 * (_rollValue * -1)), -1, 1);
 			}
-			if(Input.GetKey(KeyCode.D))
+			else
 			{
-				if(_rollValue > 0)
-				{
-					_rollValue = Mathf.Clamp(_rollValue - Time.deltaTime * rollSpeed * (1 + 2 * _rollValue), -1, 1);
-				}
-				else
-				{
-					_rollValue = Mathf.Clamp(_rollValue - Time.deltaTime * rollSpeed, -1, 1);
-				}
+				_rollValue = Mathf.Clamp(_rollValue + Time.deltaTime * rollSpeed, -1, 1);
 			}
+		}
+		if(KeyBinding.Controls[UserInputs.RollRight].EvalKeyDown())
+		{
+			if(_rollValue > 0)
+			{
+				_rollValue = Mathf.Clamp(_rollValue - Time.deltaTime * rollSpeed * (1 + 2 * _rollValue), -1, 1);
+			}
+			else
+			{
+				_rollValue = Mathf.Clamp(_rollValue - Time.deltaTime * rollSpeed, -1, 1);
+			}
+		}
 
 
 
 
-			//thruster
+		//thruster
+
+
+		if(KeyBinding.Controls[UserInputs.ForwardThruster].EvalKeyDown())
+		{
 			_strafeHor = 0;
 			_strafeVer = 0;
-
-			if(Input.GetKey(KeyCode.W))
-			{
-				_thruster = 1;
-
-			}
-
-			if(Input.GetKey(KeyCode.S))
-			{
-				_thruster = -0.2f;
-			}
-
+			_thruster = 1;
 
 		}
 
-		//strafing
-		if(Input.GetKey(KeyCode.LeftShift))
+		if(KeyBinding.Controls[UserInputs.ReverseThruster].EvalKeyDown())
 		{
+			_strafeHor = 0;
+			_strafeVer = 0;
+			_thruster = -0.2f;
+		}
 
+
+		
+
+		//strafing
+
+
+			
+
+		if(KeyBinding.Controls[UserInputs.VectorLeft].EvalKeyDown())
+		{
 			_thruster = 0;
+			_strafeHor = -1;
+		}
+		if(KeyBinding.Controls[UserInputs.VectorRight].EvalKeyDown())
+		{
+			_thruster = 0;
+			_strafeHor = 1;
+		}
+		if(KeyBinding.Controls[UserInputs.VectorUp].EvalKeyDown())
+		{
+			_thruster = 0;
+			_strafeVer = -1;
+		}
+		if(KeyBinding.Controls[UserInputs.VectorDown].EvalKeyDown())
+		{
+			_thruster = 0;
+			_strafeVer = 1;
+		}
 
-			if(Input.GetKey(KeyCode.A))
-			{
-				_strafeHor = -1;
-			}
-			if(Input.GetKey(KeyCode.D))
-			{
-				_strafeHor = 1;
-			}
-			if(Input.GetKey(KeyCode.W))
-			{
-				_strafeVer = -1;
-			}
-			if(Input.GetKey(KeyCode.S))
-			{
-				_strafeVer = 1;
-			}
-
+		if(_strafeHor != 0 || _strafeVer != 0)
+		{
 			_rollValue = Mathf.Lerp(_rollValue, 0, Time.deltaTime * rollStopSpeed);
 		}
 
 		_rollForce = GameManager.Inst.Constants.RollCurve.Evaluate(_rollValue);
 
 
-		if(!Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.S))
+		if(!KeyBinding.Controls[UserInputs.ForwardThruster].EvalKeyDown() && !KeyBinding.Controls[UserInputs.ReverseThruster].EvalKeyDown())
 		{
 			_thruster = 0;
-			_strafeVer = 0;
+
 		}
 
-		if(!Input.GetKey(KeyCode.A) && !Input.GetKey(KeyCode.D))
+		if(!KeyBinding.Controls[UserInputs.VectorLeft].EvalKeyDown() && !KeyBinding.Controls[UserInputs.VectorRight].EvalKeyDown())
 		{
-			_rollValue = Mathf.Lerp(_rollValue, 0, Time.deltaTime * rollStopSpeed);
 			_strafeHor = 0;
 		}
 
+		if(!KeyBinding.Controls[UserInputs.RollLeft].EvalKeyDown() && !KeyBinding.Controls[UserInputs.RollRight].EvalKeyDown())
+		{
+			_rollValue = Mathf.Lerp(_rollValue, 0, Time.deltaTime * rollStopSpeed);
+
+		}
+
+		if(!KeyBinding.Controls[UserInputs.VectorUp].EvalKeyDown() && !KeyBinding.Controls[UserInputs.VectorDown].EvalKeyDown())
+		{
+			_strafeVer = 0;
+		}
 
 
 		//Mouse input
@@ -541,7 +557,7 @@ public class PlayerControl
 		//firing weapon
 		if(!PlayerShip.Engine.IsCruising && !PlayerShip.Engine.IsPrepCruise)
 		{
-			if(Input.GetMouseButton(0))
+			if(KeyBinding.Controls[UserInputs.FireWeaponGroup1].EvalKeyDown())
 			{
 				foreach(WeaponJoint joint in WeaponGroups[0])
 				{
@@ -553,7 +569,7 @@ public class PlayerControl
 
 			}
 
-			if(Input.GetMouseButton(1))
+			if(KeyBinding.Controls[UserInputs.FireWeaponGroup2].EvalKeyDown())
 			{
 				foreach(WeaponJoint joint in WeaponGroups[1])
 				{
@@ -568,7 +584,7 @@ public class PlayerControl
 
 		//weapon
 		//countermeasure
-		if(Input.GetKeyDown(KeyCode.C))
+		if(KeyBinding.Controls[UserInputs.Countermeasure].Eval())
 		{
 			DropCountermeasure();
 		}
@@ -656,10 +672,12 @@ public class PlayerControl
 			{
 				if((_thruster != 0 || _strafeHor != 0 || _strafeVer != 0) && ((!PlayerShip.Engine.IsThrusting && thruster.CurrentFuel > thruster.MaxFuel * 0.1f) || (PlayerShip.Engine.IsThrusting && thruster.CurrentFuel > 0)))
 				{
-					PlayerShip.Engine.IsThrusting = true;
-					PlayerShip.RB.AddForce(PlayerShip.transform.forward * _thruster * 10);
+					
+
 					if(_thruster > 0)
 					{
+						PlayerShip.Engine.IsThrusting = true;
+						PlayerShip.RB.AddForce(PlayerShip.transform.forward * _thruster * 10);
 						GameManager.Inst.CameraShaker.TriggerScreenShake(0.15f, 0.0065f, true);
 					}
 					//strafe

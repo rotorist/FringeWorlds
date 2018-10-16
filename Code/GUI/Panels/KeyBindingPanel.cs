@@ -8,6 +8,8 @@ public class KeyBindingPanel : PanelBase
 	public List<UserInputs> KeyBindingButtonIndexes;
 	public GameObject SetKeyWindow;
 	public UILabel KeyBindingName;
+	public UIButton SaveButton;
+	public UIButton RestoreButton;
 
 	private UserInputs _pendingInput;
 
@@ -16,6 +18,8 @@ public class KeyBindingPanel : PanelBase
 		base.Initialize();
 		NGUITools.SetActive(SetKeyWindow, false);
 		_pendingInput = UserInputs.None;
+		SaveButton.isEnabled = true;
+		RestoreButton.isEnabled = true;
 	}
 
 	public override void PerFrameUpdate ()
@@ -43,6 +47,7 @@ public class KeyBindingPanel : PanelBase
 			if(currentButton == KeyBindingButtons[i])
 			{
 				_pendingInput = KeyBindingButtonIndexes[i];
+				KeyBindingName.text = _pendingInput.ToString();
 				NGUITools.SetActive(SetKeyWindow, true);
 				SetKeyWindow.GetComponent<VerticalExpandWindow>().Show();
 				InputEventHandler.Instance.InputState = InputState.KeyBindingEnter;
@@ -51,6 +56,8 @@ public class KeyBindingPanel : PanelBase
 					Collider collider = button.GetComponent<Collider>();
 					collider.enabled = false;
 				}
+				SaveButton.isEnabled = false;
+				RestoreButton.isEnabled = false;
 				return;
 			}
 		}
@@ -72,6 +79,8 @@ public class KeyBindingPanel : PanelBase
 			Collider collider = button.GetComponent<Collider>();
 			collider.enabled = true;
 		}
+		SaveButton.isEnabled = true;
+		RestoreButton.isEnabled = true;
 		return;
 	}
 

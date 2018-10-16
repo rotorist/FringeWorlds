@@ -17,6 +17,7 @@ public class KeyInput
 {
 	public KeyCode FnKey;
 	public KeyCode Key;
+	public KeyInput SimilarInput;
 
 	public bool Eval()
 	{
@@ -27,10 +28,60 @@ public class KeyInput
 
 		if(FnKey == KeyCode.None && Input.GetKeyDown(Key))
 		{
-			return true;
+			if(SimilarInput == null)
+			{
+				
+				return true;
+			}
+
+			if(SimilarInput != null && SimilarInput.FnKey != KeyCode.None && !Input.GetKey(SimilarInput.FnKey))
+			{
+				return true;
+			}
+
+			return false;
+
 		}
 
 		return false;
+	}
+
+	public bool EvalKeyDown()
+	{
+		
+		if(FnKey != KeyCode.None && Input.GetKey(FnKey) && Input.GetKey(Key))
+		{
+			//Debug.Log("true for " + FnKey.ToString() + " + " + Key.ToString());
+			return true;
+		}
+
+		if(FnKey == KeyCode.None && Input.GetKey(Key))
+		{
+			if(SimilarInput == null)
+			{
+				return true;
+			}
+
+			if(SimilarInput != null && SimilarInput.FnKey != KeyCode.None && !Input.GetKey(SimilarInput.FnKey))
+			{
+				return true;
+			}
+			return false;
+		}
+
+		return false;
+	}
+
+	public bool IsAnyFnKeyDown()
+	{
+		if(Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.AltGr) || Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.RightControl))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }
 
@@ -47,6 +98,7 @@ public enum UserInputs
 	Cruise,
 	FlightAssist,
 	Countermeasure,
+	MouseFlight,
 	Select,
 	Pause,
 	FireWeaponGroup1,

@@ -64,7 +64,7 @@ public class Launcher : Weapon
 				}
 				missile.Initialize(target);
 				missile.Attacker = this.ParentShip;
-				missile.transform.position = Barrel.transform.position + Barrel.transform.forward * 1f;
+				missile.transform.position = Barrel.transform.position + Barrel.transform.forward * 2f;
 				Vector3 lookTarget = Barrel.transform.position + Barrel.transform.forward * 100;
 				missile.transform.LookAt(lookTarget);
 				missile.Fire(this.ParentShip, missile.transform.forward * 9f + ParentShip.RB.velocity);

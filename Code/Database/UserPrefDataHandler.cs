@@ -83,8 +83,21 @@ public class UserPrefDataHandler : DataHandlerBase
 				input.Key = (KeyCode)Enum.Parse(typeof(KeyCode), tokens[0]);
 			}
 			UserInputs key = (UserInputs)Enum.Parse(typeof(UserInputs), kv.Key);
+
 			keyBindings.Add(key, input); 
 			//Debug.Log(key + " " + keyBindings[key].IsFnSet + ", " + keyBindings[key].Key);
+		}
+
+		//check for similar inputs
+		foreach(KeyValuePair<UserInputs, KeyInput> keyBinding in keyBindings)
+		{
+			foreach(KeyValuePair<UserInputs, KeyInput> target in keyBindings)
+			{
+				if(keyBinding.Value.Key == target.Value.Key && keyBinding.Value.FnKey != target.Value.FnKey)
+				{
+					keyBinding.Value.SimilarInput = target.Value;
+				}
+			}
 		}
 
 		return keyBindings;

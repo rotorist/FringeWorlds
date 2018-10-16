@@ -28,6 +28,11 @@ public class Missile : Ammunition
 			{
 				_stage = MissileStage.Chasing;
 				LoadEngineFlame();
+				Collider collider = transform.GetComponent<Collider>();
+				if(collider != null)
+				{
+					collider.enabled = true;
+				}
 			}
 		}
 		else if(_stage == MissileStage.Chasing)
@@ -86,7 +91,7 @@ public class Missile : Ammunition
 
 		if(_stage == MissileStage.Launched)
 		{
-			_rigidbody.AddForce(-1 * _rigidbody.velocity * 3.5f);
+			_rigidbody.AddForce(-1 * _rigidbody.velocity * 2.5f);
 		}
 
 
@@ -109,6 +114,12 @@ public class Missile : Ammunition
 		Damage.ShieldAmount = 500;
 		Damage.HullAmount = 800;
 		_rigidbody = transform.GetComponent<Rigidbody>();
+
+		Collider collider = transform.GetComponent<Collider>();
+		if(collider != null)
+		{
+			collider.enabled = false;
+		}
 	}
 
 	public void Fire(ShipBase attacker, Vector3 initialVelocity)
