@@ -108,6 +108,21 @@ public enum ShieldType
 	Capitol,
 }
 
+public enum ShieldClass
+{
+	F1 = 0,
+	F2 = 1,
+	F3 = 2,
+	F4 = 3,
+	F5 = 4,
+	T1 = 5,
+	T2 = 6,
+	T3 = 7,
+	C1 = 8,
+	C2 = 9,
+	C3 = 10,
+}
+
 public enum ShieldTech
 {
 	

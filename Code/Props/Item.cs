@@ -9,7 +9,7 @@ public class Item
 	public string DisplayName;
 	public string Description;
 	public ItemType Type;
-	public int CargoUnits;
+	public float CargoUnits;
 
 	public List<ItemAttribute> Attributes;
 	public Dictionary<string, int> AttributeIndex;

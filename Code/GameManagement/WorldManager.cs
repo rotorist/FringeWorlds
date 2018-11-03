@@ -11,9 +11,16 @@ public class WorldManager
 	public Dictionary<string, NavNode> AllNavNodes { get { return _allNavNodes; } }
 	public List<AsteroidField> AsteroidFields { get { return _asteroidFields; } }
 
+	public Dictionary<string, DockableStationData> DockableStationDatas;
+
 	private List<AsteroidField> _asteroidFields;
 	private Dictionary<string, StarSystemData> _allSystems;
 	private Dictionary<string, NavNode> _allNavNodes;
+
+	public void InitializeDocked()
+	{
+		DockableStationDatas = new Dictionary<string, DockableStationData>();
+	}
 
 	public void Initialize()
 	{

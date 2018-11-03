@@ -27,7 +27,7 @@ public class Launcher : Weapon
 
 	public override void Rebuild ()
 	{
-
+		base.Rebuild();
 		_isCooledDown = true;
 	}
 
@@ -43,6 +43,8 @@ public class Launcher : Weapon
 
 				GameObject o = GameObject.Instantiate(Resources.Load(ProjectilePrefab)) as GameObject;
 				Missile missile = o.GetComponent<Missile>();
+
+				Audio.PlayOneShot(GameManager.Inst.SoundManager.GetClip("MissileFire"));
 
 				ShipBase target = null;
 				if(ParentShip == GameManager.Inst.PlayerControl.PlayerShip)

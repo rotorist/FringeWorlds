@@ -39,6 +39,7 @@ public class BTUndockStation : BTLeaf
 					}
 					if(allUndocked)
 					{
+						MyParty.DockedStationID = "";
 						MyParty.PrevNode = MyParty.NextNode;
 						MyParty.NextTwoNodes.Clear();
 						Debug.LogError("All party has undocked! " + MyAI.MyShip.name);
@@ -61,6 +62,7 @@ public class BTUndockStation : BTLeaf
 
 		if(_undockSession == null)
 		{
+			
 			DockRequestResult result = station.Undock(MyAI.MyShip, out _undockSession);
 			if(result == DockRequestResult.Deny)
 			{

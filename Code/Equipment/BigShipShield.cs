@@ -57,7 +57,8 @@ public class BigShipShield : ShieldBase
 
 		//get multiplier
 		float multiplier = StaticUtility.GetShieldDamageMultiplier(this.Tech, damage.DamageType); 
-		Amount = Mathf.Clamp(Amount - damage.ShieldAmount * multiplier, 0, TotalCapacity);
+		float powerMultiplier = 1 / ParentShip.ShieldPowerAlloc;
+		Amount = Mathf.Clamp(Amount - damage.ShieldAmount * multiplier * powerMultiplier, 0, TotalCapacity);
 		//Debug.Log(multiplier + ", " + damage.ShieldAmount + ", " + Amount);
 
 		float damageEval = 1;
@@ -116,7 +117,7 @@ public class BigShipShield : ShieldBase
 				}
 				else
 				{
-					Amount = Mathf.Clamp(Amount + RechargeRate * Time.deltaTime, 0, TotalCapacity);
+					Amount = Mathf.Clamp(Amount + RechargeRate * ParentShip.ShieldPowerAlloc * Time.deltaTime, 0, TotalCapacity);
 				}
 			}
 		}

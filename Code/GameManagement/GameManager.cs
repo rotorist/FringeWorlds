@@ -11,8 +11,8 @@ public class GameManager : MonoBehaviour
 
 	#endregion
 
-	public string SystemID;
-	public string SystemName;
+	public string SystemID; //used for creating system in test space
+	public string SystemName;//used for creating system in test space
 
 	public SceneType SceneType;
 	public Constants Constants;
@@ -29,6 +29,8 @@ public class GameManager : MonoBehaviour
 	public NPCManager NPCManager;
 	public WorldManager WorldManager;
 	public SaveGameManager SaveGameManager;
+	public SoundManager SoundManager;
+	public ItemManager ItemManager;
 
 	public ShipBase ShipForTesting;
 
@@ -153,6 +155,12 @@ public class GameManager : MonoBehaviour
 		MaterialManager = new MaterialManager();
 		MaterialManager.Initialize();
 
+		SoundManager = new SoundManager();
+		SoundManager.Initialize();
+
+		ItemManager = new ItemManager();
+		ItemManager.Initialize();
+
 		if(SceneType == SceneType.Space)
 		{
 			Debug.Log("Loading space scene");
@@ -176,15 +184,7 @@ public class GameManager : MonoBehaviour
 			WorldManager = new WorldManager();
 
 
-			/*
-			GameObject [] npcs = GameObject.FindGameObjectsWithTag("NPC");
-			foreach(GameObject o in npcs)
-			{
-				AI ai = o.GetComponent<AI>();
-				ai.Initialize();
-				NPCManager.AddExistingShip(ai.MyShip);
-			}
-			*/
+
 
 			//temporarily spawn player at a station to undock
 			//StationBase station = GameObject.Find("PlanetColombiaLanding").GetComponent<StationBase>();
@@ -199,18 +199,24 @@ public class GameManager : MonoBehaviour
 				system = DBManager.XMLParserWorld.GenerateSystemScene(LevelAnchor.SpawnSystem);
 				SaveGameManager.GetSave(LevelAnchor.ProfileName);
 
+
 			}
-			else
+			else if(LevelAnchor.IsNewGame)
 			{
-				//this should never really happen
-				//load a default scene for now
-				system = DBManager.XMLParserWorld.GenerateSystemScene("washington_system");
-				SaveGameManager.LoadNewGame();
+				//load a new game
+				SaveGameManager.LoadNewGameInSpace();
+				system = DBManager.XMLParserWorld.GenerateSystemScene(GameManager.Inst.PlayerProgress.SpawnSystemID);
+
 			}
 
 
 			WorldManager.CurrentSystem = system;
 			WorldManager.Initialize();
+
+			if(LevelAnchor != null && !LevelAnchor.IsNewGame)
+			{
+				SaveGameManager.LoadSaveInSpace();
+			}
 
 			Debug.Log("About to create the player");
 			PlayerControl.CreatePlayerParty();
@@ -221,7 +227,7 @@ public class GameManager : MonoBehaviour
 			if(LevelAnchor != null && !LevelAnchor.IsNewGame)
 			{
 				PlayerControl.SpawnPlayer();
-				SaveGameManager.LoadSave();
+
 			}
 
 			LevelAnchor.IsNewGame = false;
@@ -266,10 +272,26 @@ public class GameManager : MonoBehaviour
 			UIManager = new UIManager();
 			UIManager.Initialize();
 
+			PlayerProgress = new PlayerProgress();
+			PlayerProgress.Initialize();
+
+			WorldManager = new WorldManager();
+			WorldManager.InitializeDocked();
+
+			NPCManager = new NPCManager();
+			NPCManager.InitializeDocked();
+
 			if(LevelAnchor != null && !LevelAnchor.IsNewGame)
 			{
-				SaveGameManager.LoadSave();
+				SaveGameManager.GetSave(LevelAnchor.ProfileName);
+				SaveGameManager.LoadSaveInStation();
 			}
+			else if(LevelAnchor.IsNewGame)
+			{
+				SaveGameManager.LoadNewGameInStation();
+			}
+
+			LevelAnchor.IsNewGame = false;
 		}
 			
 

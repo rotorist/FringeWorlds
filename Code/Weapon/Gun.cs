@@ -27,7 +27,7 @@ public class Gun : Weapon
 
 	public override void Rebuild ()
 	{
-		
+		base.Rebuild();
 		_isCooledDown = true;
 	}
 
@@ -35,10 +35,11 @@ public class Gun : Weapon
 
 	public override void Fire()
 	{
-		if(_isCooledDown)
+		if(_isCooledDown && ParentShip.WeaponCapacitorAmount >= PowerConsumption)
 		{
 			GameObject o = GameObject.Instantiate(Resources.Load(ProjectilePrefab)) as GameObject;
 			Projectile projectile = o.GetComponent<Projectile>();
+			projectile.DamageMultiplier = ParentShip.WeaponPowerAlloc;
 			projectile.Damage = new Damage();
 			projectile.Damage.DamageType = DamageType.Photon;
 			projectile.Damage.ShieldAmount = 20;
@@ -51,6 +52,16 @@ public class Gun : Weapon
 
 			_isCooledDown = false;
 			_coolDownTimer = 0;
+
+			if(ParentShip == GameManager.Inst.PlayerControl.PlayerShip)
+			{
+				ParentShip.WeaponCapacitorAmount -= PowerConsumption;
+			}
+
+			if(Audio != null)
+			{
+				Audio.PlayOneShot(GameManager.Inst.SoundManager.GetClip("Shot1"));
+			}
 		}
 	}
 

@@ -17,10 +17,13 @@ public class Weapon : MonoBehaviour
 	public float GimballMax;
 	public float GimballMin;
 	public string AmmoID;
+	public float PowerConsumption;
+	public string FiringSound;
+	public AudioSource Audio;
 
 	public virtual void Rebuild()
 	{
-
+		Audio = GetComponent<AudioSource>();
 	}
 
 	public virtual void Fire()
@@ -29,10 +32,3 @@ public class Weapon : MonoBehaviour
 	}
 }
 
-public enum WeaponRotationType
-{
-	Gimball,
-	Turret,
-	BallTurret,
-	Fixed,
-}

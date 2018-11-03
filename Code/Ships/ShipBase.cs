@@ -21,9 +21,20 @@ public class ShipBase : MonoBehaviour
 	public float TorqueModifier;
 	public float HullCapacity;
 	public float HullAmount;
-	public float TotalPowerCapacity;
-	public float WeaponPowerCapacity;
-	public float WeaponPowerAmount;
+
+	public float WeaponCapacitorTotal;
+	public float WeaponCapacitorAmount;
+	public float WeaponCapacitorRechargeRate;
+
+	public float MaxFuel;
+	public float FuelAmount;
+	public float MaxLifeSupport;
+	public float LifeSupportAmount;
+
+	public Vector3 CurrentPowerMgmtButton;
+	public float WeaponPowerAlloc;
+	public float ShieldPowerAlloc;
+	public float EnginePowerAlloc;
 
 	public bool IsInPortal;
 	public StationType InPortalStationType;
@@ -103,6 +114,11 @@ public class ShipBase : MonoBehaviour
 		//create explosion
 		GameObject explosion = GameObject.Instantiate(Resources.Load("Explosion" + UnityEngine.Random.Range(1, 5).ToString())) as GameObject;
 		explosion.transform.position = this.transform.position;
+
+		if(attacker == GameManager.Inst.PlayerControl.PlayerShip)
+		{
+			GameManager.Inst.SoundManager.UI.PlayOneShot(GameManager.Inst.SoundManager.GetClip("EnemyKilledUI"));
+		}
 			
 		//destroy ship
 		GameObject.Destroy(this.gameObject);
@@ -126,7 +142,7 @@ public class ShipBase : MonoBehaviour
 		}
 	}
 
-	public void ProcessHullDamage(Damage damage)
+	public void ProcessHullDamage(Damage damage, ShipBase attacker)
 	{
 		if(IsInPortal)
 		{
@@ -137,7 +153,7 @@ public class ShipBase : MonoBehaviour
 
 		if(HullAmount <= 0 && GameManager.Inst.PlayerControl.PlayerShip != this)
 		{
-			OnDeath(this);
+			OnDeath(attacker);
 		}
 	}
 
@@ -187,7 +203,7 @@ public class ShipBase : MonoBehaviour
 public enum ShipType
 {
 	Fighter,
-	Transporter,
+	Transport,
 	Gunship,
 	CargoShip,
 	BattleCruiser,

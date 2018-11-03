@@ -9,7 +9,7 @@ public class RepairPanel : PanelBase
 
 	public override void Initialize ()
 	{
-		
+		base.Initialize();
 	}
 
 	public override void PerFrameUpdate ()

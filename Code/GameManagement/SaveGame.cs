@@ -11,5 +11,8 @@ public class SaveGame
 	public StationType SpawnStationType;
 
 	public int LastUsedPartyNumber;
-	public List<MacroAIPartySaveData> AllParties;
+	public List<MacroAIPartySaveData> AllNonPlayerParties;
+
+	public List<LoadoutSaveData> PlayerLoadouts;
+	public string PlayerActiveLoadoutID;
 }

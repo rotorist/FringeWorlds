@@ -26,6 +26,11 @@ public class ExhaustController : MonoBehaviour
 		}
 	}
 
+	public ExhaustState GetExhaustState()
+	{
+		return _state;
+	}
+
 	public void setExhaustState(ExhaustState state)
 	{
 		if(state == _state)

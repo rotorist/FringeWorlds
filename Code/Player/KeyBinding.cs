@@ -107,7 +107,7 @@ public enum UserInputs
 	FireWeaponGroup4,
 	ThrottleUp,
 	ThrottleDown,
-
+	PowerManagement,
 
 	None,
 }

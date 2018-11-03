@@ -7,6 +7,10 @@ public class PlayerProgress
 	public string ProfileName;
 	public Loadout ActiveLoadout;
 
+	public string SpawnStationID;
+	public StationType SpawnStationType;
+	public string SpawnSystemID;
+
 	public void Initialize()
 	{
 		/*
@@ -22,7 +26,13 @@ public class PlayerProgress
 		}; 
 		*/
 
+
+	}
+
+	public void CreateInitialLoadout()
+	{
 		ActiveLoadout = new Loadout("Spitfire", ShipType.Fighter);
+		ActiveLoadout.LoadoutID = "Player_Spitfire_1";
 		ActiveLoadout.WeaponJoints = new Dictionary<string, string>()
 		{
 			{ "GimballLeft", "Class1Gun1" },
@@ -30,6 +40,10 @@ public class PlayerProgress
 			{ "GimballFront", "Class1Launcher1" },
 		};
 
+		ActiveLoadout.CurrentPowerMgmtButton = new Vector3(0, -20f, 0);
+		ActiveLoadout.HullAmount = GameManager.Inst.ItemManager.AllShipStats[ActiveLoadout.ShipID].Hull;
+		ActiveLoadout.FuelAmount = GameManager.Inst.ItemManager.AllShipStats[ActiveLoadout.ShipID].MaxFuel;
+		ActiveLoadout.LifeSupportAmount = GameManager.Inst.ItemManager.AllShipStats[ActiveLoadout.ShipID].LifeSupport;
 
 		ActiveLoadout.Defensives = new List<DefensiveType>()
 		{

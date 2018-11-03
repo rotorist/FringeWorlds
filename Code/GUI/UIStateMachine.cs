@@ -16,12 +16,12 @@ public class UIStateMachine
 			State = new UIStateUndocking(this);
 			Cursor.lockState = CursorLockMode.Locked;
 			Cursor.lockState = CursorLockMode.None;
-			if(GameManager.Inst.PlayerControl.SpawnStationType == StationType.Station)
+			if(GameManager.Inst.PlayerProgress.SpawnStationType == StationType.Station)
 			{
 				GameManager.Inst.UIManager.FadePanel.SetBlackBGAlpha(1f);
 				GameManager.Inst.UIManager.FadePanel.FadeIn(0.6f);
 			}
-			else if(GameManager.Inst.PlayerControl.SpawnStationType == StationType.JumpGate)
+			else if(GameManager.Inst.PlayerProgress.SpawnStationType == StationType.JumpGate)
 			{
 				GameManager.Inst.UIManager.FadePanel.SetWhiteBGAlpha(1f);
 				GameManager.Inst.UIManager.FadePanel.WhiteFadeIn(0.3f);
@@ -75,7 +75,8 @@ public class UIStateInFlight : UIStateBase
 		UIEventHandler.OnBeginDocking += OnBeginDocking;
 		UIEventHandler.OnOpenKeyBindingPanel -= OnOpenKeyBindingPanel;
 		UIEventHandler.OnOpenKeyBindingPanel += OnOpenKeyBindingPanel;
-
+		UIEventHandler.OnOpenPowerManagement -= OnOpenPowerManagement;
+		UIEventHandler.OnOpenPowerManagement += OnOpenPowerManagement;
 
 	}
 
@@ -83,6 +84,7 @@ public class UIStateInFlight : UIStateBase
 	{
 		UIEventHandler.OnBeginDocking -= OnBeginDocking;
 		UIEventHandler.OnOpenKeyBindingPanel -= OnOpenKeyBindingPanel;
+		UIEventHandler.OnOpenPowerManagement -= OnOpenPowerManagement;
 	}
 
 	public void OnBeginDocking()
@@ -97,6 +99,11 @@ public class UIStateInFlight : UIStateBase
 		SM.State = new UIStateKeyBinding(SM);
 	}
 
+	public void OnOpenPowerManagement()
+	{
+		EndState();
+		SM.State = new UIStatePowerManagement(SM);
+	}
 }
 
 
@@ -115,8 +122,9 @@ public class UIStateDocking : UIStateBase
 		//setup panels
 		SM.UIManager.HideAllPanels();
 		SM.UIManager.FadePanel.Show();
+		Debug.Log("Begin UIStateDocking");
 
-		InputEventHandler.Instance.InputState = InputState.InFlight;
+		InputEventHandler.Instance.InputState = InputState.None;
 
 		if(GameManager.Inst.SceneType == SceneType.Space || GameManager.Inst.SceneType == SceneType.SpaceTest)
 		{
@@ -175,7 +183,7 @@ public class UIStateUndocking : UIStateBase
 		SM.UIManager.HideAllPanels();
 		SM.UIManager.FadePanel.Show();
 
-		InputEventHandler.Instance.InputState = InputState.InFlight;
+		InputEventHandler.Instance.InputState = InputState.None;
 
 		if(GameManager.Inst.SceneType == SceneType.Station)
 		{
@@ -212,6 +220,42 @@ public class UIStateUndocking : UIStateBase
 	}
 
 	public void OnWhiteFadeInDone()
+	{
+		EndState();
+		SM.State = new UIStateInFlight(SM);
+	}
+}
+
+
+public class UIStatePowerManagement : UIStateBase
+{
+	public UIStatePowerManagement(UIStateMachine sm)
+	{
+		Name = "UIStatePowerManagement";
+		SM = sm;
+		BeginState();
+	}
+
+	public override void BeginState()
+	{
+		SM.UIManager.HideAllPanels();
+		SM.UIManager.HUDPanel.Show();
+		SM.UIManager.PowerManagementPanel.Show();
+
+		InputEventHandler.Instance.InputState = InputState.PowerManagement;
+		GameManager.Inst.PlayerControl.SetMouseFlight(false);
+
+		UIEventHandler.OnClosePowerManagement -= OnClosePowerManagement;
+		UIEventHandler.OnClosePowerManagement += OnClosePowerManagement;
+	}
+
+	public override void EndState ()
+	{
+		GameManager.Inst.PlayerControl.SetMouseFlight(true);
+		UIEventHandler.OnClosePowerManagement -= OnClosePowerManagement;
+	}
+
+	public void OnClosePowerManagement()
 	{
 		EndState();
 		SM.State = new UIStateInFlight(SM);
@@ -266,7 +310,7 @@ public class UIStateInStation : UIStateBase
 
 	public override void BeginState()
 	{
-		
+		Debug.Log("Begin UIStateInStation");
 
 		SM.UIManager.HideAllPanels();
 		SM.UIManager.StationHUDPanel.Show();
@@ -275,6 +319,9 @@ public class UIStateInStation : UIStateBase
 
 		UIEventHandler.OnOpenRepairWindow -= OnOpenRepairWindow;
 		UIEventHandler.OnOpenRepairWindow += OnOpenRepairWindow;
+		UIEventHandler.OnOpenStationShipInfo -= OnOpenStationShipInfo;
+		UIEventHandler.OnOpenStationShipInfo += OnOpenStationShipInfo;
+
 		UIEventHandler.OnBeginUndocking -= OnBeginUndocking;
 		UIEventHandler.OnBeginUndocking += OnBeginUndocking;
 
@@ -285,10 +332,12 @@ public class UIStateInStation : UIStateBase
 	{
 		UIEventHandler.OnOpenRepairWindow -= OnOpenRepairWindow;
 		UIEventHandler.OnBeginUndocking -= OnBeginUndocking;
+		UIEventHandler.OnOpenStationShipInfo -= OnOpenStationShipInfo;
 	}
 
 	public void OnBeginUndocking()
 	{
+		GameManager.Inst.SaveGameManager.CreateSaveInStation();
 		GameManager.Inst.UIManager.FadePanel.FadeOut(0.4f);
 		EndState();
 		SM.State = new UIStateUndocking(SM);
@@ -298,6 +347,12 @@ public class UIStateInStation : UIStateBase
 	{
 		EndState();
 		SM.State = new UIStateRepair(SM);
+	}
+
+	public void OnOpenStationShipInfo()
+	{
+		EndState();
+		SM.State = new UIStateStationShipInfo(SM);
 	}
 }
 
@@ -316,6 +371,39 @@ public class UIStateRepair : UIStateBase
 		SM.UIManager.HideAllPanels();
 		SM.UIManager.StationHUDPanel.Show();
 		SM.UIManager.RepairPanel.Show();
+
+		InputEventHandler.Instance.InputState = InputState.DockedUI;
+
+		UIEventHandler.OnCloseStationWindows -= OnCloseWindow;
+		UIEventHandler.OnCloseStationWindows += OnCloseWindow;
+	}
+
+	public override void EndState()
+	{
+		UIEventHandler.OnCloseStationWindows -= OnCloseWindow;
+	}
+
+	public void OnCloseWindow()
+	{
+		EndState();
+		SM.State = new UIStateInStation(SM);
+	}
+}
+
+public class UIStateStationShipInfo : UIStateBase
+{
+	public UIStateStationShipInfo(UIStateMachine sm)
+	{
+		Name = "UIStateStationShipInfo";
+		SM = sm;
+		BeginState();
+	}
+
+	public override void BeginState()
+	{
+		SM.UIManager.HideAllPanels();
+		SM.UIManager.StationHUDPanel.Show();
+		SM.UIManager.ShipInfoPanel.Show();
 
 		InputEventHandler.Instance.InputState = InputState.DockedUI;
 

@@ -43,9 +43,15 @@ public class UIEventHandler
 	public static event GeneralUIEventDelegate OnFadeInDone;
 	public static event GeneralUIEventDelegate OnCloseStationWindows;
 	public static event GeneralUIEventDelegate OnOpenRepairWindow;
+	public static event GeneralUIEventDelegate OnOpenStationShipInfo;
 
 	public static event GeneralUIEventDelegate OnOpenKeyBindingPanel;
 	public static event GeneralUIEventDelegate OnCloseKeyBindingPanel;
+
+	public static event GeneralUIEventDelegate OnOpenPowerManagement;
+	public static event GeneralUIEventDelegate OnClosePowerManagement;
+
+
 
 
 	public void TriggerBeginDocking()
@@ -114,6 +120,14 @@ public class UIEventHandler
 		}
 	}
 
+	public void TriggerOpenStationShipInfo()
+	{
+		if(OnOpenStationShipInfo != null)
+		{
+			OnOpenStationShipInfo();
+		}
+	}
+
 	public void TriggerOpenKeyBindingPanel()
 	{
 		if(OnOpenKeyBindingPanel != null)
@@ -127,6 +141,22 @@ public class UIEventHandler
 		if(OnCloseKeyBindingPanel != null)
 		{
 			OnCloseKeyBindingPanel();
+		}
+	}
+
+	public void TriggerOpenPowerManagement()
+	{
+		if(OnOpenPowerManagement != null)
+		{
+			OnOpenPowerManagement();
+		}
+	}
+
+	public void TriggerClosePowerManagement()
+	{
+		if(OnClosePowerManagement != null)
+		{
+			OnClosePowerManagement();
 		}
 	}
 

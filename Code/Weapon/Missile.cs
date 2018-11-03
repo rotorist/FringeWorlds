@@ -9,7 +9,8 @@ public class Missile : Ammunition
 	public ShipBase Target;
 	public float MaxSpeed;
 	public Transform EngineFlameHolder;
-	public ParticleSystem Smoke;
+	public ParticleSystem EngineFlameParticles;
+	public GameObject EngineFlame;
 
 	public MissileStage Stage { get { return _stage; } }
 
@@ -32,6 +33,11 @@ public class Missile : Ammunition
 				if(collider != null)
 				{
 					collider.enabled = true;
+				}
+				AudioSource audio = GetComponent<AudioSource>();
+				if(audio != null)
+				{
+					audio.Play();
 				}
 			}
 		}
@@ -99,7 +105,7 @@ public class Missile : Ammunition
 
 		if(_age > TTL)
 		{
-			GameObject.Destroy(this.gameObject);
+			Explode();
 		}
 
 	}
@@ -153,19 +159,16 @@ public class Missile : Ammunition
 				if(Damage.HullAmount <= 1f)
 				{
 					Explode();
-					GameObject.Destroy(this.gameObject);
 					return;
 				}
 
-				hitShip.ParentShip.ProcessHullDamage(Damage);
+				hitShip.ParentShip.ProcessHullDamage(Damage, Attacker);
 				Explode();
-				GameObject.Destroy(gameObject);
 			}
 		}
 		else
 		{
 			Explode();
-			GameObject.Destroy(gameObject);
 		}
 	}
 
@@ -177,6 +180,8 @@ public class Missile : Ammunition
 		flame.transform.localPosition = Vector3.zero;
 		flame.transform.localScale = new Vector3(1, 1, 1);
 		flame.transform.localEulerAngles = Vector3.zero;
+		EngineFlameParticles = flame.GetComponent<ParticleSystem>();
+		EngineFlame = flame.transform.Find("EngineFlames4").gameObject;
 
 	}
 
@@ -194,6 +199,16 @@ public class Missile : Ammunition
 	{
 		GameObject explosion = GameObject.Instantiate(Resources.Load("Explosion" + UnityEngine.Random.Range(1, 5).ToString())) as GameObject;
 		explosion.transform.position = this.transform.position;
+		Destroy();
+	}
+
+	private void Destroy()
+	{
+		EngineFlameParticles.transform.parent = null;
+		EngineFlameParticles.Stop();
+		EngineFlame.GetComponent<MeshRenderer>().enabled = false;
+		EngineFlameParticles.GetComponent<FXSelfDestruct>().IsTTLEnabled = true;
+		GameObject.Destroy(gameObject);
 	}
 
 }

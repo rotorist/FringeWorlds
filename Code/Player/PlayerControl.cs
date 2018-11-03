@@ -8,8 +8,7 @@ public class PlayerControl
 
 	public KeyBinding KeyBinding;
 
-	public string SpawnStationID;
-	public StationType SpawnStationType;
+
 
 	public ParticleSystem SpaceDust;
 	public ParticleSystem TradelaneDust;
@@ -31,6 +30,9 @@ public class PlayerControl
 
 	public List<WeaponJoint> [] WeaponGroups;
 
+	public AudioSource PrimaryEngine;
+	public AudioSource SecondaryEngine;
+
 	public float Throttle { get { return _throttle; } }
 	public bool IsFAKilled { get { return _isFAKilled; } }
 	public bool IsMouseFlight { get { return _isMouseFlight; } }
@@ -40,6 +42,7 @@ public class PlayerControl
 	public float ForwardForce { get { return _forwardForce; } }
 	public float ThrusterForce { get { return _thruster; } }
 	public bool IsGamePaused { get { return Time.timeScale <= 0; } }
+
 
 	private Vector2 _mousePosNorm;
 	private float _yawForce;
@@ -98,6 +101,14 @@ public class PlayerControl
 
 		_isMouseFlight = true;
 		_cmTimer = 4f;
+
+		PrimaryEngine = PlayerShip.transform.Find("PrimaryEngineSound").GetComponent<AudioSource>();
+		PrimaryEngine.loop = true;
+		PrimaryEngine.clip = GameManager.Inst.SoundManager.GetClip("NormalEngine1");
+		PrimaryEngine.Play();
+
+		SecondaryEngine = PlayerShip.transform.Find("SecondaryEngineSound").GetComponent<AudioSource>();
+		SecondaryEngine.loop = true;
 
 
 		GameManager.Inst.NPCManager.AllShips.Add(PlayerShip);
@@ -191,6 +202,11 @@ public class PlayerControl
 
 		//check if any incoming missiles are already destroyed
 		PlayerShip.IncomingMissiles.RemoveAll(GameObject => GameObject == null);
+
+		if(PlayerShip.WeaponCapacitorAmount < PlayerShip.WeaponCapacitorTotal)
+		{
+			PlayerShip.WeaponCapacitorAmount += Time.deltaTime * PlayerShip.WeaponCapacitorRechargeRate;
+		}
 	}
 
 	public void FixedFrameUpdate()
@@ -209,7 +225,7 @@ public class PlayerControl
 			UpdateShipRotation();
 			UpdateShipMovement();
 		}
-
+		UpdateEngineSound();
 		UpdateSpaceDust();
 	}
 
@@ -255,8 +271,8 @@ public class PlayerControl
 
 	public void SpawnPlayer()
 	{
-		Debug.Log(SpawnStationID);
-		StationBase station = GameObject.Find(SpawnStationID).GetComponent<StationBase>();
+		Debug.Log("Spawning in station " + GameManager.Inst.PlayerProgress.SpawnStationID);
+		StationBase station = GameObject.Find(GameManager.Inst.PlayerProgress.SpawnStationID).GetComponent<StationBase>();
 		DockSessionBase session = null;
 		station.Undock(PlayerShip, out session);
 	}
@@ -276,6 +292,11 @@ public class PlayerControl
 		}
 
 		InputEventHandler.Instance.InputState = InputState.InFlight;
+	}
+
+	public void SetMouseFlight(bool isOn)
+	{
+		_isMouseFlight = isOn;
 	}
 
 	public void UpdateSpaceTestInput()
@@ -298,6 +319,8 @@ public class PlayerControl
 				GameManager.Inst.UIManager.HUDPanel.OnUnpauseGame();
 			}
 		}
+
+
 	}
 
 
@@ -317,6 +340,12 @@ public class PlayerControl
 
 	public void UpdateInFlightKeyInput()
 	{
+		//power management
+		if(KeyBinding.Controls[UserInputs.PowerManagement].EvalKeyDown())
+		{
+			UIEventHandler.Instance.TriggerOpenPowerManagement();
+		}
+
 		//select
 		if(KeyBinding.Controls[UserInputs.Select].Eval())
 		{
@@ -376,7 +405,7 @@ public class PlayerControl
 		if(KeyBinding.Controls[UserInputs.FlightAssist].Eval())
 		{
 			_isFAKilled = !_isFAKilled;
-			if(_isFAKilled)
+			if(_isFAKilled && PlayerShip.Engine.IsCruising)
 			{
 				PlayerShip.Engine.CancelCruise();
 			}
@@ -509,20 +538,7 @@ public class PlayerControl
 		}
 
 
-		//Mouse input
-		//get mouse position
-		Vector2 mousePos = Input.mousePosition;
-		if(_isMouseFlight)
-		{
-			_mousePosNorm = new Vector2((mousePos.x / Screen.width) - 0.5f, (mousePos.y / Screen.height) - 0.5f) * 2;
-			_yawForce = GameManager.Inst.Constants.MouseYawCurve.Evaluate(_mousePosNorm.x);
-			_pitchForce = GameManager.Inst.Constants.MousePitchCurve.Evaluate(_mousePosNorm.y) * -1;
-		}
-		else
-		{
-			_yawForce = Mathf.Lerp(_yawForce, 0, Time.deltaTime * 6);
-			_pitchForce = Mathf.Lerp(_pitchForce, 0, Time.deltaTime * 6);
-		}
+
 
 		//mouse wheel throttle
 		float wheelInput = Input.GetAxis("Mouse ScrollWheel");
@@ -607,6 +623,20 @@ public class PlayerControl
 			return;
 		}
 
+		//Mouse input
+		//get mouse position
+		Vector2 mousePos = Input.mousePosition;
+		if(_isMouseFlight)
+		{
+			_mousePosNorm = new Vector2((mousePos.x / Screen.width) - 0.5f, (mousePos.y / Screen.height) - 0.5f) * 2;
+			_yawForce = GameManager.Inst.Constants.MouseYawCurve.Evaluate(_mousePosNorm.x);
+			_pitchForce = GameManager.Inst.Constants.MousePitchCurve.Evaluate(_mousePosNorm.y) * -1;
+		}
+		else
+		{
+			_yawForce = Mathf.Lerp(_yawForce, 0, Time.deltaTime * 6);
+			_pitchForce = Mathf.Lerp(_pitchForce, 0, Time.deltaTime * 6);
+		}
 
 
 		Vector3 angularVelocity = PlayerShip.transform.InverseTransformDirection(PlayerShip.RB.angularVelocity);
@@ -655,12 +685,13 @@ public class PlayerControl
 			//main engine
 			if(PlayerShip.Engine.IsCruising)
 			{
-				_forwardForce = 3;
+				_forwardForce = PlayerShip.Engine.Acceleration * 2 * PlayerShip.EnginePowerAlloc;
 			}
 			else
 			{
-				_forwardForce = _throttle * 3;
+				_forwardForce = _throttle * PlayerShip.Engine.Acceleration * PlayerShip.EnginePowerAlloc;
 			}
+
 
 			float maxSpeed = PlayerShip.Engine.MaxSpeed;
 
@@ -679,6 +710,11 @@ public class PlayerControl
 						PlayerShip.Engine.IsThrusting = true;
 						PlayerShip.RB.AddForce(PlayerShip.transform.forward * _thruster * 10);
 						GameManager.Inst.CameraShaker.TriggerScreenShake(0.15f, 0.0065f, true);
+					}
+					else if(_thruster < 0)
+					{
+						PlayerShip.Engine.IsThrusting = true;
+						PlayerShip.RB.AddForce(PlayerShip.transform.forward * _thruster * 10);
 					}
 					//strafe
 					if(thruster.CanStrafe)
@@ -778,8 +814,8 @@ public class PlayerControl
 			if((!_isFAKilled || _thruster != 0) && maxSpeed > 0)
 			{
 				Vector3 driftVelocity = velocity - Vector3.Dot(velocity, PlayerShip.transform.forward) * PlayerShip.transform.forward;
-				float assistLevel = Mathf.Clamp(1 - Mathf.Clamp01(PlayerShip.RB.velocity.magnitude / maxSpeed), 0.5f, 1);
-				PlayerShip.RB.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * assistLevel);
+				float assistLevel = Mathf.Clamp(1 - Mathf.Clamp01(PlayerShip.RB.velocity.magnitude / maxSpeed), 0.6f, 1);
+				PlayerShip.RB.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * assistLevel * PlayerShip.EnginePowerAlloc);
 			}
 
 		}
@@ -792,6 +828,94 @@ public class PlayerControl
 
 
 
+	}
+
+	private void UpdateEngineSound()
+	{
+		if(!_isFAKilled)
+		{
+			PrimaryEngine.pitch = 0.7f + 0.3f * _throttle;
+
+		}
+		else
+		{
+			PrimaryEngine.pitch = 0.6f;
+		}
+
+		ExhaustState state = PlayerShip.MyReference.ExhaustController.GetExhaustState();
+
+		if(state == ExhaustState.Thruster)
+		{
+			SecondaryEngine.volume = Mathf.Lerp(SecondaryEngine.volume, 1, 30 * Time.fixedDeltaTime);
+			SecondaryEngine.pitch = 1;
+			if(SecondaryEngine.clip == null || SecondaryEngine.clip.name != "Afterburner")
+			{
+				SecondaryEngine.clip = GameManager.Inst.SoundManager.GetClip("Afterburner");
+			}
+			else if(!SecondaryEngine.isPlaying)
+			{
+				SecondaryEngine.Play();
+			}
+		}
+		else if(state == ExhaustState.Normal || state == ExhaustState.Idle)
+		{
+			
+			if(PlayerShip.Engine.IsPrepCruise)
+			{
+				/*
+				if(PlayerShip.Engine.PrepPercent > 0.99f)
+				{
+					SecondaryEngine.volume = Mathf.Lerp(SecondaryEngine.volume, 0, 60 * Time.fixedDeltaTime);;
+				}
+				else
+				{
+					SecondaryEngine.volume = Mathf.Lerp(SecondaryEngine.volume, 1, 30 * Time.fixedDeltaTime);
+				}
+
+				if(SecondaryEngine.clip == null || SecondaryEngine.clip.name != "CruiseChargeUp")
+				{
+					
+					SecondaryEngine.clip = GameManager.Inst.SoundManager.GetClip("CruiseChargeUp");
+				}
+				else if(!SecondaryEngine.isPlaying)
+				{
+					SecondaryEngine.Play();
+				}
+				*/
+
+				SecondaryEngine.volume = Mathf.Lerp(SecondaryEngine.volume, 1f, 30 * Time.fixedDeltaTime);
+				if(SecondaryEngine.clip == null || SecondaryEngine.clip.name != "Cruise")
+				{
+					SecondaryEngine.clip = GameManager.Inst.SoundManager.GetClip("Cruise");
+					SecondaryEngine.volume = 0;
+				}
+				else if(!SecondaryEngine.isPlaying)
+				{
+					SecondaryEngine.Play();
+				}
+				SecondaryEngine.pitch = 0.4f + Mathf.Pow(PlayerShip.Engine.PrepPercent, 2) * 0.6f;
+
+			}
+			else
+			{
+				SecondaryEngine.pitch = 1;
+				SecondaryEngine.volume = Mathf.Lerp(SecondaryEngine.volume, 0, 30 * Time.fixedDeltaTime);
+			}
+		}
+		else if(state == ExhaustState.Cruise)
+		{
+			SecondaryEngine.volume = Mathf.Lerp(SecondaryEngine.volume, 1, 30 * Time.fixedDeltaTime);
+			SecondaryEngine.pitch = 1.2f;
+			if(SecondaryEngine.clip == null || SecondaryEngine.clip.name != "Cruise")
+			{
+				SecondaryEngine.clip = GameManager.Inst.SoundManager.GetClip("Cruise");
+				SecondaryEngine.volume = 0;
+			}
+			else if(!SecondaryEngine.isPlaying)
+			{
+				SecondaryEngine.Play();
+			}
+		}
 	}
 
 	private void UpdateSpaceDust()
@@ -980,6 +1104,8 @@ public class PlayerControl
 
 		if(go != null)
 		{
+			GameManager.Inst.SoundManager.UI.PlayOneShot(GameManager.Inst.SoundManager.GetClip("Select"));
+
 			if(type == SelectedObjectType.Unknown)
 			{
 				//attempt to figure out what it is
@@ -1025,6 +1151,9 @@ public class PlayerControl
 				}
 
 			}
+
+
+
 		}
 		else
 		{

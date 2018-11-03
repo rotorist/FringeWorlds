@@ -31,7 +31,7 @@ public class MacroAI
 		GameManager.Inst.NPCManager.LastUsedPartyNumber = party.PartyNumber;
 
 		//generate loadout
-		party.LeaderLoadout = new Loadout("Trimaran", ShipType.Transporter);
+		party.LeaderLoadout = new Loadout("Trimaran", ShipType.Transport);
 		party.LeaderLoadout.WeaponJoints = new Dictionary<string, string>()
 		{
 			{ "TurretLeft", "Class1Turret1" },
@@ -40,6 +40,9 @@ public class MacroAI
 			{ "GimballLeft", "Class2Gun1" },
 			{ "GimballRight", "Class2Gun1" },
 		};
+		party.LeaderLoadout.HullAmount = GameManager.Inst.ItemManager.AllShipStats[party.LeaderLoadout.ShipID].Hull;
+		party.LeaderLoadout.FuelAmount = GameManager.Inst.ItemManager.AllShipStats[party.LeaderLoadout.ShipID].MaxFuel;
+		party.LeaderLoadout.LifeSupportAmount = GameManager.Inst.ItemManager.AllShipStats[party.LeaderLoadout.ShipID].LifeSupport;
 
 		party.LeaderLoadout.Defensives = new List<DefensiveType>()
 		{
@@ -74,6 +77,11 @@ public class MacroAI
 				{ "GimballRight", "Class2Gun1" },
 				{ "GimballFront", "Class1Launcher1" },
 			};
+
+			loadout.HullAmount = GameManager.Inst.ItemManager.AllShipStats[party.LeaderLoadout.ShipID].Hull;
+			loadout.FuelAmount = GameManager.Inst.ItemManager.AllShipStats[party.LeaderLoadout.ShipID].MaxFuel;
+			loadout.LifeSupportAmount = GameManager.Inst.ItemManager.AllShipStats[party.LeaderLoadout.ShipID].LifeSupport;
+
 			loadout.Defensives = new List<DefensiveType>()
 			{
 				DefensiveType.Countermeasure,
@@ -142,14 +150,7 @@ public class MacroAI
 		party.ShouldEnableAI = true;
 
 		//generate loadout
-		party.LeaderLoadout = new Loadout("LightTransporter", ShipType.Transporter);
-		party.LeaderLoadout.WeaponJoints = new Dictionary<string, string>()
-		{
-			{ "GimballLeft", "Gun1" },
-			{ "GimballRight", "Gun1" },
-			{ "TurretLeft", "Turret1" },
-			{ "TurretRight", "Turret1" },
-		};
+		party.LeaderLoadout = GameManager.Inst.PlayerProgress.ActiveLoadout;
 
 		party.FollowerLoadouts = new List<Loadout>();
 		/*
@@ -203,7 +204,7 @@ public class MacroAI
 		GameManager.Inst.NPCManager.LastUsedPartyNumber = party.PartyNumber;
 
 		//generate loadout
-		party.LeaderLoadout = new Loadout("LightTransporter", ShipType.Transporter);
+		party.LeaderLoadout = new Loadout("LightTransporter", ShipType.Transport);
 		party.LeaderLoadout.WeaponJoints = new Dictionary<string, string>()
 		{
 			{ "GimballLeft", "Gun1" },

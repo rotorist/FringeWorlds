@@ -12,9 +12,11 @@ public class UIManager
 	public HUDPanel HUDPanel;
 	public FadePanel FadePanel;
 	public KeyBindingPanel KeyBindingPanel;
+	public PowerManagementPanel PowerManagementPanel;
 
 	public StationHUDPanel StationHUDPanel;
 	public RepairPanel RepairPanel;
+	public ShipInfoPanel ShipInfoPanel;
 
 	public float UIZoom;
 	public bool IsInHUDRegion;
@@ -44,6 +46,10 @@ public class UIManager
 			KeyBindingPanel = UICamera.transform.Find("KeyBindingPanel").GetComponent<KeyBindingPanel>();
 			KeyBindingPanel.Initialize();
 			_panels.Add(KeyBindingPanel);
+
+			PowerManagementPanel = UICamera.transform.Find("PowerManagement").GetComponent<PowerManagementPanel>();
+			PowerManagementPanel.Initialize();
+			_panels.Add(PowerManagementPanel);
 		}
 		else if(GameManager.Inst.SceneType == SceneType.SpaceTest)
 		{
@@ -57,10 +63,15 @@ public class UIManager
 		else if(GameManager.Inst.SceneType == SceneType.Station)
 		{
 			StationHUDPanel = UICamera.transform.Find("StationHUDPanel").GetComponent<StationHUDPanel>();
+			StationHUDPanel.Initialize();
 			RepairPanel = UICamera.transform.Find("RepairPanel").GetComponent<RepairPanel>();
+			RepairPanel.Initialize();
+			ShipInfoPanel = UICamera.transform.Find("ShipInfoPanel").GetComponent<ShipInfoPanel>();
+			ShipInfoPanel.Initialize();
 
 			_panels.Add(StationHUDPanel);
 			_panels.Add(RepairPanel);
+			_panels.Add(ShipInfoPanel);
 		}
 
 		FadePanel = UICamera.transform.Find("FadePanel").GetComponent<FadePanel>();
@@ -170,6 +181,28 @@ public class UIManager
 		return new Vector2(uiWidth, uiHeight);
 	}
 
+	public UISprite LoadUISprite(string spriteID, Transform anchor, int width, int height, int depth)
+	{
+		try
+		{
+			GameObject spriteGO = GameObject.Instantiate(Resources.Load(spriteID)) as GameObject;
+			UISprite sprite = spriteGO.GetComponent<UISprite>();
+			sprite.transform.parent = anchor;
+			sprite.transform.localPosition = Vector3.zero;
+			sprite.transform.localScale = new Vector3(1, 1, 1);
+			sprite.MakePixelPerfect();
+			sprite.width = width;
+			sprite.height = height;
+			sprite.depth = depth;
+
+			return sprite;
+		}
+		catch(System.Exception e)
+		{
+			return null;
+		}
+	}
+
 
 	public void HideAllPanels()
 	{
@@ -177,10 +210,13 @@ public class UIManager
 		{
 			if(panel.IsActive)
 			{
+				
 				panel.Hide();
 			}
 		}
 	}
+
+
 
 
 

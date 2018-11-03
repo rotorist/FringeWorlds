@@ -28,5 +28,8 @@ public class PanelBase : MonoBehaviour
 		IsActive = false;
 	}
 
+	public virtual void OnTabSelect(string tabName)
+	{
 
+	}
 }

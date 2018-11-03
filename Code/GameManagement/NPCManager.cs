@@ -10,6 +10,8 @@ public class NPCManager
 	public List<ShipBase> AllShips { get { return _allShips; } }
 	public List<MacroAIParty> AllParties { get { return _allParties; } }
 
+	public List<MacroAIPartySaveData> PartySaveDatas;
+
 	public Dictionary<string, Faction> AllFactions { get { return _allFactions; } }
 
 
@@ -18,6 +20,14 @@ public class NPCManager
 	private List<MacroAIParty> _allParties;
 
 
+	public void InitializeDocked()
+	{
+		MacroAI = null;
+		_allShips = new List<ShipBase>();
+		_allFactions = new Dictionary<string, Faction>();
+		_allParties = new List<MacroAIParty>();
+		PartySaveDatas = new List<MacroAIPartySaveData>();
+	}
 
 	public void Initialize()
 	{
@@ -65,7 +75,7 @@ public class NPCManager
 		{	
 			{fac1.ID, 0.5f},
 			{fac2.ID, 0.5f},
-			{fac3.ID, 0.0f},
+			{fac3.ID, 0.5f},
 			{fac4.ID, 0.5f},
 			{fac5.ID, 0.5f}
 		};
@@ -90,7 +100,7 @@ public class NPCManager
 
 		fac3.Relationships = new Dictionary<string, float>() 
 		{	
-			{facp.ID, 0.0f},
+			{facp.ID, 0.5f},
 			{fac1.ID, 0},
 			{fac2.ID, 1},
 			{fac4.ID, 1},
@@ -138,6 +148,7 @@ public class NPCManager
 		ShipType shipType = loadout.ShipType;
 
 		GameObject shipModel = GameObject.Instantiate(Resources.Load(shipModelID)) as GameObject;
+		ShipStats stats = GameManager.Inst.ItemManager.AllShipStats[shipModelID];
 		shipModel.transform.parent = ship.transform;
 		shipModel.transform.localScale = new Vector3(1, 1, 1);
 		shipModel.transform.localPosition = Vector3.zero;
@@ -147,6 +158,20 @@ public class NPCManager
 		ship.MyReference = shipModel.GetComponent<ShipReference>();
 		ship.MyReference.ParentShip = ship;
 		ship.MyReference.Defensives = new List<Defensive>();
+		ship.MyReference.ShipAudio = ship.GetComponent<AudioSource>();
+		ship.HullCapacity = stats.Hull;
+		ship.HullAmount = loadout.HullAmount;
+		ship.MaxFuel = stats.MaxFuel;
+		ship.FuelAmount = loadout.FuelAmount;
+		ship.MaxLifeSupport = stats.LifeSupport;
+		ship.LifeSupportAmount = loadout.LifeSupportAmount;
+		ship.TorqueModifier = stats.TurnRate;
+		ship.WeaponCapacitorTotal = stats.WeaponCapacitor;
+		ship.WeaponCapacitorAmount = ship.WeaponCapacitorTotal;
+		ship.WeaponCapacitorRechargeRate = stats.WeaponCapacitorRecharge;
+		ship.ShieldPowerAlloc = 1;
+		ship.WeaponPowerAlloc = 1;
+		ship.EnginePowerAlloc = 1;
 		ship.Shield = ship.MyReference.Shield.GetComponent<ShieldBase>();
 		ship.Shield.Initialize();
 		ship.Shield.ParentShip = ship;
@@ -157,6 +182,9 @@ public class NPCManager
 		ship.Scanner = shipModel.GetComponent<Scanner>();
 		ship.Storage = shipModel.GetComponent<ShipStorage>();
 		ship.Storage.Initialize();
+		ship.Storage.AmmoBaySize = stats.AmmoBaySize;
+		ship.Storage.CargoBaySize = stats.CargoBaySize;
+
 		ship.MyLoadout = loadout;
 	}
 
@@ -260,6 +288,10 @@ public class NPCManager
 		{
 			ship.Storage.CargoBayItems.Add(item.Item.ID, item);
 		}
+
+		//load power management setting
+		ship.CurrentPowerMgmtButton = loadout.CurrentPowerMgmtButton;
+
 
 		return ship;
 	}

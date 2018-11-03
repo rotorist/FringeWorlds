@@ -73,6 +73,14 @@ public class InputEventHandler
 
 	}
 
+	private void UpdatePowerManagementInput()
+	{
+		if(!GameManager.Inst.PlayerControl.KeyBinding.Controls[UserInputs.PowerManagement].EvalKeyDown())
+		{
+			UIEventHandler.Instance.TriggerClosePowerManagement();
+		}
+	}
+
 	private void UpdateKeyBindingInput()
 	{
 		KeyInput input = new KeyInput();
@@ -154,7 +162,10 @@ public class InputEventHandler
 		case InputState.KeyBindingEnter:
 			UpdateKeyBindingInput();
 			break;
-
+		
+		case InputState.PowerManagement:
+			UpdatePowerManagementInput();
+			break;
 		}
 	}
 }
@@ -167,5 +178,6 @@ public enum InputState
 	UI,
 	DockedUI,
 	KeyBindingEnter,
-
+	PowerManagement,
+	None,
 }

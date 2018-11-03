@@ -7,6 +7,7 @@ public class Engine : EquipmentBase
 	public float MaxSpeed;
 	public float CruiseSpeed;
 	public float CruisePrepTime;
+	public float Acceleration;
 
 	public bool IsThrusting;
 	public bool IsCruising;
@@ -48,6 +49,7 @@ public class Engine : EquipmentBase
 		_cruisePrepTimer = 0;
 		IsPrepCruise = false;
 		IsCruising = false;
+		GameManager.Inst.PlayerControl.PrimaryEngine.PlayOneShot(GameManager.Inst.SoundManager.GetClip("CruiseCancel"));
 	}
 }
 

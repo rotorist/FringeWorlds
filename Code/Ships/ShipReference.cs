@@ -19,4 +19,5 @@ public class ShipReference : MonoBehaviour
 	public float CameraTilt;
 	public TrailRenderer VortexLeft;
 	public TrailRenderer VortexRight;
+	public AudioSource ShipAudio;
 }

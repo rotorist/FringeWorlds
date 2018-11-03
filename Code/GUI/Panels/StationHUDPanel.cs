@@ -6,11 +6,12 @@ using UnityStandardAssets.ImageEffects;
 
 public class StationHUDPanel : PanelBase
 {
+	public List<UIButton> AllToggleButtons;
 	public GameObject TopHUDHolder;
 
 	public override void Initialize ()
 	{
-		
+		base.Initialize();
 	}
 
 	public override void Show ()
@@ -32,6 +33,8 @@ public class StationHUDPanel : PanelBase
 
 	public void OnTopHUDClick()
 	{
+		//close all current windows
+		UIEventHandler.Instance.TriggerCloseStationWindows();
 		//enable all buttons first
 		EnableAllButtons();
 
@@ -54,21 +57,31 @@ public class StationHUDPanel : PanelBase
 			button.isEnabled = false;
 		}
 
+		if(UIButton.current.name == "btnShip")
+		{
+			UIButton button = TopHUDHolder.transform.Find("btnShip").GetComponent<UIButton>();
+			button.isEnabled = false;
+			UIEventHandler.Instance.TriggerOpenStationShipInfo();
+		}
+
 		if(UIButton.current.name == "btnLaunch")
 		{
 			UIEventHandler.Instance.TriggerBeginUndocking();
 		}
+
+
 	}
 
 	public void OnCloseWindow()
 	{
 		EnableAllButtons();
+
 	}
 
 	public void EnableAllButtons()
 	{
-		UIButton [] buttons = TopHUDHolder.transform.GetComponentsInChildren<UIButton>();
-		foreach(UIButton button in buttons)
+		
+		foreach(UIButton button in AllToggleButtons)
 		{
 			button.isEnabled = true;
 		}

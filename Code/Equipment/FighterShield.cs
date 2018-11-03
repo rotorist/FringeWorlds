@@ -68,7 +68,8 @@ public class FighterShield : ShieldBase
 
 		//get multiplier
 		float multiplier = StaticUtility.GetShieldDamageMultiplier(this.Tech, damage.DamageType); 
-		Amount = Mathf.Clamp(Amount - damage.ShieldAmount * multiplier, 0, TotalCapacity);
+		float powerMultiplier = 1 / ParentShip.ShieldPowerAlloc;
+		Amount = Mathf.Clamp(Amount - damage.ShieldAmount * multiplier * powerMultiplier, 0, TotalCapacity);
 
 		//float totalAmount = FrontAmount + RearAmount;
 		//float frontPortion = FrontCapacity / TotalCapacity;
@@ -143,7 +144,7 @@ public class FighterShield : ShieldBase
 		if(Amount < TotalCapacity)
 		{
 			float recharge = RechargeRate;
-			Amount = Mathf.Clamp(Amount + recharge * Time.deltaTime, 0, TotalCapacity);
+			Amount = Mathf.Clamp(Amount + recharge * ParentShip.ShieldPowerAlloc * Time.deltaTime, 0, TotalCapacity);
 		}
 
 		if(ParentShip == GameManager.Inst.PlayerControl.PlayerShip)

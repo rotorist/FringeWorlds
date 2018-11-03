@@ -9,6 +9,7 @@ public class SaveGameManager
 {
 	public SaveGame CurrentSave;
 
+
 	public void CreateAnchorSave(StationBase station, StationType type)
 	{
 		CurrentSave = new SaveGame();
@@ -34,15 +35,71 @@ public class SaveGameManager
 		}
 
 		SaveWorldData();
+		SavePlayerData(false);
 
+		SerializeSave();
 
 		LevelAnchor anchor = GameObject.FindObjectOfType<LevelAnchor>();
 		anchor.SpawnSystem = CurrentSave.SpawnSystem;
 		anchor.ProfileName = GameManager.Inst.PlayerProgress.ProfileName;
 	}
 
-	public void CreateSaveInStation(StationBase station)
+	public void CreateSaveInStation()
 	{
+		Debug.Log("Saving game in station");
+
+		CurrentSave = new SaveGame();
+		CurrentSave.SpawnSystem = GameManager.Inst.PlayerProgress.SpawnSystemID;
+		CurrentSave.SpawnStationID = GameManager.Inst.PlayerProgress.SpawnStationID;
+		CurrentSave.SpawnStationType = GameManager.Inst.PlayerProgress.SpawnStationType;
+
+		CurrentSave.AllNonPlayerParties = GameManager.Inst.NPCManager.PartySaveDatas;
+		CurrentSave.LastUsedPartyNumber = GameManager.Inst.NPCManager.LastUsedPartyNumber;
+
+
+		SavePlayerData(true);
+
+		SerializeSave();
+
+		LevelAnchor anchor = GameObject.FindObjectOfType<LevelAnchor>();
+		anchor.SpawnSystem = CurrentSave.SpawnSystem;
+		anchor.ProfileName = GameManager.Inst.PlayerProgress.ProfileName;
+	}
+
+	public void SavePlayerData(bool isInStation)
+	{
+		CurrentSave.PlayerLoadouts = new List<LoadoutSaveData>();
+		if(!isInStation)
+		{
+			SyncLoadoutWithShip(GameManager.Inst.PlayerProgress.ActiveLoadout, GameManager.Inst.PlayerControl.PlayerShip);
+		}
+
+		Debug.Log(GameManager.Inst.PlayerProgress.ActiveLoadout.CurrentPowerMgmtButton);
+		LoadoutSaveData loadout = CreateLoadoutSaveData(GameManager.Inst.PlayerProgress.ActiveLoadout);
+
+		CurrentSave.PlayerLoadouts.Add(loadout);
+		CurrentSave.PlayerActiveLoadoutID = loadout.LoadoutID;
+		CurrentSave.ProfileName = GameManager.Inst.PlayerProgress.ProfileName;
+	}
+
+	public void SyncLoadoutWithShip(Loadout loadout, ShipBase ship)
+	{
+		loadout.AmmoBayItems = new List<InvItemData>();
+		foreach(KeyValuePair<string,InvItemData> itemData in ship.Storage.AmmoBayItems)
+		{
+			loadout.AmmoBayItems.Add(itemData.Value);
+		}
+
+		loadout.CargoBayItems = new List<InvItemData>();
+		foreach(KeyValuePair<string,InvItemData> itemData in ship.Storage.AmmoBayItems)
+		{
+			loadout.CargoBayItems.Add(itemData.Value);
+		}
+
+		loadout.CurrentPowerMgmtButton = ship.CurrentPowerMgmtButton;
+		loadout.HullAmount = ship.HullAmount;
+		loadout.FuelAmount = ship.FuelAmount;
+		loadout.LifeSupportAmount = ship.LifeSupportAmount;
 
 	}
 
@@ -53,7 +110,7 @@ public class SaveGameManager
 		CurrentSave.LastUsedPartyNumber = GameManager.Inst.NPCManager.LastUsedPartyNumber;
 
 		//save all macroAI parties
-		CurrentSave.AllParties = new List<MacroAIPartySaveData>();
+		CurrentSave.AllNonPlayerParties = new List<MacroAIPartySaveData>();
 		foreach(MacroAIParty party in GameManager.Inst.NPCManager.AllParties)
 		{
 			if(party.PartyNumber == 0)
@@ -108,9 +165,16 @@ public class SaveGameManager
 				partyData.TreeSetNames.Add(tree.Key);
 			}
 
-			CurrentSave.AllParties.Add(partyData);
+			CurrentSave.AllNonPlayerParties.Add(partyData);
 		}
 
+
+
+
+	}
+
+	public void SerializeSave()
+	{
 		string fullPath = Application.persistentDataPath + "/" + GameManager.Inst.PlayerProgress.ProfileName + ".dat";
 
 		BinaryFormatter bf = new BinaryFormatter();
@@ -127,9 +191,8 @@ public class SaveGameManager
 		bf.Serialize(file, CurrentSave);
 		file.Close();
 		Debug.Log("Game has been saved");
-
-
 	}
+
 
 	public SaveGame GetSave(string profileName)
 	{
@@ -151,15 +214,18 @@ public class SaveGameManager
 
 		CurrentSave = (SaveGame)bf.Deserialize(file);
 
-		GameManager.Inst.PlayerControl.SpawnStationID = CurrentSave.SpawnStationID;
-		GameManager.Inst.PlayerControl.SpawnStationType = CurrentSave.SpawnStationType;
+		file.Close();
+
+		GameManager.Inst.PlayerProgress.SpawnStationID = CurrentSave.SpawnStationID;
+		GameManager.Inst.PlayerProgress.SpawnStationType = CurrentSave.SpawnStationType;
+		GameManager.Inst.PlayerProgress.SpawnSystemID = CurrentSave.SpawnSystem;
 
 		GameManager.Inst.PlayerProgress.ProfileName = CurrentSave.ProfileName;
 
 		return CurrentSave;
 	}
 
-	public void LoadSave()
+	public void LoadSaveInSpace()
 	{
 		if(CurrentSave == null)
 		{
@@ -169,8 +235,8 @@ public class SaveGameManager
 		GameManager.Inst.NPCManager.LastUsedPartyNumber = CurrentSave.LastUsedPartyNumber;
 
 		//loading all NPC and player parties
-		Debug.Log("Loading AI Parties, there are " + CurrentSave.AllParties.Count);
-		foreach(MacroAIPartySaveData partyData in CurrentSave.AllParties)
+		Debug.Log("Loading AI Parties, there are " + CurrentSave.AllNonPlayerParties.Count);
+		foreach(MacroAIPartySaveData partyData in CurrentSave.AllNonPlayerParties)
 		{
 			Debug.Log("Loading Party " + partyData.PartyNumber);
 			MacroAIParty party = new MacroAIParty();
@@ -181,6 +247,7 @@ public class SaveGameManager
 			StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems[partyData.CurrentSystemID];
 			party.CurrentSystemID = currentSystem.ID;
 			party.DockedStationID = partyData.DockedStationID;
+
 			if(currentSystem.ID == GameManager.Inst.WorldManager.CurrentSystem.ID)
 			{
 				party.Location = new RelLoc(currentSystem.OriginPosition, partyData.Location.ConvertToVector3(), GameObject.Find("Origin").transform, 1);
@@ -192,22 +259,13 @@ public class SaveGameManager
 			party.PartyNumber = partyData.PartyNumber;
 
 			//generate loadout
-			party.LeaderLoadout = new Loadout(partyData.LeaderLoadout.ShipID, partyData.LeaderLoadout.ShipType);
-			party.LeaderLoadout.WeaponJoints = new Dictionary<string, string>();
+			party.LeaderLoadout = LoadLoadoutFromSave(partyData.LeaderLoadout);
 
-			for(int i=0; i<partyData.LeaderLoadout.WeaponJointNames.Count; i++)
-			{
-				party.LeaderLoadout.WeaponJoints.Add(partyData.LeaderLoadout.WeaponJointNames[i], partyData.LeaderLoadout.WeaponNames[i]);
-			}
 
 			party.FollowerLoadouts = new List<Loadout>();
 			foreach(LoadoutSaveData loadoutData in partyData.FollowerLoadouts)
 			{
-				Loadout loadout = new Loadout(loadoutData.ShipID, loadoutData.ShipType);
-				for(int i=0; i<loadoutData.WeaponJointNames.Count; i++)
-				{
-					loadout.WeaponJoints.Add(loadoutData.WeaponJointNames[i], loadoutData.WeaponNames[i]);
-				}
+				Loadout loadout = LoadLoadoutFromSave(loadoutData);
 				party.FollowerLoadouts.Add(loadout);
 			}
 				
@@ -271,22 +329,60 @@ public class SaveGameManager
 
 
 			GameManager.Inst.NPCManager.AllParties.Add(party);
+
+
+		}
+
+		//load player data now
+		LoadPlayerData();
+
+	}
+
+	public void LoadPlayerData()
+	{
+		foreach(LoadoutSaveData loadoutData in CurrentSave.PlayerLoadouts)
+		{
+			if(loadoutData.LoadoutID == CurrentSave.PlayerActiveLoadoutID)
+			{
+				GameManager.Inst.PlayerProgress.ActiveLoadout = LoadLoadoutFromSave(loadoutData);
+				Debug.Log(GameManager.Inst.PlayerProgress.ActiveLoadout.CurrentPowerMgmtButton);
+			}
 		}
 	}
 
 	public void LoadSaveInStation()
 	{
+		if(CurrentSave == null)
+		{
+			return;
+		}
 
+		GameManager.Inst.NPCManager.LastUsedPartyNumber = CurrentSave.LastUsedPartyNumber;
+		GameManager.Inst.NPCManager.PartySaveDatas = CurrentSave.AllNonPlayerParties;
+
+		//load player data now
+		LoadPlayerData();
 	}
 
-	public void LoadNewGame()
+	public void LoadNewGameInSpace()
 	{
+		Debug.Log("Creating new game in space");
 		CurrentSave = null;
-		GameManager.Inst.PlayerControl.SpawnStationID = "alexandria_station";
-		GameManager.Inst.PlayerControl.SpawnStationType = StationType.Station;
+		GameManager.Inst.PlayerProgress.SpawnSystemID = "washington_system";
+		GameManager.Inst.PlayerProgress.SpawnStationID = "planet_colombia_landing";
+		GameManager.Inst.PlayerProgress.SpawnStationType = StationType.Station;
+		GameManager.Inst.PlayerProgress.CreateInitialLoadout();
 	}
 
-
+	public void LoadNewGameInStation()
+	{
+		Debug.Log("Creating new game in station");
+		CurrentSave = null;
+		GameManager.Inst.PlayerProgress.SpawnSystemID = "washington_system";
+		GameManager.Inst.PlayerProgress.SpawnStationID = "planet_colombia_landing";
+		GameManager.Inst.PlayerProgress.SpawnStationType = StationType.Station;
+		GameManager.Inst.PlayerProgress.CreateInitialLoadout();
+	}
 
 
 	private LoadoutSaveData CreateLoadoutSaveData(Loadout loadout)
@@ -296,6 +392,7 @@ public class SaveGameManager
 			return null;
 		}
 		LoadoutSaveData loadoutData = new LoadoutSaveData();
+		loadoutData.LoadoutID = loadout.LoadoutID;
 		loadoutData.ShipID = loadout.ShipID;
 		loadoutData.ShipType = loadout.ShipType;
 		loadoutData.WeaponJointNames = new List<string>();
@@ -306,6 +403,37 @@ public class SaveGameManager
 			loadoutData.WeaponNames.Add(joint.Value);
 		}
 
+		loadoutData.CurrentPowerMgmtButton = new SerVector3(loadout.CurrentPowerMgmtButton);
+		loadoutData.HullAmount = loadout.HullAmount;
+		loadoutData.FuelAmount = loadout.FuelAmount;
+		loadoutData.LifeSupportAmount = loadout.LifeSupportAmount;
+
+		loadoutData.Defensives = loadout.Defensives;
+		loadoutData.DefensiveAmmoIDs = loadout.DefensiveAmmoIDs;
+		loadoutData.AmmoBayItems = loadout.AmmoBayItems;
+		loadoutData.CargoBayItems = loadout.CargoBayItems;
+
 		return loadoutData;
+	}
+
+	private Loadout LoadLoadoutFromSave(LoadoutSaveData data)
+	{
+		Loadout loadout = new Loadout(data.ShipID, data.ShipType);
+		for(int i=0; i<data.WeaponJointNames.Count; i++)
+		{
+			loadout.WeaponJoints.Add(data.WeaponJointNames[i], data.WeaponNames[i]);
+		}
+		loadout.LoadoutID = data.LoadoutID;
+		loadout.CurrentPowerMgmtButton = data.CurrentPowerMgmtButton.ConvertToVector3();
+		loadout.HullAmount = data.HullAmount;
+		loadout.FuelAmount = data.FuelAmount;
+		loadout.LifeSupportAmount = data.LifeSupportAmount;
+
+		loadout.Defensives = data.Defensives;
+		loadout.DefensiveAmmoIDs = data.DefensiveAmmoIDs;
+		loadout.AmmoBayItems = data.AmmoBayItems;
+		loadout.CargoBayItems = data.CargoBayItems;
+
+		return loadout;
 	}
 }

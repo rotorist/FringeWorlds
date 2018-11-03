@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class FXSelfDestruct : MonoBehaviour 
 {
+	public bool IsTTLEnabled;
 	public float TTL;
 
 	private float _timer;
@@ -11,10 +12,15 @@ public class FXSelfDestruct : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
 	{
-		if(_timer > TTL)
+		if(IsTTLEnabled)
 		{
-			GameObject.Destroy(this.gameObject);
+			if(_timer > TTL)
+			{
+				GameObject.Destroy(this.gameObject);
+			}
+			_timer += Time.deltaTime;
 		}
-		_timer += Time.deltaTime;
+
+
 	}
 }

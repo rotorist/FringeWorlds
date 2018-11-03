@@ -14,6 +14,8 @@ public class HUDPanel : PanelBase
 	public UISprite ShieldIndicatorRear;
 	public BarIndicator ShieldAmountIndicator;
 	public BarIndicator HullAmountIndicator;
+	public BarIndicator WeaponCapacitorIndicator;
+
 	public BarIndicator CruisePrepIndicator;
 
 	public CurveIndicator SpeedCurve;
@@ -92,6 +94,7 @@ public class HUDPanel : PanelBase
 		UpdatePipPosition();
 		UpdateShieldAmount();
 		UpdateHullAmount();
+		UpdateSupplyAmount();
 		UpdateCruisePrep();
 		UpdateSelectMarkerPosition();
 		UpdateUnselectedMarkerPosition();
@@ -327,6 +330,13 @@ public class HUDPanel : PanelBase
 		float currentHull = GameManager.Inst.PlayerControl.PlayerShip.HullAmount;
 	
 		HullAmountIndicator.SetFillPercentage(currentHull / totalHull);
+	}
+
+	private void UpdateSupplyAmount()
+	{
+		float totalCapacitor = GameManager.Inst.PlayerControl.PlayerShip.WeaponCapacitorTotal;
+		float currentCapacitor = GameManager.Inst.PlayerControl.PlayerShip.WeaponCapacitorAmount;
+		WeaponCapacitorIndicator.SetFillPercentage(currentCapacitor / totalCapacitor);
 	}
 
 	private void UpdateCruisePrep()
@@ -594,7 +604,7 @@ public class HUDPanel : PanelBase
 		//flight assist indicator
 		if(GameManager.Inst.PlayerControl.IsFAKilled)
 		{
-			FALabel.text = "NEWTONIAN";
+			FALabel.text = "FREEFALL";
 		}
 		else
 		{

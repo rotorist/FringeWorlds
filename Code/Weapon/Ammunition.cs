@@ -6,6 +6,7 @@ public class Ammunition : MonoBehaviour
 {
 	public Damage Damage;
 	public ShipBase Attacker;
+	public float DamageMultiplier;
 
 	public virtual void OnTriggerEnter(Collider other)
 	{
@@ -43,9 +44,19 @@ public class Ammunition : MonoBehaviour
 			{
 				//Debug.Log("Hit shield");
 				ShieldBase shield = hitShip.Shield.GetComponent<ShieldBase>();
+
 				if(shield.ParentShip == Attacker)
 				{
 					return;
+				}
+				if(Damage.DamageType != DamageType.Shock)
+				{
+					Damage.ShieldAmount *= DamageMultiplier;
+					Damage.HullAmount *= DamageMultiplier;
+				}
+				if(Attacker == GameManager.Inst.PlayerControl.PlayerShip)
+				{
+					GameManager.Inst.SoundManager.PlayUISoundRateLimited("HitMarkerSoft", 0.1f);
 				}
 
 				Damage.HitLocation = collision.contacts[0].point;
@@ -56,7 +67,8 @@ public class Ammunition : MonoBehaviour
 					return;
 				}
 
-				hitShip.ParentShip.ProcessHullDamage(Damage);
+				hitShip.ParentShip.ProcessHullDamage(Damage, Attacker);
+
 
 				GameObject.Destroy(this.gameObject);
 			}

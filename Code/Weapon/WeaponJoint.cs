@@ -37,7 +37,7 @@ public class WeaponJoint : MonoBehaviour
 						targetVelocity = transform.GetComponent<Rigidbody>().velocity;
 					}
 					TargetPos = StaticUtility.FirstOrderIntercept(ParentShip.transform.position, ParentShip.RB.velocity,
-						30, Target.position, targetVelocity);
+						50, Target.position, targetVelocity);
 				}
 				else if(MountedWeapon.TurretBase != null)
 				{
@@ -51,9 +51,9 @@ public class WeaponJoint : MonoBehaviour
 			{
 				Vector3 verticalLos = lookDir - (transform.forward * 100);
 				float angle = Vector3.Angle(lookDir, transform.forward);
-
 				if(angle > MountedWeapon.GimballMax * GimballLimitPercent)
 				{
+					
 					verticalLos = verticalLos.normalized * (Mathf.Tan(Mathf.Deg2Rad * MountedWeapon.GimballMax * GimballLimitPercent) * 100);
 					Vector3 newTarget = transform.position + transform.forward * 100 + verticalLos;
 					lookDir = newTarget - MountedWeapon.transform.position;
@@ -115,6 +115,7 @@ public class WeaponJoint : MonoBehaviour
 		MountedWeapon.transform.localPosition = Vector3.zero;
 		MountedWeapon.transform.LookAt(transform.forward);
 		MountedWeapon.ParentShip = ParentShip;
+		weapon.Rebuild();
 	}
 
 
@@ -173,9 +174,23 @@ public class WeaponJoint : MonoBehaviour
 	}
 }
 
+[System.Serializable]
+public class WeaponJointData
+{
+	public int Class;
+	public WeaponRotationType RotationType;
+}
+
 public enum TurretControlMode
 {
 	Manual,
 	Selected,
 	Automatic,
+}
+
+public enum WeaponRotationType
+{
+	Gimball,
+	Turret,
+	Fixed,
 }
