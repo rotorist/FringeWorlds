@@ -40,24 +40,26 @@ public class ShipStorage : MonoBehaviour
 		return true;
 	}
 
-	public bool TakeAmmo(string itemID, int quantity)
+	public Item TakeAmmo(string itemID, int quantity)
 	{
 		if(AmmoBayItems.ContainsKey(itemID))
 		{
 			if(AmmoBayItems[itemID].Quantity >= quantity)
 			{
+				Item item = AmmoBayItems[itemID].Item;
 				AmmoBayItems[itemID].Quantity -=  quantity;
+				AmmoBayUsage -= quantity * AmmoBayItems[itemID].Item.CargoUnits;
 				if(AmmoBayItems[itemID].Quantity <= 0)
 				{
 					AmmoBayItems.Remove(itemID);
-					AmmoBayUsage -= quantity * AmmoBayItems[itemID].Item.CargoUnits;
+
 				}
 
-				return true;
+				return item;
 			}
 		}
 
-		return false;
+		return null;
 	}
 
 	public int GetAmmoCount(string itemID)

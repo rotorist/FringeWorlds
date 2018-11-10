@@ -23,10 +23,21 @@ public class UITabSelection : MonoBehaviour
 			{
 				tab.Background.depth = currentDepth + step;
 				currentDepth = tab.Background.depth;
-				tab.OnDeselect();
+				tab.OnDeselectTab();
 			}
 		}
 
 		ParentPanel.OnTabSelect(selectedTab.Name);
+	}
+
+	public void ForceSelectTab(string tabName)
+	{
+		foreach(UITab tab in Tabs)
+		{
+			if(tab.Name == tabName)
+			{
+				tab.OnSelectTab();
+			}
+		}
 	}
 }

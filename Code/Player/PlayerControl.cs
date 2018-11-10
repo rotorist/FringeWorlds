@@ -203,10 +203,7 @@ public class PlayerControl
 		//check if any incoming missiles are already destroyed
 		PlayerShip.IncomingMissiles.RemoveAll(GameObject => GameObject == null);
 
-		if(PlayerShip.WeaponCapacitorAmount < PlayerShip.WeaponCapacitorTotal)
-		{
-			PlayerShip.WeaponCapacitorAmount += Time.deltaTime * PlayerShip.WeaponCapacitorRechargeRate;
-		}
+	
 	}
 
 	public void FixedFrameUpdate()
@@ -724,9 +721,13 @@ public class PlayerControl
 					}
 
 					float consumption = 0;
-					if(Mathf.Abs(_thruster) > 0)
+					if(_thruster > 0)
 					{
 						consumption = thruster.ConsumptionRate;
+					}
+					else if(_thruster < 0)
+					{
+						consumption = thruster.ConsumptionRate * 0.5f;
 					}
 					else if(thruster.CanStrafe && (Mathf.Abs(_strafeHor) > 0 || Mathf.Abs(_strafeVer) > 0))
 					{
@@ -782,11 +783,11 @@ public class PlayerControl
 			if(!_isFAKilled && !PlayerShip.Engine.IsCruising)
 			{
 				
-				maxSpeed = maxSpeed * _throttle;
+				maxSpeed = maxSpeed * _throttle + 0.01f;
 			}
 
 
-			if(velocity.magnitude < maxSpeed && !_isFAKilled && !PlayerShip.Engine.IsPrepCruise)
+			if(velocity.magnitude < maxSpeed && !_isFAKilled && !PlayerShip.Engine.IsPrepCruise && _thruster >= 0)
 			{
 				PlayerShip.RB.AddForce(PlayerShip.transform.forward * _forwardForce);
 			}
@@ -801,13 +802,15 @@ public class PlayerControl
 				drag = -1f;
 			}
 			//Debug.Log(velocity.magnitude);
-			if(velocity.magnitude > maxSpeed * 0.95f)
+			if(velocity.magnitude >= maxSpeed * 0.95f)
 			{
-				PlayerShip.RB.AddForce(drag * velocity * Mathf.Lerp(0, 1f, (velocity.magnitude - maxSpeed * 0.95f) / (maxSpeed * 0.05f)));
+				PlayerShip.RB.AddForce(drag * velocity * Mathf.Lerp(0.01f, 1f, (velocity.magnitude - maxSpeed * 0.95f) / (maxSpeed * 0.05f)));
+
 			}
 			else
 			{
 				PlayerShip.RB.AddForce(-1 * velocity * 0.01f);
+
 			}
 
 			//flight assist

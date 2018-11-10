@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Missile : Ammunition 
 {
@@ -8,9 +9,14 @@ public class Missile : Ammunition
 
 	public ShipBase Target;
 	public float MaxSpeed;
+	public float Acceleration;
 	public Transform EngineFlameHolder;
 	public ParticleSystem EngineFlameParticles;
 	public GameObject EngineFlame;
+	public float TurnRate;
+	public float LaunchedStageDuration;
+	public float BlastRadius;
+	public float DetonationRadius;
 
 	public MissileStage Stage { get { return _stage; } }
 
@@ -25,7 +31,8 @@ public class Missile : Ammunition
 	{
 		if(_stage == MissileStage.Launched)
 		{
-			if(_age > 0.3f)
+			//if(_age > 0.3f)
+			if(_age > LaunchedStageDuration)
 			{
 				_stage = MissileStage.Chasing;
 				LoadEngineFlame();
@@ -45,7 +52,7 @@ public class Missile : Ammunition
 		{
 			if(Target == null)
 			{
-				_force = 5f;
+				_force = Acceleration;//5f;
 				_rigidbody.AddForce(transform.forward * _force);
 			}
 			else
@@ -66,7 +73,7 @@ public class Missile : Ammunition
 
 				if(Vector3.Angle(los, transform.forward) < 10)
 				{
-					_force = 5f;
+					_force = Acceleration;//5f
 					//here we need to reduce torque so it stops turning
 				}
 				else
@@ -74,7 +81,7 @@ public class Missile : Ammunition
 					//AddLookTorque(los);
 					Vector3 lookDir = Vector3.RotateTowards(transform.forward, los, 1f * Time.fixedDeltaTime, 0f);
 					transform.rotation = Quaternion.LookRotation(lookDir);
-					_force = 3f;
+					_force = Acceleration * 0.6f;//3f;
 				}
 
 				_rigidbody.AddForce(transform.forward * _force);
@@ -83,7 +90,7 @@ public class Missile : Ammunition
 
 
 			Vector3 driftVelocity = _rigidbody.velocity - Vector3.Dot(_rigidbody.velocity, transform.forward) * transform.forward;
-			_rigidbody.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * 2f);
+			_rigidbody.AddForce(-1 * driftVelocity.normalized * driftVelocity.magnitude * TurnRate);
 		}
 
 		//keep under max speed
@@ -110,15 +117,20 @@ public class Missile : Ammunition
 
 	}
 
-	public void Initialize(ShipBase target)
+	public void Initialize(ShipBase target, Item missileItem)
 	{
 		_stage = MissileStage.None;
 		Target = target;
-		MaxSpeed = 20;
+		MaxSpeed = missileItem.GetFloatAttribute("MaxSpeed");
 		Damage = new Damage();
-		Damage.DamageType = DamageType.Shock;
-		Damage.ShieldAmount = 500;
-		Damage.HullAmount = 800;
+		Damage.DamageType = (DamageType)Enum.Parse(typeof(DamageType), missileItem.GetStringAttribute("DamageType"));
+		Damage.ShieldAmount = missileItem.GetFloatAttribute("ShieldDamage");
+		Damage.HullAmount = missileItem.GetFloatAttribute("HullDamage");
+		BlastRadius = missileItem.GetFloatAttribute("BlastRadius");
+		DetonationRadius = missileItem.GetFloatAttribute("DetonationRadius");
+		TurnRate = missileItem.GetFloatAttribute("TurnRate");
+		Acceleration = missileItem.GetFloatAttribute("Acceleration");
+		LaunchedStageDuration = missileItem.GetFloatAttribute("IgnitionDelay");
 		_rigidbody = transform.GetComponent<Rigidbody>();
 
 		Collider collider = transform.GetComponent<Collider>();
@@ -152,16 +164,16 @@ public class Missile : Ammunition
 		{
 			if(hitShip.ParentShip != Attacker)
 			{
-				Debug.Log("Sending damage " + Damage.ShieldAmount + " to " + hitShip.ParentShip.name);
+				//Debug.Log("Sending damage " + Damage.ShieldAmount + " to " + hitShip.ParentShip.name);
 				Damage.HitLocation = collision.contacts[0].point;
 				Damage = hitShip.ParentShip.Shield.ProcessDamage(Damage);
-				Debug.Log("Hull amount " + Damage.HullAmount);
+
 				if(Damage.HullAmount <= 1f)
 				{
 					Explode();
 					return;
 				}
-
+				//Debug.Log("Hull amount " + Damage.HullAmount);
 				hitShip.ParentShip.ProcessHullDamage(Damage, Attacker);
 				Explode();
 			}

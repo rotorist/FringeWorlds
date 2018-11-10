@@ -8,15 +8,24 @@ public class Loadout
 	public string ShipID;
 	public ShipType ShipType;
 	public Dictionary<string, string> WeaponJoints;
+	public List<string> DefenseDeviceIDs;
 	public List<DefensiveType> Defensives;
 	public List<string> DefensiveAmmoIDs;
 	public List<InvItemData> AmmoBayItems;
 	public List<InvItemData> CargoBayItems;
+	public string ShieldID;
+	public string WeaponCapacitorID;
+	public string ThrusterID;
+	public string ScannerID;
+	public string TeleporterID;
+	public List<string> ShipModIDs;
 
 	public Vector3 CurrentPowerMgmtButton;
 	public float HullAmount;
 	public float FuelAmount;
 	public float LifeSupportAmount;
+
+
 
 	public Loadout(string shipID, ShipType shipType)
 	{
@@ -38,10 +47,17 @@ public class LoadoutSaveData
 	public ShipType ShipType;
 	public List<string> WeaponJointNames;
 	public List<string> WeaponNames;
+	public List<string> DefenseDeviceIDs;
 	public List<DefensiveType> Defensives;
 	public List<string> DefensiveAmmoIDs;
 	public List<InvItemData> AmmoBayItems;
 	public List<InvItemData> CargoBayItems;
+	public string ShieldID;
+	public string WeaponCapacitorID;
+	public string ThrusterID;
+	public string ScannerID;
+	public string TeleporterID;
+	public List<string> ShipModIDs;
 
 	public SerVector3 CurrentPowerMgmtButton;
 	public float HullAmount;

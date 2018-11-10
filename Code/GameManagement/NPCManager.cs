@@ -75,7 +75,7 @@ public class NPCManager
 		{	
 			{fac1.ID, 0.5f},
 			{fac2.ID, 0.5f},
-			{fac3.ID, 0.5f},
+			{fac3.ID, 0.0f},
 			{fac4.ID, 0.5f},
 			{fac5.ID, 0.5f}
 		};
@@ -100,7 +100,7 @@ public class NPCManager
 
 		fac3.Relationships = new Dictionary<string, float>() 
 		{	
-			{facp.ID, 0.5f},
+			{facp.ID, 0.0f},
 			{fac1.ID, 0},
 			{fac2.ID, 1},
 			{fac4.ID, 1},
@@ -165,10 +165,9 @@ public class NPCManager
 		ship.FuelAmount = loadout.FuelAmount;
 		ship.MaxLifeSupport = stats.LifeSupport;
 		ship.LifeSupportAmount = loadout.LifeSupportAmount;
+		ship.PowerSupply = stats.PowerSupply;
 		ship.TorqueModifier = stats.TurnRate;
-		ship.WeaponCapacitorTotal = stats.WeaponCapacitor;
-		ship.WeaponCapacitorAmount = ship.WeaponCapacitorTotal;
-		ship.WeaponCapacitorRechargeRate = stats.WeaponCapacitorRecharge;
+		ship.PowerSupply = stats.PowerSupply;
 		ship.ShieldPowerAlloc = 1;
 		ship.WeaponPowerAlloc = 1;
 		ship.EnginePowerAlloc = 1;
@@ -184,6 +183,10 @@ public class NPCManager
 		ship.Storage.Initialize();
 		ship.Storage.AmmoBaySize = stats.AmmoBaySize;
 		ship.Storage.CargoBaySize = stats.CargoBaySize;
+		ship.WeaponCapacitor = shipModel.GetComponent<WeaponCapacitor>();
+		ship.WeaponCapacitor.Initialize();
+
+		//TODO: set component data from installed equipment
 
 		ship.MyLoadout = loadout;
 	}

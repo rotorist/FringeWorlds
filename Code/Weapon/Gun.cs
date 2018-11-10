@@ -35,7 +35,7 @@ public class Gun : Weapon
 
 	public override void Fire()
 	{
-		if(_isCooledDown && ParentShip.WeaponCapacitorAmount >= PowerConsumption)
+		if(_isCooledDown && ParentShip.WeaponCapacitor.IsPowerAvailable(PowerConsumption))
 		{
 			GameObject o = GameObject.Instantiate(Resources.Load(ProjectilePrefab)) as GameObject;
 			Projectile projectile = o.GetComponent<Projectile>();
@@ -55,7 +55,7 @@ public class Gun : Weapon
 
 			if(ParentShip == GameManager.Inst.PlayerControl.PlayerShip)
 			{
-				ParentShip.WeaponCapacitorAmount -= PowerConsumption;
+				ParentShip.WeaponCapacitor.Consume(PowerConsumption);
 			}
 
 			if(Audio != null)

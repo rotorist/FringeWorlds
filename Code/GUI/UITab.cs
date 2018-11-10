@@ -11,7 +11,7 @@ public class UITab : MonoBehaviour
 
 	public UITabSelection ParentSelection;
 
-	public void OnSelect()
+	public void OnSelectTab()
 	{
 		Background.color = new Color(1, 1, 1);
 		Button.hover = new Color(1, 1, 1);
@@ -21,7 +21,7 @@ public class UITab : MonoBehaviour
 		ParentSelection.OnTabSelect(this);
 	}
 
-	public void OnDeselect()
+	public void OnDeselectTab()
 	{
 		Background.color = new Color(0.6f, 0.6f, 0.6f);
 		Button.hover = new Color(0.6f, 0.6f, 0.6f);

@@ -6,6 +6,7 @@ public class PanelBase : MonoBehaviour
 {
 	public bool IsActive;
 
+
 	public virtual void Initialize()
 	{
 		IsActive = true;
@@ -29,6 +30,11 @@ public class PanelBase : MonoBehaviour
 	}
 
 	public virtual void OnTabSelect(string tabName)
+	{
+
+	}
+
+	public virtual void OnItemSelect(InvItemData itemData)
 	{
 
 	}

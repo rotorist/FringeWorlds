@@ -17,14 +17,13 @@ public class ShipBase : MonoBehaviour
 	public Thruster Thruster;
 	public Scanner Scanner;
 	public ShipStorage Storage;
+	public WeaponCapacitor WeaponCapacitor;
 
 	public float TorqueModifier;
 	public float HullCapacity;
 	public float HullAmount;
 
-	public float WeaponCapacitorTotal;
-	public float WeaponCapacitorAmount;
-	public float WeaponCapacitorRechargeRate;
+	public float PowerSupply;
 
 	public float MaxFuel;
 	public float FuelAmount;
@@ -148,9 +147,9 @@ public class ShipBase : MonoBehaviour
 		{
 			return;
 		}
-
+		Debug.Log("Current Hull " + HullAmount);
 		HullAmount = Mathf.Clamp(HullAmount - damage.HullAmount, 0, HullCapacity);
-
+		Debug.Log("current hull " + HullAmount + " damage " + damage.HullAmount);
 		if(HullAmount <= 0 && GameManager.Inst.PlayerControl.PlayerShip != this)
 		{
 			OnDeath(attacker);

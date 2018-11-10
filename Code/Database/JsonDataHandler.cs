@@ -73,7 +73,7 @@ public class JsonDataHandler : DataHandlerBase
 
 	}
 
-	public ShipStats LoadShipStatJson(string fileName)
+	public ShipStats LoadShipStatsJson(string fileName)
 	{
 		Debug.Log("Loading ship from json " + fileName);
 		
@@ -89,13 +89,45 @@ public class JsonDataHandler : DataHandlerBase
 		Dictionary<string, ShipStats> ships = new Dictionary<string, ShipStats>();
 		foreach(FileInfo info in infos)
 		{
-			ShipStats stats = LoadShipStatJson(info.Name);
+			ShipStats stats = LoadShipStatsJson(info.Name);
 			ships.Add(stats.ID, stats);
 		}
 
 
 		return ships;
 	}
+
+
+	public ItemStats LoadItemStatsJson(string fileName)
+	{
+		Debug.Log("Loading item from json " + fileName);
+
+		string dataAsJson = LoadJsonString("Items/" + fileName);
+		ItemStats item = JsonUtility.FromJson<ItemStats>(dataAsJson);
+		return item;
+	}
+
+	public Dictionary<string, ItemStats> LoadAllItemStats()
+	{
+		Dictionary<string, ItemStats> items = new Dictionary<string, ItemStats>();
+		DirectoryInfo topDirInfo = new DirectoryInfo(this.Path + "Items/");
+		DirectoryInfo [] dirInfos = topDirInfo.GetDirectories();
+		foreach(DirectoryInfo dirInfo in dirInfos)
+		{
+			FileInfo [] infos = dirInfo.GetFiles("*.json");
+			foreach(FileInfo info in infos)
+			{
+				ItemStats stats = LoadItemStatsJson(dirInfo.Name + "/" + info.Name);
+				items.Add(stats.ID, stats);
+
+				Debug.Log(stats.ID + " " + stats.Attributes[0].Name + " " + stats.Attributes[0].SerValue);
+			}
+		}
+
+		return items;
+	}
+
+
 }
 
 

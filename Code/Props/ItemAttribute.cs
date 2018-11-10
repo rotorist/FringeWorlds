@@ -7,6 +7,7 @@ public class ItemAttribute
 {
 	public string Name;
 	public object Value;
+	public string SerValue;
 
 	public ItemAttribute(string name, object value)
 	{
@@ -15,3 +16,4 @@ public class ItemAttribute
 	}
 
 }
+

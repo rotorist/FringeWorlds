@@ -5,7 +5,7 @@ using UnityEngine;
 public class Launcher : Weapon 
 {
 	public AILauncherType AILauncherType;
-	public string ProjectilePrefab;
+	//public string ProjectilePrefab;
 
 
 	private float _coolDownTimer;
@@ -38,10 +38,11 @@ public class Launcher : Weapon
 		if(_isCooledDown)
 		{
 			//check if storage has it
-			if(ParentShip.Storage.TakeAmmo(AmmoID, 1))
+			Item missileItem = ParentShip.Storage.TakeAmmo(AmmoID, 1);
+			if(missileItem != null)
 			{
 
-				GameObject o = GameObject.Instantiate(Resources.Load(ProjectilePrefab)) as GameObject;
+				GameObject o = GameObject.Instantiate(Resources.Load(GameManager.Inst.ItemManager.AllItemStats[AmmoID].PrefabName)) as GameObject;
 				Missile missile = o.GetComponent<Missile>();
 
 				Audio.PlayOneShot(GameManager.Inst.SoundManager.GetClip("MissileFire"));
@@ -64,7 +65,7 @@ public class Launcher : Weapon
 						currentTarget.IncomingMissiles.Add(missile.gameObject);
 					}
 				}
-				missile.Initialize(target);
+				missile.Initialize(target, missileItem);
 				missile.Attacker = this.ParentShip;
 				missile.transform.position = Barrel.transform.position + Barrel.transform.forward * 2f;
 				Vector3 lookTarget = Barrel.transform.position + Barrel.transform.forward * 100;

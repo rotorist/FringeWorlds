@@ -45,33 +45,36 @@ public class PlayerProgress
 		ActiveLoadout.FuelAmount = GameManager.Inst.ItemManager.AllShipStats[ActiveLoadout.ShipID].MaxFuel;
 		ActiveLoadout.LifeSupportAmount = GameManager.Inst.ItemManager.AllShipStats[ActiveLoadout.ShipID].LifeSupport;
 
+		ActiveLoadout.DefenseDeviceIDs = new List<string>()
+		{
+			"dfs_CMDispenser",
+		};
 		ActiveLoadout.Defensives = new List<DefensiveType>()
 		{
 			DefensiveType.Countermeasure,
 		};
 		ActiveLoadout.DefensiveAmmoIDs = new List<string>()
 		{
-			"LongDurationCM",
+			"ammo_LongDurationCM",
 		};
-		Item item = new Item();
-		item.ID = "Class1Missile1";
-		item.DisplayName = "Seeker Missile";
-		item.Type = ItemType.Ammo;
-		item.CargoUnits = 2;
+		Item item = new Item(GameManager.Inst.ItemManager.AllItemStats["ammo_Class1Missile1"]);
 		InvItemData itemData = new InvItemData();
 		itemData.Item = item;
 		itemData.Quantity = 12;
 		ActiveLoadout.AmmoBayItems.Add(itemData);
 
-		Item item2 = new Item();
-		item2.ID = "LongDurationCM";
-		item2.DisplayName = "Long Duration Countermeasure";
-		item2.Type = ItemType.Ammo;
-		item2.CargoUnits = 2;
+		Item item2 = new Item(GameManager.Inst.ItemManager.AllItemStats["ammo_LongDurationCM"]);
 		InvItemData itemData2 = new InvItemData();
 		itemData2.Item = item2;
 		itemData2.Quantity = 10;
 		ActiveLoadout.AmmoBayItems.Add(itemData2);
+		//Debug.Log(ActiveLoadout.AmmoBayItems[1].Item.ID);
+
+		Item item3 = new Item(GameManager.Inst.ItemManager.AllItemStats["shd_KeslerFighterShieldMK1"]);
+		InvItemData itemData3 = new InvItemData();
+		itemData3.Item = item3;
+		itemData3.Quantity = 1;
+		ActiveLoadout.CargoBayItems.Add(itemData3);
 
 		ProfileName = "Kurt";
 	}

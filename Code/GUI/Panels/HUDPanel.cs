@@ -94,7 +94,7 @@ public class HUDPanel : PanelBase
 		UpdatePipPosition();
 		UpdateShieldAmount();
 		UpdateHullAmount();
-		UpdateSupplyAmount();
+		UpdateWeaponCapacitorAmount();
 		UpdateCruisePrep();
 		UpdateSelectMarkerPosition();
 		UpdateUnselectedMarkerPosition();
@@ -332,10 +332,11 @@ public class HUDPanel : PanelBase
 		HullAmountIndicator.SetFillPercentage(currentHull / totalHull);
 	}
 
-	private void UpdateSupplyAmount()
+	private void UpdateWeaponCapacitorAmount()
 	{
-		float totalCapacitor = GameManager.Inst.PlayerControl.PlayerShip.WeaponCapacitorTotal;
-		float currentCapacitor = GameManager.Inst.PlayerControl.PlayerShip.WeaponCapacitorAmount;
+		float totalCapacitor = GameManager.Inst.PlayerControl.PlayerShip.WeaponCapacitor.Capacity;
+		float currentCapacitor = GameManager.Inst.PlayerControl.PlayerShip.WeaponCapacitor.Amount;
+
 		WeaponCapacitorIndicator.SetFillPercentage(currentCapacitor / totalCapacitor);
 	}
 

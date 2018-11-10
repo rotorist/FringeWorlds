@@ -10,8 +10,7 @@ public class ShipStats
 	public string HUDName;
 	public string Description;
 	public float Hull;
-	public float WeaponCapacitor;
-	public float WeaponCapacitorRecharge;
+	public float PowerSupply;
 	public float TurnRate;
 	public float Weight;
 	public int ModSlots;
