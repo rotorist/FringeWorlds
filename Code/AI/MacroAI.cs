@@ -40,9 +40,9 @@ public class MacroAI
 			{ "GimballLeft", "Class2Gun1" },
 			{ "GimballRight", "Class2Gun1" },
 		};
-		party.LeaderLoadout.HullAmount = GameManager.Inst.ItemManager.AllShipStats[party.LeaderLoadout.ShipID].Hull;
-		party.LeaderLoadout.FuelAmount = GameManager.Inst.ItemManager.AllShipStats[party.LeaderLoadout.ShipID].MaxFuel;
-		party.LeaderLoadout.LifeSupportAmount = GameManager.Inst.ItemManager.AllShipStats[party.LeaderLoadout.ShipID].LifeSupport;
+		party.LeaderLoadout.HullAmount = GameManager.Inst.ItemManager.GetShipStats(party.LeaderLoadout.ShipID).Hull;
+		party.LeaderLoadout.FuelAmount = GameManager.Inst.ItemManager.GetShipStats(party.LeaderLoadout.ShipID).MaxFuel;
+		party.LeaderLoadout.LifeSupportAmount = GameManager.Inst.ItemManager.GetShipStats(party.LeaderLoadout.ShipID).LifeSupport;
 
 		party.LeaderLoadout.DefenseDeviceIDs = new List<string>()
 		{
@@ -58,7 +58,7 @@ public class MacroAI
 		};
 
 
-		Item item2 = new Item(GameManager.Inst.ItemManager.AllItemStats["ammo_LongDurationCM"]);
+		Item item2 = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_LongDurationCM"));
 		InvItemData itemData2 = new InvItemData();
 		itemData2.Item = item2;
 		itemData2.Quantity = UnityEngine.Random.Range(1, 3);
@@ -78,9 +78,9 @@ public class MacroAI
 				{ "GimballFront", "Class1Launcher1" },
 			};
 
-			loadout.HullAmount = GameManager.Inst.ItemManager.AllShipStats[loadout.ShipID].Hull;
-			loadout.FuelAmount = GameManager.Inst.ItemManager.AllShipStats[loadout.ShipID].MaxFuel;
-			loadout.LifeSupportAmount = GameManager.Inst.ItemManager.AllShipStats[loadout.ShipID].LifeSupport;
+			loadout.HullAmount = GameManager.Inst.ItemManager.GetShipStats(loadout.ShipID).Hull;
+			loadout.FuelAmount = GameManager.Inst.ItemManager.GetShipStats(loadout.ShipID).MaxFuel;
+			loadout.LifeSupportAmount = GameManager.Inst.ItemManager.GetShipStats(loadout.ShipID).LifeSupport;
 
 			loadout.DefenseDeviceIDs = new List<string>()
 			{
@@ -96,7 +96,7 @@ public class MacroAI
 			};
 
 
-			Item item = new Item(GameManager.Inst.ItemManager.AllItemStats["ammo_Class1Missile1"]);
+			Item item = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_Class1Missile1"));
 			InvItemData itemData = new InvItemData();
 			itemData.Item = item;
 			itemData.Quantity = 2;
@@ -104,7 +104,7 @@ public class MacroAI
 
 			if(UnityEngine.Random.value > 0.4f)
 			{
-				item2 = new Item(GameManager.Inst.ItemManager.AllItemStats["ammo_LongDurationCM"]);
+				item2 = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_LongDurationCM"));
 				itemData2 = new InvItemData();
 				itemData2.Item = item2;
 				itemData2.Quantity = UnityEngine.Random.Range(1, 3);

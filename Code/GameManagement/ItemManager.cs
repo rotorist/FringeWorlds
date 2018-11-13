@@ -15,4 +15,28 @@ public class ItemManager
 		_allShipStats = GameManager.Inst.DBManager.JsonDataHandler.LoadAllShipStats();
 		_allItemStats = GameManager.Inst.DBManager.JsonDataHandler.LoadAllItemStats();
 	}
+
+	public ItemStats GetItemStats(string id)
+	{
+		if(AllItemStats.ContainsKey(id))
+		{
+			return AllItemStats[id];
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	public ShipStats GetShipStats(string id)
+	{
+		if(AllShipStats.ContainsKey(id))
+		{
+			return AllShipStats[id];
+		}
+		else
+		{
+			return null;
+		}
+	}
 }

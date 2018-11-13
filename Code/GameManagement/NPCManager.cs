@@ -148,7 +148,7 @@ public class NPCManager
 		ShipType shipType = loadout.ShipType;
 
 		GameObject shipModel = GameObject.Instantiate(Resources.Load(shipModelID)) as GameObject;
-		ShipStats stats = GameManager.Inst.ItemManager.AllShipStats[shipModelID];
+		ShipStats stats = GameManager.Inst.ItemManager.GetShipStats(shipModelID);
 		shipModel.transform.parent = ship.transform;
 		shipModel.transform.localScale = new Vector3(1, 1, 1);
 		shipModel.transform.localPosition = Vector3.zero;

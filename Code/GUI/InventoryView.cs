@@ -11,16 +11,18 @@ public class InventoryView : MonoBehaviour
 
 	public PanelBase SelectedItemHandler;
 
+	public List<InventoryItemEntry> ItemEntries;
+
 	private List<InvItemData> _inventory;
-	private List<InventoryItemEntry> _entries;
+
 
 	public virtual void Initialize(List<InvItemData> inventory)
 	{
 		Debug.Log("initializing inventory view");
 		_inventory = inventory;
-		if(_entries == null)
+		if(ItemEntries == null)
 		{
-			_entries = new List<InventoryItemEntry>();
+			ItemEntries = new List<InventoryItemEntry>();
 		}
 		Refresh();
 	}
@@ -33,11 +35,11 @@ public class InventoryView : MonoBehaviour
 		}
 
 		//destroy all existing entries
-		foreach(InventoryItemEntry entry in _entries)
+		foreach(InventoryItemEntry entry in ItemEntries)
 		{
 			GameObject.Destroy(entry.gameObject);
 		}
-		_entries.Clear();
+		ItemEntries.Clear();
 
 		//add entries
 		int i = 0;
@@ -55,7 +57,7 @@ public class InventoryView : MonoBehaviour
 			entry.OnDeselect();
 			entry.ItemData = itemData;
 			entry.SetItemText(itemData.Item.DisplayName);
-			_entries.Add(entry);
+			ItemEntries.Add(entry);
 
 			i ++;
 		}
@@ -65,7 +67,7 @@ public class InventoryView : MonoBehaviour
 
 	public void OnUserClickEntry(InventoryItemEntry clickedEntry)
 	{
-		SelectedItemHandler.OnItemSelect(clickedEntry.ItemData);
+		SelectedItemHandler.OnItemSelect(clickedEntry.ItemData, this);
 
 		clickedEntry.OnSelect();
 
@@ -73,7 +75,7 @@ public class InventoryView : MonoBehaviour
 
 	public void DeselectAll()
 	{
-		foreach(InventoryItemEntry entry in _entries)
+		foreach(InventoryItemEntry entry in ItemEntries)
 		{
 			entry.OnDeselect();
 		}

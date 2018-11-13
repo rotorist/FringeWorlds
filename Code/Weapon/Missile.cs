@@ -121,16 +121,16 @@ public class Missile : Ammunition
 	{
 		_stage = MissileStage.None;
 		Target = target;
-		MaxSpeed = missileItem.GetFloatAttribute("MaxSpeed");
+		MaxSpeed = missileItem.GetFloatAttribute("Max Speed");
 		Damage = new Damage();
-		Damage.DamageType = (DamageType)Enum.Parse(typeof(DamageType), missileItem.GetStringAttribute("DamageType"));
-		Damage.ShieldAmount = missileItem.GetFloatAttribute("ShieldDamage");
-		Damage.HullAmount = missileItem.GetFloatAttribute("HullDamage");
-		BlastRadius = missileItem.GetFloatAttribute("BlastRadius");
-		DetonationRadius = missileItem.GetFloatAttribute("DetonationRadius");
-		TurnRate = missileItem.GetFloatAttribute("TurnRate");
+		Damage.DamageType = (DamageType)Enum.Parse(typeof(DamageType), missileItem.GetStringAttribute("Damage Type"));
+		Damage.ShieldAmount = missileItem.GetFloatAttribute("Shield Damage");
+		Damage.HullAmount = missileItem.GetFloatAttribute("Hull Damage");
+		BlastRadius = missileItem.GetFloatAttribute("Blast Radius");
+		DetonationRadius = missileItem.GetFloatAttribute("Detonation Radius");
+		TurnRate = missileItem.GetFloatAttribute("Turn Rate");
 		Acceleration = missileItem.GetFloatAttribute("Acceleration");
-		LaunchedStageDuration = missileItem.GetFloatAttribute("IgnitionDelay");
+		LaunchedStageDuration = missileItem.GetFloatAttribute("Ignition Delay");
 		_rigidbody = transform.GetComponent<Rigidbody>();
 
 		Collider collider = transform.GetComponent<Collider>();

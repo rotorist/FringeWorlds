@@ -36,7 +36,7 @@ public class Item
 		Attributes = new List<ItemAttribute>();
 		foreach(ItemAttribute attribute in stats.Attributes)
 		{
-			ItemAttribute newAttribute = new ItemAttribute(attribute.Name, attribute.SerValue);
+			ItemAttribute newAttribute = new ItemAttribute(attribute.Name, attribute.SerValue, attribute.IsHidden);
 			Attributes.Add(newAttribute);
 		}
 
@@ -57,7 +57,7 @@ public class Item
 		Attributes = new List<ItemAttribute>();
 		foreach(ItemAttribute attribute in item.Attributes)
 		{
-			ItemAttribute newAttribute = new ItemAttribute(attribute.Name, attribute.Value);
+			ItemAttribute newAttribute = new ItemAttribute(attribute.Name, attribute.Value, attribute.IsHidden);
 			Attributes.Add(newAttribute);
 		}
 

@@ -37,7 +37,7 @@ public class ShipDataSheet : PanelBase
 	public void Refresh()
 	{
 		string shipID = GameManager.Inst.PlayerProgress.ActiveLoadout.ShipID;
-		ShipStats stats = GameManager.Inst.ItemManager.AllShipStats[shipID];
+		ShipStats stats = GameManager.Inst.ItemManager.GetShipStats(shipID);
 
 		HullValue.text = stats.Hull.ToString();
 		TurnRateValue.text = stats.TurnRate.ToString();

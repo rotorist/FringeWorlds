@@ -42,7 +42,7 @@ public class Launcher : Weapon
 			if(missileItem != null)
 			{
 
-				GameObject o = GameObject.Instantiate(Resources.Load(GameManager.Inst.ItemManager.AllItemStats[AmmoID].PrefabName)) as GameObject;
+				GameObject o = GameObject.Instantiate(Resources.Load(GameManager.Inst.ItemManager.GetItemStats(AmmoID).PrefabName)) as GameObject;
 				Missile missile = o.GetComponent<Missile>();
 
 				Audio.PlayOneShot(GameManager.Inst.SoundManager.GetClip("MissileFire"));

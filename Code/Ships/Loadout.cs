@@ -13,12 +13,12 @@ public class Loadout
 	public List<string> DefensiveAmmoIDs;
 	public List<InvItemData> AmmoBayItems;
 	public List<InvItemData> CargoBayItems;
-	public string ShieldID;
-	public string WeaponCapacitorID;
-	public string ThrusterID;
-	public string ScannerID;
-	public string TeleporterID;
-	public List<string> ShipModIDs;
+	public InvItemData Shield;
+	public InvItemData WeaponCapacitor;
+	public InvItemData Thruster;
+	public InvItemData Scanner;
+	public InvItemData Teleporter;
+	public List<InvItemData> ShipMods;
 
 	public Vector3 CurrentPowerMgmtButton;
 	public float HullAmount;
@@ -52,12 +52,12 @@ public class LoadoutSaveData
 	public List<string> DefensiveAmmoIDs;
 	public List<InvItemData> AmmoBayItems;
 	public List<InvItemData> CargoBayItems;
-	public string ShieldID;
-	public string WeaponCapacitorID;
-	public string ThrusterID;
-	public string ScannerID;
-	public string TeleporterID;
-	public List<string> ShipModIDs;
+	public InvItemData Shield;
+	public InvItemData WeaponCapacitor;
+	public InvItemData Thruster;
+	public InvItemData Scanner;
+	public InvItemData Teleporter;
+	public List<InvItemData> ShipMods;
 
 	public SerVector3 CurrentPowerMgmtButton;
 	public float HullAmount;

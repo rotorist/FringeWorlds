@@ -24,7 +24,10 @@ public class ShipInfoPanel : PanelBase
 	{
 		base.Initialize();
 		//GameManager.Inst.DBManager.JsonDataHandler.LoadAllItemStats();
-
+		ShipInfoSheet.Initialize();
+		ShipDataSheet.Initialize();
+		EquipmentSheet.Initialize();
+		EquipmentInventorySheet.Initialize();
 	}
 
 	public override void Show ()
@@ -46,13 +49,15 @@ public class ShipInfoPanel : PanelBase
 	{
 		foreach(GameObject go in AllSheets)
 		{
-			NGUITools.SetActive(go, false);
+			//NGUITools.SetActive(go, false);
+			PanelBase sheet = go.GetComponent<PanelBase>();
+			sheet.Hide();
 		}
 
 		if(tabName == "Ship")
 		{
-			NGUITools.SetActive(ShipInfoSheet.gameObject, true);
-			NGUITools.SetActive(ShipDataSheet.gameObject, true);
+			ShipInfoSheet.Show();
+			ShipDataSheet.Show();
 			ShipInfoSheet.Refresh();
 			ShipDataSheet.Refresh();
 			SetLayout(2);
@@ -60,8 +65,8 @@ public class ShipInfoPanel : PanelBase
 		else if(tabName == "Equipment")
 		{
 			
-			NGUITools.SetActive(EquipmentSheet.gameObject, true);
-			NGUITools.SetActive(EquipmentInventorySheet.gameObject, true);
+			EquipmentSheet.Show();
+			EquipmentInventorySheet.Show();
 			EquipmentSheet.Refresh();
 			EquipmentInventorySheet.Refresh();
 			SetLayout(3);

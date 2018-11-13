@@ -24,8 +24,8 @@ public class CMDispenser : Defensive
 			cm.transform.parent = null;
 			CounterMeasureFlares flares = cm.GetComponentInChildren<CounterMeasureFlares>();
 
-			flares.DeviationRadius = ammo.GetFloatAttribute("DeviationRadius");
-			flares.EffectiveTime = ammo.GetFloatAttribute("EffectiveDuration");
+			flares.DeviationRadius = ammo.GetFloatAttribute("Missile Deviation");
+			flares.EffectiveTime = ammo.GetFloatAttribute("Effective Duration");
 			flares.InitialVelocity = ParentShip.RB.velocity;
 			ParentShip.CurrentCountermeasure = cm;
 

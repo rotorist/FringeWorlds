@@ -33,7 +33,7 @@ public class ShipInfoSheet : PanelBase
 	public void Refresh()
 	{
 		string shipID = GameManager.Inst.PlayerProgress.ActiveLoadout.ShipID;
-		ShipStats stats = GameManager.Inst.ItemManager.AllShipStats[shipID];
+		ShipStats stats = GameManager.Inst.ItemManager.GetShipStats(shipID);
 
 		ShipName.text = stats.DisplayName;
 		ShipDescription.text = stats.Description;
@@ -57,9 +57,9 @@ public class ShipInfoSheet : PanelBase
 		else if(GameManager.Inst.SceneType == SceneType.Station)
 		{
 			Loadout activeLoadout = GameManager.Inst.PlayerProgress.ActiveLoadout;
-			hullAmountPercent = activeLoadout.HullAmount / GameManager.Inst.ItemManager.AllShipStats[activeLoadout.ShipID].Hull;
-			fuelAmountPercent = activeLoadout.FuelAmount / GameManager.Inst.ItemManager.AllShipStats[activeLoadout.ShipID].MaxFuel;
-			lsAmountPercent = activeLoadout.LifeSupportAmount / GameManager.Inst.ItemManager.AllShipStats[activeLoadout.ShipID].LifeSupport;
+			hullAmountPercent = activeLoadout.HullAmount / GameManager.Inst.ItemManager.GetShipStats(activeLoadout.ShipID).Hull;
+			fuelAmountPercent = activeLoadout.FuelAmount / GameManager.Inst.ItemManager.GetShipStats(activeLoadout.ShipID).MaxFuel;
+			lsAmountPercent = activeLoadout.LifeSupportAmount / GameManager.Inst.ItemManager.GetShipStats(activeLoadout.ShipID).LifeSupport;
 		}
 
 		HullIndicator.SetFillPercentage(hullAmountPercent);

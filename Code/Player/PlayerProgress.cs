@@ -41,9 +41,9 @@ public class PlayerProgress
 		};
 
 		ActiveLoadout.CurrentPowerMgmtButton = new Vector3(0, -20f, 0);
-		ActiveLoadout.HullAmount = GameManager.Inst.ItemManager.AllShipStats[ActiveLoadout.ShipID].Hull;
-		ActiveLoadout.FuelAmount = GameManager.Inst.ItemManager.AllShipStats[ActiveLoadout.ShipID].MaxFuel;
-		ActiveLoadout.LifeSupportAmount = GameManager.Inst.ItemManager.AllShipStats[ActiveLoadout.ShipID].LifeSupport;
+		ActiveLoadout.HullAmount = GameManager.Inst.ItemManager.GetShipStats(ActiveLoadout.ShipID).Hull;
+		ActiveLoadout.FuelAmount = GameManager.Inst.ItemManager.GetShipStats(ActiveLoadout.ShipID).MaxFuel;
+			ActiveLoadout.LifeSupportAmount = GameManager.Inst.ItemManager.GetShipStats(ActiveLoadout.ShipID).LifeSupport;
 
 		ActiveLoadout.DefenseDeviceIDs = new List<string>()
 		{
@@ -57,24 +57,30 @@ public class PlayerProgress
 		{
 			"ammo_LongDurationCM",
 		};
-		Item item = new Item(GameManager.Inst.ItemManager.AllItemStats["ammo_Class1Missile1"]);
+		Item item = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_Class1Missile1"));
 		InvItemData itemData = new InvItemData();
 		itemData.Item = item;
 		itemData.Quantity = 12;
 		ActiveLoadout.AmmoBayItems.Add(itemData);
 
-		Item item2 = new Item(GameManager.Inst.ItemManager.AllItemStats["ammo_LongDurationCM"]);
+		Item item2 = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_LongDurationCM"));
 		InvItemData itemData2 = new InvItemData();
 		itemData2.Item = item2;
 		itemData2.Quantity = 10;
 		ActiveLoadout.AmmoBayItems.Add(itemData2);
 		//Debug.Log(ActiveLoadout.AmmoBayItems[1].Item.ID);
 
-		Item item3 = new Item(GameManager.Inst.ItemManager.AllItemStats["shd_KeslerFighterShieldMK1"]);
+		Item item3 = new Item(GameManager.Inst.ItemManager.GetItemStats("shd_KeslerFighterShieldMK1"));
 		InvItemData itemData3 = new InvItemData();
 		itemData3.Item = item3;
 		itemData3.Quantity = 1;
 		ActiveLoadout.CargoBayItems.Add(itemData3);
+
+		Item item4 = new Item(GameManager.Inst.ItemManager.GetItemStats("shd_KeslerFighterShieldMK1"));
+		InvItemData itemData4 = new InvItemData();
+		itemData4.Item = item4;
+		itemData4.Quantity = 1;
+		ActiveLoadout.Shield = itemData4;
 
 		ProfileName = "Kurt";
 	}

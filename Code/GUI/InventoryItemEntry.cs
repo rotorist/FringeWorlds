@@ -5,7 +5,7 @@ using UnityEngine;
 public class InventoryItemEntry : MonoBehaviour 
 {
 	public InvItemData ItemData;
-
+	public UILabel HintText;
 	public InventoryView ParentView;
 	public UILabel ItemText;
 	public Transform IconAnchor;
@@ -31,6 +31,21 @@ public class InventoryItemEntry : MonoBehaviour
 
 	public void SetItemText(string text)
 	{
+		if(text == "")
+		{
+			if(HintText != null)
+			{
+				HintText.alpha = 1;
+			}
+		}
+		else
+		{
+			if(HintText != null)
+			{
+				HintText.alpha = 0;
+			}
+		}
+
 		ItemText.text = text;
 	}
 
