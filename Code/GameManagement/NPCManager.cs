@@ -172,7 +172,7 @@ public class NPCManager
 		ship.WeaponPowerAlloc = 1;
 		ship.EnginePowerAlloc = 1;
 		ship.Shield = ship.MyReference.Shield.GetComponent<ShieldBase>();
-		ship.Shield.Initialize();
+		ship.Shield.Initialize(loadout.Shield);
 		ship.Shield.ParentShip = ship;
 		ship.RB = ship.GetComponent<Rigidbody>();
 		ship.RB.inertiaTensor = new Vector3(1, 1, 1);
@@ -184,7 +184,7 @@ public class NPCManager
 		ship.Storage.AmmoBaySize = stats.AmmoBaySize;
 		ship.Storage.CargoBaySize = stats.CargoBaySize;
 		ship.WeaponCapacitor = shipModel.GetComponent<WeaponCapacitor>();
-		ship.WeaponCapacitor.Initialize();
+		ship.WeaponCapacitor.Initialize(loadout.WeaponCapacitor);
 
 		//TODO: set component data from installed equipment
 
@@ -231,10 +231,10 @@ public class NPCManager
 		{
 			ship.Storage.AmmoBayItems.Add(item.Item.ID, item);
 		}
-		ship.Storage.CargoBayItems = new Dictionary<string, InvItemData>();
+		ship.Storage.CargoBayItems = new List<InvItemData>();
 		foreach(InvItemData item in loadout.CargoBayItems)
 		{
-			ship.Storage.CargoBayItems.Add(item.Item.ID, item);
+			ship.Storage.CargoBayItems.Add(item);
 		}
 
 		AI ai = ship.GetComponent<AI>();
@@ -286,12 +286,13 @@ public class NPCManager
 		{
 			ship.Storage.AmmoBayItems.Add(item.Item.ID, item);
 		}
-		ship.Storage.CargoBayItems = new Dictionary<string, InvItemData>();
+
+		ship.Storage.CargoBayItems = new List<InvItemData>();
 		foreach(InvItemData item in loadout.CargoBayItems)
 		{
-			ship.Storage.CargoBayItems.Add(item.Item.ID, item);
+			ship.Storage.CargoBayItems.Add(item);
 		}
-
+		//In$8177BB
 		//load power management setting
 		ship.CurrentPowerMgmtButton = loadout.CurrentPowerMgmtButton;
 

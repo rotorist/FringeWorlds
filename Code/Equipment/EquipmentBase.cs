@@ -4,6 +4,6 @@ using UnityEngine;
 
 public class EquipmentBase : MonoBehaviour 
 {
-	public float PowerAlloc;
+	public float PowerRequired;
 
 }

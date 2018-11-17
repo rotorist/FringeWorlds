@@ -43,7 +43,7 @@ public class PlayerProgress
 		ActiveLoadout.CurrentPowerMgmtButton = new Vector3(0, -20f, 0);
 		ActiveLoadout.HullAmount = GameManager.Inst.ItemManager.GetShipStats(ActiveLoadout.ShipID).Hull;
 		ActiveLoadout.FuelAmount = GameManager.Inst.ItemManager.GetShipStats(ActiveLoadout.ShipID).MaxFuel;
-			ActiveLoadout.LifeSupportAmount = GameManager.Inst.ItemManager.GetShipStats(ActiveLoadout.ShipID).LifeSupport;
+		ActiveLoadout.LifeSupportAmount = GameManager.Inst.ItemManager.GetShipStats(ActiveLoadout.ShipID).LifeSupport;
 
 		ActiveLoadout.DefenseDeviceIDs = new List<string>()
 		{
@@ -81,6 +81,12 @@ public class PlayerProgress
 		itemData4.Item = item4;
 		itemData4.Quantity = 1;
 		ActiveLoadout.Shield = itemData4;
+
+		Item item5 = new Item(GameManager.Inst.ItemManager.GetItemStats("wc_NCPWeaponCapacitorMK1"));
+		InvItemData itemData5 = new InvItemData();
+		itemData5.Item = item5;
+		itemData5.Quantity = 1;
+		ActiveLoadout.CargoBayItems.Add(itemData5);
 
 		ProfileName = "Kurt";
 	}

@@ -10,9 +10,9 @@ public class BigShipShield : ShieldBase
 	private float _fadeAlpha;
 	private float _delayTimer;
 
-	public override void Initialize ()
+	public override void Initialize (InvItemData shieldItem)
 	{
-		base.Initialize ();
+		base.Initialize (shieldItem);
 		Amount = TotalCapacity;
 		_delayTimer = RechargeDelay;
 	}

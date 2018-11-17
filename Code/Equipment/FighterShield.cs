@@ -8,9 +8,9 @@ public class FighterShield : ShieldBase
 	private float _shieldFlashTimer;
 	private float _fadeAlpha;
 
-	public override void Initialize ()
+	public override void Initialize (InvItemData shieldItem)
 	{
-		base.Initialize ();
+		base.Initialize (shieldItem);
 		Amount = TotalCapacity;
 	}
 
@@ -40,7 +40,11 @@ public class FighterShield : ShieldBase
 			shieldFill = RearAmount / RearCapacity;
 		}
 		*/
-		float shieldFill = Amount / TotalCapacity;
+		float shieldFill = 0;
+		if(TotalCapacity > 0)
+		{
+			shieldFill = Amount / TotalCapacity;
+		}
 
 		if(shieldFill > 0.2f)
 		{

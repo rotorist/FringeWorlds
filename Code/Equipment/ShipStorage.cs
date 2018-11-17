@@ -7,15 +7,29 @@ public class ShipStorage : MonoBehaviour
 	public float AmmoBaySize;
 	public float CargoBaySize;
 	public float AmmoBayUsage;
-	public float CargoBayUsage;
 
 	public Dictionary<string, InvItemData> AmmoBayItems;
-	public Dictionary<string, InvItemData> CargoBayItems;
+	public List<InvItemData> CargoBayItems;
 
 	public void Initialize()
 	{
 		AmmoBayItems = new Dictionary<string, InvItemData>();
-		CargoBayItems = new Dictionary<string, InvItemData>();
+		CargoBayItems = new List<InvItemData>();
+	}
+
+	public void Initialize(List<InvItemData> ammoBayItems, List<InvItemData> cargoBayItems)
+	{
+		AmmoBayItems = new Dictionary<string, InvItemData>();
+		foreach(InvItemData item in ammoBayItems)
+		{
+			AmmoBayItems.Add(item.Item.ID, item);
+		}
+
+		CargoBayItems = new List<InvItemData>();
+		foreach(InvItemData item in cargoBayItems)
+		{
+			CargoBayItems.Add(item);
+		}
 	}
 
 	public bool AddAmmo(InvItemData item)
@@ -81,6 +95,12 @@ public class ShipStorage : MonoBehaviour
 
 	public float GetCargoBaySpace()
 	{
-		return CargoBaySize - CargoBayUsage;
+		float usage = 0;
+		foreach(InvItemData item in CargoBayItems)
+		{
+			usage += item.Item.CargoUnits;
+		}
+
+		return CargoBaySize - usage;
 	}
 }

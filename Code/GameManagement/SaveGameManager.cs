@@ -91,15 +91,16 @@ public class SaveGameManager
 		}
 
 		loadout.CargoBayItems = new List<InvItemData>();
-		foreach(KeyValuePair<string,InvItemData> itemData in ship.Storage.AmmoBayItems)
+		foreach(InvItemData itemData in ship.Storage.CargoBayItems)
 		{
-			loadout.CargoBayItems.Add(itemData.Value);
+			loadout.CargoBayItems.Add(itemData);
 		}
 
 		loadout.CurrentPowerMgmtButton = ship.CurrentPowerMgmtButton;
 		loadout.HullAmount = ship.HullAmount;
 		loadout.FuelAmount = ship.FuelAmount;
 		loadout.LifeSupportAmount = ship.LifeSupportAmount;
+
 
 	}
 
@@ -345,7 +346,8 @@ public class SaveGameManager
 			if(loadoutData.LoadoutID == CurrentSave.PlayerActiveLoadoutID)
 			{
 				GameManager.Inst.PlayerProgress.ActiveLoadout = LoadLoadoutFromSave(loadoutData);
-				Debug.Log(GameManager.Inst.PlayerProgress.ActiveLoadout.CurrentPowerMgmtButton);
+
+				//Debug.Log(GameManager.Inst.PlayerProgress.ActiveLoadout.CurrentPowerMgmtButton);
 			}
 		}
 	}
@@ -413,6 +415,12 @@ public class SaveGameManager
 		loadoutData.AmmoBayItems = loadout.AmmoBayItems;
 		loadoutData.CargoBayItems = loadout.CargoBayItems;
 
+		loadoutData.Shield = loadout.Shield;
+		loadoutData.WeaponCapacitor = loadout.WeaponCapacitor;
+		loadoutData.Thruster = loadout.Thruster;
+		loadoutData.Scanner = loadout.Scanner;
+		loadoutData.Teleporter = loadout.Teleporter;
+
 		return loadoutData;
 	}
 
@@ -431,8 +439,55 @@ public class SaveGameManager
 
 		loadout.Defensives = data.Defensives;
 		loadout.DefensiveAmmoIDs = data.DefensiveAmmoIDs;
+
 		loadout.AmmoBayItems = data.AmmoBayItems;
+		foreach(InvItemData itemData in loadout.AmmoBayItems)
+		{
+			if(itemData != null)
+			{
+				itemData.Item.PostLoad();
+			}
+		}
+
 		loadout.CargoBayItems = data.CargoBayItems;
+		foreach(InvItemData itemData in loadout.CargoBayItems)
+		{
+			if(itemData != null)
+			{
+				itemData.Item.PostLoad();
+			}
+		}
+
+		Debug.Log("Cargo bay items count " + loadout.CargoBayItems.Count);
+		loadout.Shield = data.Shield;
+		if(loadout.Shield != null)
+		{
+			loadout.Shield.Item.PostLoad();
+		}
+
+		loadout.WeaponCapacitor = data.WeaponCapacitor;
+		if(loadout.WeaponCapacitor != null)
+		{
+			loadout.WeaponCapacitor.Item.PostLoad();
+		}
+
+		loadout.Thruster = data.Thruster;
+		if(loadout.Thruster != null)
+		{
+			loadout.Thruster.Item.PostLoad();
+		}
+
+		loadout.Scanner = data.Scanner;
+		if(loadout.Scanner != null)
+		{
+			loadout.Scanner.Item.PostLoad();
+		}
+
+		loadout.Teleporter = data.Teleporter;
+		if(loadout.Teleporter != null)
+		{
+			loadout.Teleporter.Item.PostLoad();
+		}
 
 		return loadout;
 	}

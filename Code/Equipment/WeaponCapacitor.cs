@@ -10,9 +10,21 @@ public class WeaponCapacitor : EquipmentBase
 
 	private bool IsEnabled;
 
-	public void Initialize()
+	public void Initialize(InvItemData weaponCapacitorItem)
 	{
-		Amount = Capacity;
+		if(weaponCapacitorItem == null)
+		{
+			Capacity = 0;
+			Amount = 0;
+			RechargeRate = 0;
+		}
+		else
+		{
+			Capacity = weaponCapacitorItem.Item.GetFloatAttribute("Capacity");
+			Amount = Capacity;
+			RechargeRate = weaponCapacitorItem.Item.GetFloatAttribute("Recharge Rate");
+		}
+
 		IsEnabled = true;
 	}
 

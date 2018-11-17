@@ -337,7 +337,14 @@ public class HUDPanel : PanelBase
 		float totalCapacitor = GameManager.Inst.PlayerControl.PlayerShip.WeaponCapacitor.Capacity;
 		float currentCapacitor = GameManager.Inst.PlayerControl.PlayerShip.WeaponCapacitor.Amount;
 
-		WeaponCapacitorIndicator.SetFillPercentage(currentCapacitor / totalCapacitor);
+		if(totalCapacitor > 0)
+		{
+			WeaponCapacitorIndicator.SetFillPercentage(currentCapacitor / totalCapacitor);
+		}
+		else
+		{
+			WeaponCapacitorIndicator.SetFillPercentage(0);
+		}
 	}
 
 	private void UpdateCruisePrep()

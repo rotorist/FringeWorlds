@@ -55,4 +55,12 @@ public class EquipmentActionSheet : PanelBase
 		ItemAttributeValues.text = attributeValues;
 	}
 
+	public void Clear()
+	{
+		SetItemTitle("");
+		SetItemDesc("");
+		ItemAttributes.text = "";
+		ItemAttributeValues.text = "";
+	}
+
 }

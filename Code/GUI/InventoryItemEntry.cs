@@ -35,7 +35,7 @@ public class InventoryItemEntry : MonoBehaviour
 		{
 			if(HintText != null)
 			{
-				HintText.alpha = 1;
+				HintText.alpha = 0.4f;
 			}
 		}
 		else

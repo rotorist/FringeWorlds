@@ -37,6 +37,70 @@ public class Loadout
 
 	}
 
+	public InvItemData GetInvItemFromEquipmentType(string equipmentType)
+	{
+		switch(equipmentType)
+		{
+		case "Shield":
+			return Shield;
+		case "WeaponCapacitor":
+			return WeaponCapacitor;
+		case "Thruster":
+			return Thruster;
+		case "Scanner":
+			return Scanner;
+		case "Teleportor":
+			return Teleporter;
+			break;
+		}
+		return null;
+	}
+	
+	public void SetEquipmentInvItem(InvItemData invItem)
+	{
+		switch(invItem.Item.GetStringAttribute("Equipment Type"))
+		{
+		case "Shield":
+			Shield  = invItem;
+			break;
+		case "WeaponCapacitor":
+			WeaponCapacitor = invItem;
+			break;
+		case "Thruster":
+			Thruster = invItem;
+			break;
+		case "Scanner":
+			Scanner = invItem;
+			break;
+		case "Teleporter":
+			Teleporter = invItem;
+			break;
+		}
+	}
+
+	public void ClearEquipment(InvItemData invItem)
+	{
+		if(Shield == invItem)
+		{
+			Shield = null;
+		}
+		else if(WeaponCapacitor == invItem)
+		{
+			WeaponCapacitor = null;
+		}
+		else if(Thruster == invItem)
+		{
+			Thruster = null;
+		}
+		else if(Scanner == invItem)
+		{
+			Scanner = null;
+		}
+		else if(Teleporter == invItem)
+		{
+			Teleporter = null;
+		}
+	}
 }
 
 [System.Serializable]

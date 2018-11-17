@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class ShieldBase : EquipmentBase
 {
 	public ShieldType Type;
 	public ShieldTech Tech;
+	public ShieldClass Class;
 	public ShipBase ParentShip;
 	public float TotalCapacity;
 	public MeshRenderer MyRenderer;
@@ -13,9 +15,25 @@ public class ShieldBase : EquipmentBase
 	public float RechargeRate;
 	public float RechargeDelay;
 
-	public virtual void Initialize()
+
+	public virtual void Initialize(InvItemData shieldItem)
 	{
-		
+		if(shieldItem == null)
+		{
+			//no shield installed
+			TotalCapacity = 0;
+		}
+		else
+		{
+			Type = (ShieldType)Enum.Parse(typeof(ShieldType), shieldItem.Item.GetStringAttribute("Shield Type"));
+			Tech = (ShieldTech)Enum.Parse(typeof(ShieldTech), shieldItem.Item.GetStringAttribute("Shield Technology"));
+			Class = (ShieldClass)Enum.Parse(typeof(ShieldClass), shieldItem.Item.GetStringAttribute("Shield Class"));
+			TotalCapacity = shieldItem.Item.GetFloatAttribute("Capacity");
+			RechargeRate = shieldItem.Item.GetFloatAttribute("Recharge Rate");
+			RechargeDelay = shieldItem.Item.GetFloatAttribute("Recharge Delay");
+
+		}
+
 		MyRenderer = this.GetComponent<MeshRenderer>();
 		Material mat = null;
 
@@ -110,17 +128,11 @@ public enum ShieldType
 
 public enum ShieldClass
 {
-	F1 = 0,
-	F2 = 1,
-	F3 = 2,
-	F4 = 3,
-	F5 = 4,
-	T1 = 5,
-	T2 = 6,
-	T3 = 7,
-	C1 = 8,
-	C2 = 9,
-	C3 = 10,
+	Fighter = 0, //fighter
+	Transporter = 1, //bigship
+	Explorer = 2, //fighter
+	Cruiser = 3, //bigship
+	CapitolShip = 4, //capitol
 }
 
 public enum ShieldTech
