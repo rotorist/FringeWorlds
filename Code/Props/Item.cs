@@ -67,17 +67,68 @@ public class Item
 
 	public string GetStringAttribute(string name)
 	{
-		return GetAttributeByName(name).Value.ToString();
+		ItemAttribute attribute = GetAttributeByName(name);
+		if(attribute != null)
+		{
+			return attribute.Value.ToString();
+		}
+		else
+		{
+			return "";
+		}
 	}
 
 	public float GetFloatAttribute(string name)
 	{
-		return Convert.ToSingle(GetAttributeByName(name).Value.ToString());
+		ItemAttribute attribute = GetAttributeByName(name);
+		if(attribute != null)
+		{
+			return Convert.ToSingle(attribute.Value.ToString());
+		}
+		else
+		{
+			return 0;
+		}
+
 	}
 
-	public float GetIntAttribute(string name)
+	public int GetIntAttribute(string name)
 	{
-		return Convert.ToInt32(GetAttributeByName(name).Value.ToString());
+		ItemAttribute attribute = GetAttributeByName(name);
+		if(attribute != null)
+		{
+			return Convert.ToInt32(attribute.Value.ToString());
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	public bool GetBoolAttribute(string name)
+	{
+		ItemAttribute attribute = GetAttributeByName(name);
+		if(attribute != null)
+		{
+			return Convert.ToBoolean(attribute.Value.ToString());
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	public int [] GetIntArrayAttribute(string name)
+	{
+		string value = GetStringAttribute(name);
+		string [] stringArray = value.Split(',');
+		int [] intArray = new int[stringArray.Length];
+		for(int i=0; i<stringArray.Length; i++)
+		{
+			intArray[i] = Convert.ToInt32(stringArray[i]);
+		}
+
+		return intArray;
 	}
 
 	public ItemAttribute GetAttributeByName(string name)

@@ -31,7 +31,7 @@ public class ShieldBase : EquipmentBase
 			TotalCapacity = shieldItem.Item.GetFloatAttribute("Capacity");
 			RechargeRate = shieldItem.Item.GetFloatAttribute("Recharge Rate");
 			RechargeDelay = shieldItem.Item.GetFloatAttribute("Recharge Delay");
-
+			this.PowerRequired = shieldItem.Item.GetFloatAttribute("Power Required");
 		}
 
 		MyRenderer = this.GetComponent<MeshRenderer>();

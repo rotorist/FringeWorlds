@@ -57,12 +57,31 @@ public class MacroAI
 			"ammo_LongDurationCM",
 		};
 
+		Item item1 = new Item(GameManager.Inst.ItemManager.GetItemStats("wc_NCPWeaponCapacitorMK1"));
+		InvItemData itemData1 = new InvItemData();
+		itemData1.Item = item1;
+		itemData1.Quantity = 1;
+		party.LeaderLoadout.WeaponCapacitor = itemData1;
 
-		Item item2 = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_LongDurationCM"));
+		Item item2 = new Item(GameManager.Inst.ItemManager.GetItemStats("scn_RadianTekShortRangeScanner"));
 		InvItemData itemData2 = new InvItemData();
 		itemData2.Item = item2;
-		itemData2.Quantity = UnityEngine.Random.Range(1, 3);
-		party.LeaderLoadout.AmmoBayItems.Add(itemData2);
+		itemData2.Quantity = 1;
+		party.LeaderLoadout.Scanner = itemData2;
+
+		Item item3 = new Item(GameManager.Inst.ItemManager.GetItemStats("thr_StrelSkyThrusterMK1"));
+		InvItemData itemData3 = new InvItemData();
+		itemData3.Item = item3;
+		itemData3.Quantity = 1;
+		party.LeaderLoadout.Thruster = itemData3;
+
+		Item item20 = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_LongDurationCM"));
+		InvItemData itemData20 = new InvItemData();
+		itemData20.Item = item20;
+		itemData20.Quantity = UnityEngine.Random.Range(1, 3);
+		party.LeaderLoadout.AmmoBayItems.Add(itemData20);
+
+
 
 
 
@@ -95,6 +114,24 @@ public class MacroAI
 				"ammo_LongDurationCM",
 			};
 
+			Item item11 = new Item(GameManager.Inst.ItemManager.GetItemStats("wc_NCPWeaponCapacitorMK1"));
+			InvItemData itemData11 = new InvItemData();
+			itemData11.Item = item11;
+			itemData11.Quantity = 11;
+			loadout.WeaponCapacitor = itemData11;
+
+			Item item12 = new Item(GameManager.Inst.ItemManager.GetItemStats("scn_RadianTekShortRangeScanner"));
+			InvItemData itemData12 = new InvItemData();
+			itemData12.Item = item12;
+			itemData12.Quantity = 1;
+			loadout.Scanner = itemData12;
+
+			Item item13 = new Item(GameManager.Inst.ItemManager.GetItemStats("thr_StrelSkyThrusterMK1"));
+			InvItemData itemData13 = new InvItemData();
+			itemData13.Item = item13;
+			itemData13.Quantity = 1;
+			loadout.Thruster = itemData13;
+
 
 			Item item = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_Class1Missile1"));
 			InvItemData itemData = new InvItemData();
@@ -104,11 +141,11 @@ public class MacroAI
 
 			if(UnityEngine.Random.value > 0.4f)
 			{
-				item2 = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_LongDurationCM"));
-				itemData2 = new InvItemData();
-				itemData2.Item = item2;
-				itemData2.Quantity = UnityEngine.Random.Range(1, 3);
-				loadout.AmmoBayItems.Add(itemData2);
+				Item item21 = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_LongDurationCM"));
+				InvItemData itemData21 = new InvItemData();
+				itemData21.Item = item21;
+				itemData21.Quantity = UnityEngine.Random.Range(1, 3);
+				loadout.AmmoBayItems.Add(itemData21);
 			}
 
 		}

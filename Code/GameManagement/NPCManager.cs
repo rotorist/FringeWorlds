@@ -178,7 +178,9 @@ public class NPCManager
 		ship.RB.inertiaTensor = new Vector3(1, 1, 1);
 		ship.Engine = shipModel.GetComponent<Engine>();
 		ship.Thruster = shipModel.GetComponent<Thruster>();
+		ship.Thruster.Initialize(loadout.Thruster);
 		ship.Scanner = shipModel.GetComponent<Scanner>();
+		ship.Scanner.Initialize(loadout.Scanner);
 		ship.Storage = shipModel.GetComponent<ShipStorage>();
 		ship.Storage.Initialize();
 		ship.Storage.AmmoBaySize = stats.AmmoBaySize;

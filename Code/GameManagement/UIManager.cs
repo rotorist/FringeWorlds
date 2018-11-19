@@ -17,6 +17,7 @@ public class UIManager
 	public StationHUDPanel StationHUDPanel;
 	public RepairPanel RepairPanel;
 	public ShipInfoPanel ShipInfoPanel;
+	public ErrorMessagePanel ErrorMessagePanel;
 
 	public float UIZoom;
 	public bool IsInHUDRegion;
@@ -68,10 +69,13 @@ public class UIManager
 			RepairPanel.Initialize();
 			ShipInfoPanel = UICamera.transform.Find("ShipInfoPanel").GetComponent<ShipInfoPanel>();
 			ShipInfoPanel.Initialize();
+			ErrorMessagePanel = UICamera.transform.Find("ErrorMessagePanel").GetComponent<ErrorMessagePanel>();
+			ErrorMessagePanel.Initialize();
 
 			_panels.Add(StationHUDPanel);
 			_panels.Add(RepairPanel);
 			_panels.Add(ShipInfoPanel);
+			_panels.Add(ErrorMessagePanel);
 		}
 
 		FadePanel = UICamera.transform.Find("FadePanel").GetComponent<FadePanel>();

@@ -476,7 +476,7 @@ public class HUDPanel : PanelBase
 				isMarkerHidden = true;
 			}
 				
-			if(distFromPlayer > 200)
+			if(distFromPlayer > playerShip.Scanner.Range)
 			{
 				isMarkerHidden = true;
 				isMarkerTooFar = true;
@@ -589,10 +589,14 @@ public class HUDPanel : PanelBase
 
 		//thruster fuel
 		Thruster thruster = GameManager.Inst.PlayerControl.PlayerShip.Thruster;
-		if(thruster != null)
+		if(thruster != null && thruster.MaxFuel > 0)
 		{
 			ThrusterCurve.SetValue(thruster.CurrentFuel / thruster.MaxFuel);
 			//ThrusterBar.height = 20 + Mathf.CeilToInt(80f * thruster.CurrentFuel / thruster.MaxFuel);
+		}
+		else
+		{
+			ThrusterCurve.SetValue(0);
 		}
 
 		//ship speed

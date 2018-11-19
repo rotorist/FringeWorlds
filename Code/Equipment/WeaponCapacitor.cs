@@ -23,6 +23,7 @@ public class WeaponCapacitor : EquipmentBase
 			Capacity = weaponCapacitorItem.Item.GetFloatAttribute("Capacity");
 			Amount = Capacity;
 			RechargeRate = weaponCapacitorItem.Item.GetFloatAttribute("Recharge Rate");
+			this.PowerRequired = weaponCapacitorItem.Item.GetFloatAttribute("Power Required");
 		}
 
 		IsEnabled = true;

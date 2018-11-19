@@ -88,6 +88,18 @@ public class PlayerProgress
 		itemData5.Quantity = 1;
 		ActiveLoadout.CargoBayItems.Add(itemData5);
 
+		Item item6 = new Item(GameManager.Inst.ItemManager.GetItemStats("thr_StrelSkyThrusterMK1"));
+		InvItemData itemData6 = new InvItemData();
+		itemData6.Item = item6;
+		itemData6.Quantity = 1;
+		ActiveLoadout.Thruster = itemData6;
+
+		Item item7 = new Item(GameManager.Inst.ItemManager.GetItemStats("scn_RadianTekShortRangeScanner"));
+		InvItemData itemData7 = new InvItemData();
+		itemData7.Item = item7;
+		itemData7.Quantity = 1;
+		ActiveLoadout.CargoBayItems.Add(itemData7);
+
 		ProfileName = "Kurt";
 	}
 }

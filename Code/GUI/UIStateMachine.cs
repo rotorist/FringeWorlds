@@ -371,6 +371,7 @@ public class UIStateRepair : UIStateBase
 		SM.UIManager.HideAllPanels();
 		SM.UIManager.StationHUDPanel.Show();
 		SM.UIManager.RepairPanel.Show();
+		SM.UIManager.ErrorMessagePanel.Show();
 
 		InputEventHandler.Instance.InputState = InputState.DockedUI;
 
@@ -404,6 +405,7 @@ public class UIStateStationShipInfo : UIStateBase
 		SM.UIManager.HideAllPanels();
 		SM.UIManager.StationHUDPanel.Show();
 		SM.UIManager.ShipInfoPanel.Show();
+		SM.UIManager.ErrorMessagePanel.Show();
 
 		InputEventHandler.Instance.InputState = InputState.DockedUI;
 
