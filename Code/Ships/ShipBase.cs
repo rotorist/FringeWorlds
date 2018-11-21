@@ -18,6 +18,7 @@ public class ShipBase : MonoBehaviour
 	public Scanner Scanner;
 	public ShipStorage Storage;
 	public WeaponCapacitor WeaponCapacitor;
+	public ShipModSlots ShipModSlots;
 
 	public float TorqueModifier;
 	public float HullCapacity;

@@ -5,6 +5,7 @@ using UnityEngine;
 public class EquipmentSheet : PanelBase
 {
 	public StaticInventoryView EquipmentInventory;
+	public StaticInventoryView ShipModsInventory;
 	public InventoryView CargoEquipmentInventory;
 	public EquipmentActionSheet ActionSheet;
 	public ShipInventorySheet ShipInventorySheet;
@@ -12,8 +13,11 @@ public class EquipmentSheet : PanelBase
 	public UIButton InstallButton;
 	public UIButton RemoveButton;
 
+
+
 	public BarIndicator PowerUsage;
 	public UILabel AvailablePower;
+
 
 	private float _availablePower;
 	private InvItemData _selectedItem;
@@ -78,21 +82,42 @@ public class EquipmentSheet : PanelBase
 
 				//remove the invItemData from cargo and assign it to the slot in loadout
 				//determine the slot by "EquipmentType" attribute of the item
-				Loadout activeLoadout = GameManager.Inst.PlayerProgress.ActiveLoadout;
-				if(activeLoadout.CargoBayItems.Contains(_selectedItem))
-				{
-					activeLoadout.CargoBayItems.Remove(_selectedItem);
-				}
 
 				string equipmentType = _selectedItem.Item.GetStringAttribute("Equipment Type");
-				InvItemData tempItem = activeLoadout.GetInvItemFromEquipmentType(equipmentType);
-				if(tempItem != null)
+				Loadout activeLoadout = GameManager.Inst.PlayerProgress.ActiveLoadout;
+
+				if(equipmentType != "PassiveShipMod" && equipmentType != "ActiveShipMod")
 				{
-					activeLoadout.CargoBayItems.Add(tempItem);
+					
+					if(activeLoadout.CargoBayItems.Contains(_selectedItem))
+					{
+						activeLoadout.CargoBayItems.Remove(_selectedItem);
+					}
+
+					InvItemData tempItem = activeLoadout.GetInvItemFromEquipmentType(equipmentType);
+					if(tempItem != null)
+					{
+						activeLoadout.CargoBayItems.Add(tempItem);
+					}
+
+					activeLoadout.SetEquipmentInvItem(_selectedItem, equipmentType);
+					_selectedItem = null;
+					tempItem = null;
 				}
-				activeLoadout.SetEquipmentInvItem(_selectedItem);
-				_selectedItem = null;
-				tempItem = null;
+				else
+				{
+					//try to install the mod
+					bool result = activeLoadout.SetShipModInvItem(_selectedItem, equipmentType);
+					if(result == false)
+					{
+						GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("No Ship Mod slots available.");
+						return;
+					}
+
+					_selectedItem = null;
+				}
+
+
 
 				Refresh();
 

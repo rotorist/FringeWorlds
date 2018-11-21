@@ -18,7 +18,7 @@ public class Loadout
 	public InvItemData Thruster;
 	public InvItemData Scanner;
 	public InvItemData Teleporter;
-	public List<InvItemData> ShipMods;
+	public InvItemData [] ShipMods;
 
 	public Vector3 CurrentPowerMgmtButton;
 	public float HullAmount;
@@ -56,9 +56,9 @@ public class Loadout
 		return null;
 	}
 	
-	public void SetEquipmentInvItem(InvItemData invItem)
+	public void SetEquipmentInvItem(InvItemData invItem, string equipmentType)
 	{
-		switch(invItem.Item.GetStringAttribute("Equipment Type"))
+		switch(equipmentType)
 		{
 		case "Shield":
 			Shield  = invItem;
@@ -76,6 +76,44 @@ public class Loadout
 			Teleporter = invItem;
 			break;
 		}
+	}
+
+	public bool SetShipModInvItem(InvItemData invItem, string equipmentType)
+	{
+		if(equipmentType == "PassiveShipMod")
+		{
+			for(int i=0; i<ShipMods.Length; i++)
+			{
+				if(ShipMods[i] == null)
+				{
+					ShipMods[i] = invItem;
+					return true;
+				}
+			}
+			return false;
+		}
+		else if(equipmentType == "ActiveShipMod")
+		{
+			if(ShipMods.Length > 0 && ShipMods[0] == null)
+			{
+				ShipMods[0] = invItem;
+				return true;
+			}
+
+			return false;
+		}
+
+		return false;
+	}
+
+	public InvItemData GetShipModFromSlotNumber(int slotNumber)
+	{
+		if(ShipMods.Length > slotNumber)
+		{
+			return ShipMods[slotNumber];
+		}
+
+		return null;
 	}
 
 	public void ClearEquipment(InvItemData invItem)
@@ -121,7 +159,7 @@ public class LoadoutSaveData
 	public InvItemData Thruster;
 	public InvItemData Scanner;
 	public InvItemData Teleporter;
-	public List<InvItemData> ShipMods;
+	public InvItemData [] ShipMods;
 
 	public SerVector3 CurrentPowerMgmtButton;
 	public float HullAmount;

@@ -187,8 +187,10 @@ public class NPCManager
 		ship.Storage.CargoBaySize = stats.CargoBaySize;
 		ship.WeaponCapacitor = shipModel.GetComponent<WeaponCapacitor>();
 		ship.WeaponCapacitor.Initialize(loadout.WeaponCapacitor);
-
-		//TODO: set component data from installed equipment
+		ship.ShipModSlots = shipModel.GetComponent<ShipModSlots>();
+		ship.ShipModSlots.NumberOfSlots = stats.ModSlots;
+		ship.ShipModSlots.Initialize(loadout.ShipMods, ship);
+		ship.ShipModSlots.ApplyMods();
 
 		ship.MyLoadout = loadout;
 	}
