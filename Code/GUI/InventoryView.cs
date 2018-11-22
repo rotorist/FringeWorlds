@@ -67,7 +67,7 @@ public class InventoryView : MonoBehaviour
 
 	public void OnUserClickEntry(InventoryItemEntry clickedEntry)
 	{
-		SelectedItemHandler.OnItemSelect(clickedEntry.ItemData, this);
+		SelectedItemHandler.OnItemSelect(clickedEntry, this);
 
 		clickedEntry.OnSelect();
 

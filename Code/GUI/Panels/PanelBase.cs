@@ -34,7 +34,7 @@ public class PanelBase : MonoBehaviour
 
 	}
 
-	public virtual void OnItemSelect(InvItemData itemData, InventoryView container)
+	public virtual void OnItemSelect(InventoryItemEntry itemEntry, InventoryView container)
 	{
 
 	}

@@ -57,6 +57,9 @@ public class PlayerProgress
 		{
 			"ammo_LongDurationCM",
 		};
+
+		ActiveLoadout.ShipMods = new InvItemData[GameManager.Inst.ItemManager.GetShipStats(ActiveLoadout.ShipID).ModSlots];
+
 		Item item = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_Class1Missile1"));
 		InvItemData itemData = new InvItemData();
 		itemData.Item = item;
@@ -99,6 +102,18 @@ public class PlayerProgress
 		itemData7.Item = item7;
 		itemData7.Quantity = 1;
 		ActiveLoadout.CargoBayItems.Add(itemData7);
+
+		Item item8 = new Item(GameManager.Inst.ItemManager.GetItemStats("mod_ShieldConnectorTuningStage1"));
+		InvItemData itemData8 = new InvItemData();
+		itemData8.Item = item8;
+		itemData8.Quantity = 1;
+		ActiveLoadout.CargoBayItems.Add(itemData8);
+
+		Item item9 = new Item(GameManager.Inst.ItemManager.GetItemStats("mod_ShieldConnectorTuningStage2"));
+		InvItemData itemData9 = new InvItemData();
+		itemData9.Item = item9;
+		itemData9.Quantity = 1;
+		ActiveLoadout.CargoBayItems.Add(itemData9);
 
 		ProfileName = "Kurt";
 	}

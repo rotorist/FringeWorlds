@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class StaticInventoryView : InventoryView
 {
-
+	
 
 	private List<InvItemData> _staticInventory;
 
@@ -25,11 +25,15 @@ public class StaticInventoryView : InventoryView
 				ItemEntries[i].ItemData = _staticInventory[i];
 				ItemEntries[i].SetItemText(_staticInventory[i].Item.DisplayName);
 				ItemEntries[i].MyButton.enabled = true;
+				ItemEntries[i].MyButton.isEnabled = true;
+				ItemEntries[i].InventoryIndex = i;
+				//Debug.Log(ItemEntries[i].name + " " + _staticInventory[i].Item.DisplayName + " button enabled " + ItemEntries[i].MyButton.isEnabled);
 			}
 			else
 			{
 				ItemEntries[i].SetItemText("");
 				ItemEntries[i].MyButton.enabled = false;
+				//Debug.Log(ItemEntries[i].name + ItemEntries[i].MyButton.enabled);
 			}
 		}
 	}

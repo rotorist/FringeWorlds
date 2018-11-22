@@ -116,6 +116,19 @@ public class Loadout
 		return null;
 	}
 
+	public InvItemData GetShipModFromID(string itemID)
+	{
+		for(int i=0; i<ShipMods.Length; i++)
+		{
+			if(ShipMods[i] != null && ShipMods[i].Item.ID  == itemID)
+			{
+				return ShipMods[i];
+			}
+		}
+
+		return null;
+	}
+
 	public void ClearEquipment(InvItemData invItem)
 	{
 		if(Shield == invItem)
@@ -138,6 +151,40 @@ public class Loadout
 		{
 			Teleporter = null;
 		}
+	}
+
+	public void RemoveShipModByIndex(int index)
+	{
+		ShipMods[index] = null;
+	}
+
+	public void RemoveShipMod(InvItemData invItem)
+	{
+		for(int i=0; i<ShipMods.Length; i++)
+		{
+			if(ShipMods[i] == invItem)
+			{
+				ShipMods[i] = null;
+			}
+		}
+	}
+
+	public List<InvItemData> GetModDependencies(string itemID)
+	{
+		List<InvItemData> dependencies = new List<InvItemData>();
+		for(int i=0; i<ShipMods.Length; i++)
+		{
+			if(ShipMods[i] == null)
+			{
+				continue;
+			}
+			if(ShipMods[i].Item.GetStringAttribute("Dependency") == itemID)
+			{
+				dependencies.Add(ShipMods[i]);
+			}
+		}
+
+		return dependencies;
 	}
 }
 

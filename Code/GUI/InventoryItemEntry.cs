@@ -13,6 +13,7 @@ public class InventoryItemEntry : MonoBehaviour
 	public UISprite Icon;
 	public float IconSize;
 	public UIButton MyButton;
+	public int InventoryIndex;
 
 	public void OnEntryClick()
 	{

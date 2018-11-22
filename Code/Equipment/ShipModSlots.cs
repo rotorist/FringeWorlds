@@ -18,7 +18,7 @@ public class ShipModSlots : EquipmentBase
 		int activeModIndex = -1;
 		for(int i=0; i<shipMods.Length && i<NumberOfSlots; i++)
 		{
-			if(shipMods[i].Item.GetStringAttribute("Ship Mod Type") == "Active")
+			if(shipMods[i].Item.GetStringAttribute("Equipment Type") == "ActiveShipMod")
 			{
 				activeModIndex = i;
 				ActiveMod = new ShipMod();

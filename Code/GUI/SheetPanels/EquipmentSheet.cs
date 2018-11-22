@@ -13,8 +13,6 @@ public class EquipmentSheet : PanelBase
 	public UIButton InstallButton;
 	public UIButton RemoveButton;
 
-
-
 	public BarIndicator PowerUsage;
 	public UILabel AvailablePower;
 
@@ -22,6 +20,7 @@ public class EquipmentSheet : PanelBase
 	private float _availablePower;
 	private InvItemData _selectedItem;
 	private InventoryView _selectedItemContainer;
+	private int _selectedItemIndex;
 
 	public override void Initialize ()
 	{
@@ -41,18 +40,20 @@ public class EquipmentSheet : PanelBase
 		ClearSelections();
 	}
 
-	public override void OnItemSelect (InvItemData itemData, InventoryView container)
+	public override void OnItemSelect (InventoryItemEntry itemEntry, InventoryView container)
 	{
-		_selectedItem = itemData;
+		_selectedItem = itemEntry.ItemData;
 		_selectedItemContainer = container;
+		_selectedItemIndex = itemEntry.InventoryIndex;
 		EquipmentInventory.DeselectAll();
 		CargoEquipmentInventory.DeselectAll();
+		ShipModsInventory.DeselectAll();
 
-		ActionSheet.SetItemTitle(itemData.Item.DisplayName);
+		ActionSheet.SetItemTitle(itemEntry.ItemData.Item.DisplayName);
 
 		//build description with item description and attributes
-		ActionSheet.SetItemDesc(itemData.Item.Description);
-		ActionSheet.ListItemAttributes(itemData.Item.Attributes);
+		ActionSheet.SetItemDesc(itemEntry.ItemData.Item.Description);
+		ActionSheet.ListItemAttributes(itemEntry.ItemData.Item.Attributes);
 
 		if(container == EquipmentInventory)
 		{
@@ -63,6 +64,11 @@ public class EquipmentSheet : PanelBase
 		{
 			InstallButton.isEnabled = true;
 			RemoveButton.isEnabled = false;
+		}
+		else if(container == ShipModsInventory)
+		{
+			InstallButton.isEnabled = false;
+			RemoveButton.isEnabled = true;
 		}
 	}
 
@@ -89,6 +95,7 @@ public class EquipmentSheet : PanelBase
 				if(equipmentType != "PassiveShipMod" && equipmentType != "ActiveShipMod")
 				{
 					
+
 					if(activeLoadout.CargoBayItems.Contains(_selectedItem))
 					{
 						activeLoadout.CargoBayItems.Remove(_selectedItem);
@@ -106,12 +113,27 @@ public class EquipmentSheet : PanelBase
 				}
 				else
 				{
+					//check if dependency mod is equiped
+					string dependency = _selectedItem.Item.GetStringAttribute("Dependency");
+					if(dependency != "" && activeLoadout.GetShipModFromID(dependency) == null)
+					{
+						GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("Cannot install ship mod. Dependency required.");
+						return;
+					}
+
 					//try to install the mod
 					bool result = activeLoadout.SetShipModInvItem(_selectedItem, equipmentType);
 					if(result == false)
 					{
 						GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("No Ship Mod slots available.");
 						return;
+					}
+					else
+					{
+						if(activeLoadout.CargoBayItems.Contains(_selectedItem))
+						{
+							activeLoadout.CargoBayItems.Remove(_selectedItem);
+						}
 					}
 
 					_selectedItem = null;
@@ -137,9 +159,24 @@ public class EquipmentSheet : PanelBase
 				activeLoadout.ClearEquipment(_selectedItem);
 				activeLoadout.CargoBayItems.Add(_selectedItem);
 
-				Refresh();
+
+			}
+			else if(_selectedItemContainer == ShipModsInventory)
+			{
+				Loadout activeLoadout = GameManager.Inst.PlayerProgress.ActiveLoadout;
+				activeLoadout.CargoBayItems.Add(_selectedItem);
+				activeLoadout.RemoveShipModByIndex(_selectedItemIndex);
+				//also remove any dependencies
+				//check if any mod depends on me
+				List<InvItemData> dependencies = activeLoadout.GetModDependencies(_selectedItem.Item.ID);
+				foreach(InvItemData dependency in dependencies)
+				{
+					activeLoadout.RemoveShipMod(dependency);
+					activeLoadout.CargoBayItems.Add(dependency);
+				}
 			}
 
+			Refresh();
 		}
 	}
 
@@ -154,10 +191,31 @@ public class EquipmentSheet : PanelBase
 		loadoutEquipment.Add(playerLoadout.Teleporter);
 		EquipmentInventory.Initialize(loadoutEquipment);
 
+		//hide mod slots beyond what ship has
+		int numberSlots = GameManager.Inst.ItemManager.AllShipStats[playerLoadout.ShipID].ModSlots;
+		for(int i=0; i<ShipModsInventory.ItemEntries.Count; i++)
+		{
+			if(i < numberSlots)
+			{
+				NGUITools.SetActive(ShipModsInventory.ItemEntries[i].gameObject, true);
+			}
+			else
+			{
+				NGUITools.SetActive(ShipModsInventory.ItemEntries[i].gameObject, false);
+			}
+		}
 		//here add all the mods to loadoutEquipment
+		List<InvItemData> loadoutShipMods = new List<InvItemData>();
+		for(int i=0; i<playerLoadout.ShipMods.Length; i++)
+		{
+			loadoutShipMods.Add(playerLoadout.ShipMods[i]);
+		}
+		ShipModsInventory.Initialize(loadoutShipMods);
 
 		//now get power usage
-		float powerUsage = CalculatePowerUsage(loadoutEquipment);
+		float powerUsageEquipment = CalculatePowerUsage(loadoutEquipment);
+		float powerUsageShipMods = CalculatePowerUsage(loadoutShipMods);
+		float powerUsage = powerUsageEquipment + powerUsageShipMods;
 		float totalPower = GameManager.Inst.ItemManager.AllShipStats[playerLoadout.ShipID].PowerSupply;
 		_availablePower = totalPower - powerUsage;
 		PowerUsage.SetFillPercentage(powerUsage / totalPower);
@@ -171,6 +229,7 @@ public class EquipmentSheet : PanelBase
 	{
 		EquipmentInventory.DeselectAll();
 		CargoEquipmentInventory.DeselectAll();
+		ShipModsInventory.DeselectAll();
 		_selectedItem = null;
 		_selectedItemContainer = null;
 		InstallButton.isEnabled = false;

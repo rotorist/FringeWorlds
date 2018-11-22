@@ -12,7 +12,7 @@ public class ShipMod
 		NumericAttributes = new Dictionary<string, float>();
 		foreach(ItemAttribute attribute in shipModItem.Item.Attributes)
 		{
-			if(attribute.Name != "Ship Mod Type" && attribute.Name != "Power Required" && attribute.Name != "Active Mod Class Name")
+			if(attribute.Name != "Power Required" && attribute.Name != "Active Mod Class Name" && attribute.Name != "Dependency" && attribute.Name != "Equipment Type")
 			{
 				NumericAttributes.Add(attribute.Name, shipModItem.Item.GetFloatAttribute(attribute.Name));
 			}

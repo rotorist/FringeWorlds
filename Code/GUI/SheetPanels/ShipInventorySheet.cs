@@ -5,7 +5,7 @@ using UnityEngine;
 public class ShipInventorySheet : PanelBase
 {
 	public InventoryView Inventory;
-	public ItemType InventoryItemType;
+	public List<ItemType> InventoryItemTypes;
 
 	public override void Initialize ()
 	{
@@ -32,7 +32,7 @@ public class ShipInventorySheet : PanelBase
 			List<InvItemData> itemList = new List<InvItemData>();
 			foreach(InvItemData itemData in GameManager.Inst.PlayerProgress.ActiveLoadout.CargoBayItems)
 			{
-				if(itemData.Item.Type == InventoryItemType)
+				if(InventoryItemTypes.Contains(itemData.Item.Type))
 				{
 					itemList.Add(itemData);
 				}

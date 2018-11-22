@@ -57,6 +57,8 @@ public class MacroAI
 			"ammo_LongDurationCM",
 		};
 
+		party.LeaderLoadout.ShipMods = new InvItemData[GameManager.Inst.ItemManager.GetShipStats(party.LeaderLoadout.ShipID).ModSlots];
+
 		Item item1 = new Item(GameManager.Inst.ItemManager.GetItemStats("wc_NCPWeaponCapacitorMK1"));
 		InvItemData itemData1 = new InvItemData();
 		itemData1.Item = item1;
@@ -113,6 +115,8 @@ public class MacroAI
 			{
 				"ammo_LongDurationCM",
 			};
+
+			loadout.ShipMods = new InvItemData[GameManager.Inst.ItemManager.GetShipStats(loadout.ShipID).ModSlots];
 
 			Item item11 = new Item(GameManager.Inst.ItemManager.GetItemStats("wc_NCPWeaponCapacitorMK1"));
 			InvItemData itemData11 = new InvItemData();
