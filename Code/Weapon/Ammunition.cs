@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Ammunition : MonoBehaviour 
 {
+	public string Type;
 	public Damage Damage;
 	public ShipBase Attacker;
 	public float DamageMultiplier;

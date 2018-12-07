@@ -101,7 +101,14 @@ public class SaveGameManager
 		loadout.FuelAmount = ship.FuelAmount;
 		loadout.LifeSupportAmount = ship.LifeSupportAmount;
 
-
+		//sync weapon ammo assignment
+		foreach(WeaponJoint joint in ship.MyReference.WeaponJoints)
+		{
+			if(joint.MountedWeapon != null && loadout.WeaponJoints.ContainsKey(joint.JointID))
+			{
+				loadout.WeaponJoints[joint.JointID].RelatedItemID = joint.MountedWeapon.AmmoID;
+			}
+		}
 	}
 
 	public void SaveWorldData()
@@ -398,11 +405,11 @@ public class SaveGameManager
 		loadoutData.ShipID = loadout.ShipID;
 		loadoutData.ShipType = loadout.ShipType;
 		loadoutData.WeaponJointNames = new List<string>();
-		loadoutData.WeaponNames = new List<string>();
-		foreach(KeyValuePair<string, string> joint in loadout.WeaponJoints)
+		loadoutData.Weapons = new List<InvItemData>();
+		foreach(KeyValuePair<string, InvItemData> joint in loadout.WeaponJoints)
 		{
 			loadoutData.WeaponJointNames.Add(joint.Key);
-			loadoutData.WeaponNames.Add(joint.Value);
+			loadoutData.Weapons.Add(joint.Value);
 		}
 
 		loadoutData.CurrentPowerMgmtButton = new SerVector3(loadout.CurrentPowerMgmtButton);
@@ -411,7 +418,6 @@ public class SaveGameManager
 		loadoutData.LifeSupportAmount = loadout.LifeSupportAmount;
 
 		loadoutData.Defensives = loadout.Defensives;
-		loadoutData.DefensiveAmmoIDs = loadout.DefensiveAmmoIDs;
 		loadoutData.AmmoBayItems = loadout.AmmoBayItems;
 		loadoutData.CargoBayItems = loadout.CargoBayItems;
 
@@ -421,6 +427,8 @@ public class SaveGameManager
 		loadoutData.Scanner = loadout.Scanner;
 		loadoutData.Teleporter = loadout.Teleporter;
 
+		loadoutData.ShipMods = loadout.ShipMods;
+
 		return loadoutData;
 	}
 
@@ -429,7 +437,7 @@ public class SaveGameManager
 		Loadout loadout = new Loadout(data.ShipID, data.ShipType);
 		for(int i=0; i<data.WeaponJointNames.Count; i++)
 		{
-			loadout.WeaponJoints.Add(data.WeaponJointNames[i], data.WeaponNames[i]);
+			loadout.WeaponJoints.Add(data.WeaponJointNames[i], data.Weapons[i]);
 		}
 		loadout.LoadoutID = data.LoadoutID;
 		loadout.CurrentPowerMgmtButton = data.CurrentPowerMgmtButton.ConvertToVector3();
@@ -438,7 +446,6 @@ public class SaveGameManager
 		loadout.LifeSupportAmount = data.LifeSupportAmount;
 
 		loadout.Defensives = data.Defensives;
-		loadout.DefensiveAmmoIDs = data.DefensiveAmmoIDs;
 
 		loadout.AmmoBayItems = data.AmmoBayItems;
 		foreach(InvItemData itemData in loadout.AmmoBayItems)
@@ -487,6 +494,15 @@ public class SaveGameManager
 		if(loadout.Teleporter != null)
 		{
 			loadout.Teleporter.Item.PostLoad();
+		}
+
+		loadout.ShipMods = data.ShipMods;
+		foreach(InvItemData itemData in loadout.ShipMods)
+		{
+			if(itemData != null)
+			{
+				itemData.Item.PostLoad();
+			}
 		}
 
 		return loadout;

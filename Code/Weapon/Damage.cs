@@ -13,6 +13,7 @@ public class Damage
 
 public enum DamageType
 {
+	Ion,
 	EMP,
 	Photon,
 	Antimatter,

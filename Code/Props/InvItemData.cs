@@ -8,5 +8,5 @@ public class InvItemData
 
 	public Item Item;
 	public int Quantity;
-	
+	public string RelatedItemID;
 }

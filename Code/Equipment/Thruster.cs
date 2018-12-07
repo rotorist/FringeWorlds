@@ -21,7 +21,7 @@ public class Thruster : EquipmentBase
 		}
 		else
 		{
-			MaxSpeed = itemData.Item.GetFloatAttribute("Top Speed") / 100f;
+			MaxSpeed = itemData.Item.GetFloatAttribute("Top Speed");
 			Acceleration = itemData.Item.GetFloatAttribute("Acceleration");
 			MaxFuel = itemData.Item.GetFloatAttribute("Max Fuel");
 			CurrentFuel = MaxFuel;

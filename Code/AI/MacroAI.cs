@@ -30,59 +30,194 @@ public class MacroAI
 		party.PartyNumber = GameManager.Inst.NPCManager.LastUsedPartyNumber + 1;
 		GameManager.Inst.NPCManager.LastUsedPartyNumber = party.PartyNumber;
 
-		//generate loadout
-		party.LeaderLoadout = new Loadout("Trimaran", ShipType.Transport);
-		party.LeaderLoadout.WeaponJoints = new Dictionary<string, string>()
-		{
-			{ "TurretLeft", "Class1Turret1" },
-			{ "TurretRight", "Class1Turret1" },
-			{ "TurretTop", "Class3Turret1" },
-			{ "GimballLeft", "Class2Gun1" },
-			{ "GimballRight", "Class2Gun1" },
-		};
-		party.LeaderLoadout.HullAmount = GameManager.Inst.ItemManager.GetShipStats(party.LeaderLoadout.ShipID).Hull;
-		party.LeaderLoadout.FuelAmount = GameManager.Inst.ItemManager.GetShipStats(party.LeaderLoadout.ShipID).MaxFuel;
-		party.LeaderLoadout.LifeSupportAmount = GameManager.Inst.ItemManager.GetShipStats(party.LeaderLoadout.ShipID).LifeSupport;
-
-		party.LeaderLoadout.DefenseDeviceIDs = new List<string>()
-		{
-			"dfs_CMDispenser",
-		};
-		party.LeaderLoadout.Defensives = new List<DefensiveType>()
-		{
-			DefensiveType.Countermeasure,
-		};
-		party.LeaderLoadout.DefensiveAmmoIDs = new List<string>()
-		{
-			"ammo_LongDurationCM",
-		};
-
-		party.LeaderLoadout.ShipMods = new InvItemData[GameManager.Inst.ItemManager.GetShipStats(party.LeaderLoadout.ShipID).ModSlots];
-
-		Item item1 = new Item(GameManager.Inst.ItemManager.GetItemStats("wc_NCPWeaponCapacitorMK1"));
+		Item item1 = new Item(GameManager.Inst.ItemManager.GetItemStats("wc_VikoWeaponCapacitorMK1"));
 		InvItemData itemData1 = new InvItemData();
 		itemData1.Item = item1;
 		itemData1.Quantity = 1;
-		party.LeaderLoadout.WeaponCapacitor = itemData1;
+
 
 		Item item2 = new Item(GameManager.Inst.ItemManager.GetItemStats("scn_RadianTekShortRangeScanner"));
 		InvItemData itemData2 = new InvItemData();
 		itemData2.Item = item2;
 		itemData2.Quantity = 1;
-		party.LeaderLoadout.Scanner = itemData2;
 
-		Item item3 = new Item(GameManager.Inst.ItemManager.GetItemStats("thr_StrelSkyThrusterMK1"));
+
+		Item item3 = new Item(GameManager.Inst.ItemManager.GetItemStats("thr_StrelskyThrusterMK1"));
 		InvItemData itemData3 = new InvItemData();
 		itemData3.Item = item3;
 		itemData3.Quantity = 1;
-		party.LeaderLoadout.Thruster = itemData3;
+
+
+		Item item4 = new Item(GameManager.Inst.ItemManager.GetItemStats("shd_NCPTransporterShieldMK1"));
+		InvItemData itemData4 = new InvItemData();
+		itemData4.Item = item4;
+		itemData4.Quantity = 1;
+
+
+		Item item5 = new Item(GameManager.Inst.ItemManager.GetItemStats("dfs_CMDispenser"));
+		InvItemData itemData5 = new InvItemData();
+		itemData5.Item = item5;
+		itemData5.Quantity = 1;
+		itemData5.RelatedItemID = "ammo_LongDurationCM";
+
+
+		Item item10 = new Item(GameManager.Inst.ItemManager.GetItemStats("wpn_SDCStomperAutocannon"));
+		InvItemData itemData10 = new InvItemData();
+		itemData10.Item = item10;
+		itemData10.Quantity = 1;
+		itemData10.RelatedItemID = "ammo_20mmTitaniumSlugs";
+
+
+		Item item11 = new Item(GameManager.Inst.ItemManager.GetItemStats("wpn_StrelskyScreamerMissileLauncher"));
+		InvItemData itemData11 = new InvItemData();
+		itemData11.Item = item11;
+		itemData11.Quantity = 1;
+		itemData11.RelatedItemID = "ammo_StrelskySeekerMissile";
+
+
+		Item item12 = new Item(GameManager.Inst.ItemManager.GetItemStats("wpn_AlFasadIonFluxTurretMK1"));
+		InvItemData itemData12 = new InvItemData();
+		itemData12.Item = item12;
+		itemData12.Quantity = 1;
+
+
+		Item item13 = new Item(GameManager.Inst.ItemManager.GetItemStats("wpn_CGGAnnihilatorTurretMK2"));
+		InvItemData itemData13 = new InvItemData();
+		itemData13.Item = item13;
+		itemData13.Quantity = 1;
+
+
+		Item item14 = new Item(GameManager.Inst.ItemManager.GetItemStats("shd_KeslerFighterShieldMK1"));
+		InvItemData itemData14 = new InvItemData();
+		itemData14.Item = item14;
+		itemData14.Quantity = 1;
+
+		Item item15 = new Item(GameManager.Inst.ItemManager.GetItemStats("wpn_AlFasadStingerPulseCannon"));
+		InvItemData itemData15 = new InvItemData();
+		itemData15.Item = item15;
+		itemData15.Quantity = 1;
+
 
 		Item item20 = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_LongDurationCM"));
 		InvItemData itemData20 = new InvItemData();
 		itemData20.Item = item20;
 		itemData20.Quantity = UnityEngine.Random.Range(1, 3);
-		party.LeaderLoadout.AmmoBayItems.Add(itemData20);
 
+
+		Item item21 = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_20mmTitaniumSlugs"));
+		InvItemData itemData21 = new InvItemData();
+		itemData21.Item = item21;
+		itemData21.Quantity = 500;
+
+
+		Item item101 = new Item(GameManager.Inst.ItemManager.GetItemStats("wc_VikoWeaponCapacitorMK1"));
+		InvItemData itemData101 = new InvItemData();
+		itemData101.Item = item101;
+		itemData101.Quantity = 1;
+
+
+		Item item102 = new Item(GameManager.Inst.ItemManager.GetItemStats("scn_RadianTekShortRangeScanner"));
+		InvItemData itemData102 = new InvItemData();
+		itemData102.Item = item102;
+		itemData102.Quantity = 1;
+
+
+		Item item103 = new Item(GameManager.Inst.ItemManager.GetItemStats("thr_StrelskyThrusterMK1"));
+		InvItemData itemData103 = new InvItemData();
+		itemData103.Item = item103;
+		itemData103.Quantity = 1;
+
+
+		Item item104 = new Item(GameManager.Inst.ItemManager.GetItemStats("shd_NCPTransporterShieldMK1"));
+		InvItemData itemData104 = new InvItemData();
+		itemData104.Item = item104;
+		itemData104.Quantity = 1;
+
+
+		Item item105 = new Item(GameManager.Inst.ItemManager.GetItemStats("dfs_CMDispenser"));
+		InvItemData itemData105 = new InvItemData();
+		itemData105.Item = item105;
+		itemData105.Quantity = 1;
+		itemData105.RelatedItemID = "ammo_LongDurationCM";
+
+
+		Item item110 = new Item(GameManager.Inst.ItemManager.GetItemStats("wpn_SDCStomperAutocannon"));
+		InvItemData itemData110 = new InvItemData();
+		itemData110.Item = item110;
+		itemData110.Quantity = 1;
+		itemData110.RelatedItemID = "ammo_20mmTitaniumSlugs";
+
+
+		Item item111 = new Item(GameManager.Inst.ItemManager.GetItemStats("wpn_StrelskyScreamerMissileLauncher"));
+		InvItemData itemData111 = new InvItemData();
+		itemData111.Item = item111;
+		itemData111.Quantity = 1;
+		itemData111.RelatedItemID = "ammo_StrelskySeekerMissile";
+
+
+		Item item112 = new Item(GameManager.Inst.ItemManager.GetItemStats("wpn_AlFasadIonFluxTurretMK1"));
+		InvItemData itemData112 = new InvItemData();
+		itemData112.Item = item112;
+		itemData112.Quantity = 1;
+
+
+		Item item113 = new Item(GameManager.Inst.ItemManager.GetItemStats("wpn_CGGAnnihilatorTurretMK2"));
+		InvItemData itemData113 = new InvItemData();
+		itemData113.Item = item113;
+		itemData113.Quantity = 1;
+
+
+		Item item114 = new Item(GameManager.Inst.ItemManager.GetItemStats("shd_KeslerFighterShieldMK1"));
+		InvItemData itemData114 = new InvItemData();
+		itemData114.Item = item114;
+		itemData114.Quantity = 1;
+
+		Item item115 = new Item(GameManager.Inst.ItemManager.GetItemStats("wpn_AlFasadStingerPulseCannon"));
+		InvItemData itemData115 = new InvItemData();
+		itemData115.Item = item115;
+		itemData115.Quantity = 1;
+
+
+		Item item120 = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_LongDurationCM"));
+		InvItemData itemData120 = new InvItemData();
+		itemData120.Item = item120;
+		itemData120.Quantity = UnityEngine.Random.Range(1, 3);
+
+
+		Item item121 = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_20mmTitaniumSlugs"));
+		InvItemData itemData121 = new InvItemData();
+		itemData121.Item = item121;
+		itemData121.Quantity = 500;
+
+		//generate loadout
+		party.LeaderLoadout = new Loadout("Trimaran", ShipType.Transport);
+
+		party.LeaderLoadout.HullAmount = GameManager.Inst.ItemManager.GetShipStats(party.LeaderLoadout.ShipID).Hull;
+		party.LeaderLoadout.FuelAmount = GameManager.Inst.ItemManager.GetShipStats(party.LeaderLoadout.ShipID).MaxFuel;
+		party.LeaderLoadout.LifeSupportAmount = GameManager.Inst.ItemManager.GetShipStats(party.LeaderLoadout.ShipID).LifeSupport;
+
+		party.LeaderLoadout.Defensives = new List<InvItemData>();
+
+		party.LeaderLoadout.ShipMods = new InvItemData[GameManager.Inst.ItemManager.GetShipStats(party.LeaderLoadout.ShipID).ModSlots];
+
+
+
+		party.LeaderLoadout.WeaponCapacitor = itemData1;
+		party.LeaderLoadout.Shield = itemData4;
+		party.LeaderLoadout.Defensives.Add(itemData5);
+		party.LeaderLoadout.Thruster = itemData3;
+		party.LeaderLoadout.Scanner = itemData2;
+		party.LeaderLoadout.AmmoBayItems.Add(itemData20);
+		party.LeaderLoadout.AmmoBayItems.Add(itemData21);
+
+		party.LeaderLoadout.WeaponJoints = new Dictionary<string, InvItemData>()
+		{
+			{ "GimballLeft", itemData10 },
+			{ "GimballRight", itemData10 },
+			{ "TurretLeft", itemData12 },
+			{ "TurretRight", itemData12 },
+			{ "TurretTop", itemData13 },
+		};
 
 
 
@@ -92,65 +227,33 @@ public class MacroAI
 		{
 			Loadout loadout = new Loadout("Spitfire", ShipType.Fighter);
 			party.FollowerLoadouts.Add(loadout);
-			loadout.WeaponJoints = new Dictionary<string, string>()
+			loadout.WeaponJoints = new Dictionary<string, InvItemData>()
 			{
-				{ "GimballLeft", "Class2Gun1" },
-				{ "GimballRight", "Class2Gun1" },
-				{ "GimballFront", "Class1Launcher1" },
+				{ "GimballLeft", itemData115 },
+				{ "GimballRight", itemData115 },
+				{ "GimballFront", itemData111 },
 			};
 
 			loadout.HullAmount = GameManager.Inst.ItemManager.GetShipStats(loadout.ShipID).Hull;
 			loadout.FuelAmount = GameManager.Inst.ItemManager.GetShipStats(loadout.ShipID).MaxFuel;
 			loadout.LifeSupportAmount = GameManager.Inst.ItemManager.GetShipStats(loadout.ShipID).LifeSupport;
 
-			loadout.DefenseDeviceIDs = new List<string>()
+			loadout.Defensives = new List<InvItemData>();
+
+			loadout.WeaponCapacitor = itemData1;
+			if(UnityEngine.Random.value > 0.6f)
 			{
-				"dfs_CMDispenser",
-			};
-			loadout.Defensives = new List<DefensiveType>()
-			{
-				DefensiveType.Countermeasure,
-			};
-			loadout.DefensiveAmmoIDs = new List<string>()
-			{
-				"ammo_LongDurationCM",
-			};
+				loadout.Defensives.Add(itemData5);
+			}
+			loadout.Shield = itemData114;
+			loadout.Thruster = itemData103;
+			loadout.Scanner = itemData102;
+			loadout.AmmoBayItems.Add(itemData120);
+			loadout.AmmoBayItems.Add(itemData121);
 
 			loadout.ShipMods = new InvItemData[GameManager.Inst.ItemManager.GetShipStats(loadout.ShipID).ModSlots];
 
-			Item item11 = new Item(GameManager.Inst.ItemManager.GetItemStats("wc_NCPWeaponCapacitorMK1"));
-			InvItemData itemData11 = new InvItemData();
-			itemData11.Item = item11;
-			itemData11.Quantity = 11;
-			loadout.WeaponCapacitor = itemData11;
 
-			Item item12 = new Item(GameManager.Inst.ItemManager.GetItemStats("scn_RadianTekShortRangeScanner"));
-			InvItemData itemData12 = new InvItemData();
-			itemData12.Item = item12;
-			itemData12.Quantity = 1;
-			loadout.Scanner = itemData12;
-
-			Item item13 = new Item(GameManager.Inst.ItemManager.GetItemStats("thr_StrelSkyThrusterMK1"));
-			InvItemData itemData13 = new InvItemData();
-			itemData13.Item = item13;
-			itemData13.Quantity = 1;
-			loadout.Thruster = itemData13;
-
-
-			Item item = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_Class1Missile1"));
-			InvItemData itemData = new InvItemData();
-			itemData.Item = item;
-			itemData.Quantity = 2;
-			loadout.AmmoBayItems.Add(itemData);
-
-			if(UnityEngine.Random.value > 0.4f)
-			{
-				Item item21 = new Item(GameManager.Inst.ItemManager.GetItemStats("ammo_LongDurationCM"));
-				InvItemData itemData21 = new InvItemData();
-				itemData21.Item = item21;
-				itemData21.Quantity = UnityEngine.Random.Range(1, 3);
-				loadout.AmmoBayItems.Add(itemData21);
-			}
 
 		}
 
@@ -217,7 +320,7 @@ public class MacroAI
 
 		return party;
 	}
-
+	/*
 	public void GenerateParties()
 	{
 		MacroAIParty party = new MacroAIParty();
@@ -242,7 +345,7 @@ public class MacroAI
 
 		//generate loadout
 		party.LeaderLoadout = new Loadout("LightTransporter", ShipType.Transport);
-		party.LeaderLoadout.WeaponJoints = new Dictionary<string, string>()
+		party.LeaderLoadout.WeaponJoints = new Dictionary<string, InvItemData>()
 		{
 			{ "GimballLeft", "Gun1" },
 			{ "GimballRight", "Gun1" },
@@ -279,7 +382,7 @@ public class MacroAI
 
 		GameManager.Inst.NPCManager.AllParties.Add(party);
 	}
-
+	*/
 	public void PerFrameUpdate()
 	{
 		//each frame update 1 party

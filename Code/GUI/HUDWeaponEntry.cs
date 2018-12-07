@@ -7,7 +7,7 @@ public class HUDWeaponEntry : MonoBehaviour
 	public UILabel WeaponGroupLabel;
 	public UILabel WeaponNameLabel;
 	public UILabel AmmoLabel;
-	public string AmmoID;
+	public string AmmoID = "";
 
 
 

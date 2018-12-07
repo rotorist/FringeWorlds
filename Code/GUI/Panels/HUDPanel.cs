@@ -12,6 +12,8 @@ public class HUDPanel : PanelBase
 	public UISprite PipCenter;
 	public UISprite ShieldIndicatorFront;
 	public UISprite ShieldIndicatorRear;
+	public UILabel ShieldAmount;
+	public UILabel HullAmount;
 	public BarIndicator ShieldAmountIndicator;
 	public BarIndicator HullAmountIndicator;
 	public BarIndicator WeaponCapacitorIndicator;
@@ -316,11 +318,13 @@ public class HUDPanel : PanelBase
 		{
 			FighterShield shield = (FighterShield)shieldBase;
 			ShieldAmountIndicator.SetFillPercentage(shield.GetShieldPercentage());
+			ShieldAmount.text = Mathf.FloorToInt(shield.Amount).ToString();
 		}
 		else if(shieldBase != null && shieldBase.Type == ShieldType.BigShip)
 		{
 			BigShipShield shield = (BigShipShield)shieldBase;
 			ShieldAmountIndicator.SetFillPercentage(shield.GetShieldPercentage());
+			ShieldAmount.text = Mathf.FloorToInt(shield.Amount).ToString();
 		}
 	}
 
@@ -330,6 +334,7 @@ public class HUDPanel : PanelBase
 		float currentHull = GameManager.Inst.PlayerControl.PlayerShip.HullAmount;
 	
 		HullAmountIndicator.SetFillPercentage(currentHull / totalHull);
+		HullAmount.text = Mathf.FloorToInt(currentHull).ToString();
 	}
 
 	private void UpdateWeaponCapacitorAmount()
@@ -602,11 +607,11 @@ public class HUDPanel : PanelBase
 		//ship speed
 		if(GameManager.Inst.PlayerControl.PlayerShip.IsInPortal)
 		{
-			SpeedLabel.text = Mathf.FloorToInt(GameManager.Inst.PlayerControl.PlayerShip.InPortalSpeed * 100).ToString();
+			SpeedLabel.text = Mathf.FloorToInt(GameManager.Inst.PlayerControl.PlayerShip.InPortalSpeed).ToString();
 		}
 		else
 		{
-			SpeedLabel.text = Mathf.FloorToInt(GameManager.Inst.PlayerControl.PlayerShip.RB.velocity.magnitude * 100).ToString();
+			SpeedLabel.text = Mathf.FloorToInt(GameManager.Inst.PlayerControl.PlayerShip.RB.velocity.magnitude).ToString();
 		}
 
 		//throttle
@@ -754,7 +759,7 @@ public class HUDPanel : PanelBase
 		{
 
 			int ammoCount = 0;
-			if(entry.AmmoID != "")
+			if(!string.IsNullOrEmpty(entry.AmmoID))
 			{
 				ammoCount = GameManager.Inst.PlayerControl.PlayerShip.Storage.GetAmmoCount(entry.AmmoID);
 

@@ -69,6 +69,7 @@ public class UIManager
 			RepairPanel.Initialize();
 			ShipInfoPanel = UICamera.transform.Find("ShipInfoPanel").GetComponent<ShipInfoPanel>();
 			ShipInfoPanel.Initialize();
+
 			ErrorMessagePanel = UICamera.transform.Find("ErrorMessagePanel").GetComponent<ErrorMessagePanel>();
 			ErrorMessagePanel.Initialize();
 

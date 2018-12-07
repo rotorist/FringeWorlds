@@ -33,5 +33,7 @@ public class ShipModShield : ShipMod
 			}
 
 		}
+
+		Debug.Log("Shield capacity " + shield.TotalCapacity);
 	}
 }

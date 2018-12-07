@@ -13,10 +13,11 @@ public class CMDispenser : Defensive
 			return;
 		}
 
-		Item ammo = ParentShip.Storage.TakeAmmo(AmmoID, 1);
+		Item ammo = ParentShip.Storage.TakeAmmo(AmmoID, 1, "Countermeasure");
 		if(ammo != null)
 		{
-			GameObject cm = GameObject.Instantiate(Resources.Load("CountermeasureEffect")) as GameObject;
+			string prefabID = ammo.GetStringAttribute("Weapon Prefab ID");
+			GameObject cm = GameObject.Instantiate(Resources.Load(prefabID)) as GameObject;
 			cm.transform.parent = ParentShip.transform;
 			cm.transform.localPosition = Vector3.zero;
 			cm.transform.localEulerAngles = Vector3.zero;

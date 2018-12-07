@@ -34,6 +34,14 @@ public class Engine : EquipmentBase
 		}
 	}
 
+	public void Initialize(ShipStats stats)
+	{
+		MaxSpeed = stats.MaxSpeed;
+		CruiseSpeed = stats.CruiseSpeed;
+		CruisePrepTime = stats.CruisePrepTime;
+		Acceleration = stats.Acceleration;
+	}
+
 	public void StartCruisePrep()
 	{
 		if(!IsCruising && !IsPrepCruise)

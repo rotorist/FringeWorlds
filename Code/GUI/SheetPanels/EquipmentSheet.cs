@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class EquipmentSheet : PanelBase
 {
+	public Loadout CurrentLoadout;
 	public StaticInventoryView EquipmentInventory;
 	public StaticInventoryView ShipModsInventory;
 	public InventoryView CargoEquipmentInventory;
@@ -32,6 +34,7 @@ public class EquipmentSheet : PanelBase
 	{
 		base.Show();
 		ClearSelections();
+		CargoEquipmentInventory.SelectedItemHandler = this;
 	}
 
 	public override void Hide ()
@@ -53,7 +56,8 @@ public class EquipmentSheet : PanelBase
 
 		//build description with item description and attributes
 		ActionSheet.SetItemDesc(itemEntry.ItemData.Item.Description);
-		ActionSheet.ListItemAttributes(itemEntry.ItemData.Item.Attributes);
+		ActionSheet.SetItemSubnote("", "");
+		ActionSheet.ListItemAttributes(itemEntry.ItemData.Item);
 
 		if(container == EquipmentInventory)
 		{
@@ -82,7 +86,7 @@ public class EquipmentSheet : PanelBase
 				if(_availablePower < _selectedItem.Item.GetFloatAttribute("Power Required"))
 				{
 					//issue an error
-					GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("Cannot install equipment. Not enough power.");
+					GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("CANNOT INSTALL EQUIPMENT. NOT ENOUGH POWER");
 					return;
 				}
 
@@ -90,24 +94,33 @@ public class EquipmentSheet : PanelBase
 				//determine the slot by "EquipmentType" attribute of the item
 
 				string equipmentType = _selectedItem.Item.GetStringAttribute("Equipment Type");
-				Loadout activeLoadout = GameManager.Inst.PlayerProgress.ActiveLoadout;
 
 				if(equipmentType != "PassiveShipMod" && equipmentType != "ActiveShipMod")
 				{
-					
-
-					if(activeLoadout.CargoBayItems.Contains(_selectedItem))
+					//if is shield, check shield class
+					if(equipmentType == "Shield")
 					{
-						activeLoadout.CargoBayItems.Remove(_selectedItem);
+						ShieldClass itemShieldClass = (ShieldClass)Enum.Parse(typeof(ShieldClass), _selectedItem.Item.GetStringAttribute("Shield Class"));
+						if(itemShieldClass != GameManager.Inst.ItemManager.AllShipStats[CurrentLoadout.ShipID].ShieldClass)
+						{
+							//issue an error
+							GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("SHIELD CLASS DOES NOT MATCH CURRENT SHIP");
+							return;
+						}
 					}
 
-					InvItemData tempItem = activeLoadout.GetInvItemFromEquipmentType(equipmentType);
+					if(CurrentLoadout.CargoBayItems.Contains(_selectedItem))
+					{
+						CurrentLoadout.CargoBayItems.Remove(_selectedItem);
+					}
+
+					InvItemData tempItem = CurrentLoadout.GetInvItemFromEquipmentType(equipmentType);
 					if(tempItem != null)
 					{
-						activeLoadout.CargoBayItems.Add(tempItem);
+						CurrentLoadout.CargoBayItems.Add(tempItem);
 					}
 
-					activeLoadout.SetEquipmentInvItem(_selectedItem, equipmentType);
+					CurrentLoadout.SetEquipmentInvItem(_selectedItem, equipmentType);
 					_selectedItem = null;
 					tempItem = null;
 				}
@@ -115,24 +128,24 @@ public class EquipmentSheet : PanelBase
 				{
 					//check if dependency mod is equiped
 					string dependency = _selectedItem.Item.GetStringAttribute("Dependency");
-					if(dependency != "" && activeLoadout.GetShipModFromID(dependency) == null)
+					if(dependency != "" && CurrentLoadout.GetShipModFromID(dependency) == null)
 					{
-						GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("Cannot install ship mod. Dependency required.");
+						GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("CANNOT INSTALL SHIP MOD. DEPENDENCY REQUIRED");
 						return;
 					}
 
 					//try to install the mod
-					bool result = activeLoadout.SetShipModInvItem(_selectedItem, equipmentType);
+					bool result = CurrentLoadout.SetShipModInvItem(_selectedItem, equipmentType);
 					if(result == false)
 					{
-						GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("No Ship Mod slots available.");
+						GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("NO SHIP MOD SLOTS AVAILABLE");
 						return;
 					}
 					else
 					{
-						if(activeLoadout.CargoBayItems.Contains(_selectedItem))
+						if(CurrentLoadout.CargoBayItems.Contains(_selectedItem))
 						{
-							activeLoadout.CargoBayItems.Remove(_selectedItem);
+							CurrentLoadout.CargoBayItems.Remove(_selectedItem);
 						}
 					}
 
@@ -151,28 +164,33 @@ public class EquipmentSheet : PanelBase
 	{
 		if(_selectedItem != null)
 		{
+			//check if there's enough cargo space
+			if(_selectedItem.Item.CargoUnits > ShipInventorySheet.AvailableCargoSpaceValue)
+			{
+				GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("NOT ENOUGH SPACE IN CARGO BAY");
+				return;
+			}
+
 			if(_selectedItemContainer == EquipmentInventory)
 			{
 				//remove the item from slot and put it in cargo in loadout
 				//determine the slot by "EquipmentType" attribute of the item
-				Loadout activeLoadout = GameManager.Inst.PlayerProgress.ActiveLoadout;
-				activeLoadout.ClearEquipment(_selectedItem);
-				activeLoadout.CargoBayItems.Add(_selectedItem);
+				CurrentLoadout.ClearEquipment(_selectedItem);
+				CurrentLoadout.CargoBayItems.Add(_selectedItem);
 
 
 			}
 			else if(_selectedItemContainer == ShipModsInventory)
 			{
-				Loadout activeLoadout = GameManager.Inst.PlayerProgress.ActiveLoadout;
-				activeLoadout.CargoBayItems.Add(_selectedItem);
-				activeLoadout.RemoveShipModByIndex(_selectedItemIndex);
+				CurrentLoadout.CargoBayItems.Add(_selectedItem);
+				CurrentLoadout.RemoveShipModByIndex(_selectedItemIndex);
 				//also remove any dependencies
 				//check if any mod depends on me
-				List<InvItemData> dependencies = activeLoadout.GetModDependencies(_selectedItem.Item.ID);
+				List<InvItemData> dependencies = CurrentLoadout.GetModDependencies(_selectedItem.Item.ID);
 				foreach(InvItemData dependency in dependencies)
 				{
-					activeLoadout.RemoveShipMod(dependency);
-					activeLoadout.CargoBayItems.Add(dependency);
+					CurrentLoadout.RemoveShipMod(dependency);
+					CurrentLoadout.CargoBayItems.Add(dependency);
 				}
 			}
 
@@ -182,17 +200,16 @@ public class EquipmentSheet : PanelBase
 
 	public void Refresh()
 	{
-		Loadout playerLoadout = GameManager.Inst.PlayerProgress.ActiveLoadout;
 		List<InvItemData> loadoutEquipment = new List<InvItemData>();
-		loadoutEquipment.Add(playerLoadout.Shield);
-		loadoutEquipment.Add(playerLoadout.WeaponCapacitor);
-		loadoutEquipment.Add(playerLoadout.Thruster);
-		loadoutEquipment.Add(playerLoadout.Scanner);
-		loadoutEquipment.Add(playerLoadout.Teleporter);
+		loadoutEquipment.Add(CurrentLoadout.Shield);
+		loadoutEquipment.Add(CurrentLoadout.WeaponCapacitor);
+		loadoutEquipment.Add(CurrentLoadout.Thruster);
+		loadoutEquipment.Add(CurrentLoadout.Scanner);
+		loadoutEquipment.Add(CurrentLoadout.Teleporter);
 		EquipmentInventory.Initialize(loadoutEquipment);
 
 		//hide mod slots beyond what ship has
-		int numberSlots = GameManager.Inst.ItemManager.AllShipStats[playerLoadout.ShipID].ModSlots;
+		int numberSlots = GameManager.Inst.ItemManager.AllShipStats[CurrentLoadout.ShipID].ModSlots;
 		for(int i=0; i<ShipModsInventory.ItemEntries.Count; i++)
 		{
 			if(i < numberSlots)
@@ -206,9 +223,9 @@ public class EquipmentSheet : PanelBase
 		}
 		//here add all the mods to loadoutEquipment
 		List<InvItemData> loadoutShipMods = new List<InvItemData>();
-		for(int i=0; i<playerLoadout.ShipMods.Length; i++)
+		for(int i=0; i<CurrentLoadout.ShipMods.Length; i++)
 		{
-			loadoutShipMods.Add(playerLoadout.ShipMods[i]);
+			loadoutShipMods.Add(CurrentLoadout.ShipMods[i]);
 		}
 		ShipModsInventory.Initialize(loadoutShipMods);
 
@@ -216,12 +233,16 @@ public class EquipmentSheet : PanelBase
 		float powerUsageEquipment = CalculatePowerUsage(loadoutEquipment);
 		float powerUsageShipMods = CalculatePowerUsage(loadoutShipMods);
 		float powerUsage = powerUsageEquipment + powerUsageShipMods;
-		float totalPower = GameManager.Inst.ItemManager.AllShipStats[playerLoadout.ShipID].PowerSupply;
+		float totalPower = GameManager.Inst.ItemManager.AllShipStats[CurrentLoadout.ShipID].PowerSupply;
 		_availablePower = totalPower - powerUsage;
 		PowerUsage.SetFillPercentage(powerUsage / totalPower);
 		AvailablePower.text = _availablePower.ToString();
 
+		ShipInventorySheet.InventoryItemTypes.Clear();
+		ShipInventorySheet.InventoryItemTypes.Add(ItemType.Equipment);
+		ShipInventorySheet.InventoryItemTypes.Add(ItemType.ShipMod);
 		ShipInventorySheet.Refresh();
+		ShipInventorySheet.RefreshLoadButtons(null);
 		ClearSelections();
 	}
 

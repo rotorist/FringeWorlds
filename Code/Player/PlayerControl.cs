@@ -602,7 +602,12 @@ public class PlayerControl
 			DropCountermeasure();
 		}
 
-
+		//active ship mod
+		if(KeyBinding.Controls[UserInputs.DeployShipMod].Eval())
+		{
+			Debug.Log("Deploy ship mod");
+			DeployShipMod();
+		}
 
 
 
@@ -1238,7 +1243,13 @@ public class PlayerControl
 
 	}
 
-
+	private void DeployShipMod()
+	{
+		if(PlayerShip.ShipModSlots.ActiveMod != null)
+		{
+			PlayerShip.ShipModSlots.ActiveMod.Deploy();
+		}
+	}
 }
 
 public enum SelectedObjectType

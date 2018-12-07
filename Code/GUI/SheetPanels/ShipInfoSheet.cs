@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ShipInfoSheet : PanelBase
 {
+	public Loadout CurrentLoadout;
 	public UILabel ShipName;
 	public UILabel ShipDescription;
 
@@ -32,7 +33,7 @@ public class ShipInfoSheet : PanelBase
 
 	public void Refresh()
 	{
-		string shipID = GameManager.Inst.PlayerProgress.ActiveLoadout.ShipID;
+		string shipID = CurrentLoadout.ShipID;
 		ShipStats stats = GameManager.Inst.ItemManager.GetShipStats(shipID);
 
 		ShipName.text = stats.DisplayName;
@@ -56,10 +57,9 @@ public class ShipInfoSheet : PanelBase
 		}
 		else if(GameManager.Inst.SceneType == SceneType.Station)
 		{
-			Loadout activeLoadout = GameManager.Inst.PlayerProgress.ActiveLoadout;
-			hullAmountPercent = activeLoadout.HullAmount / GameManager.Inst.ItemManager.GetShipStats(activeLoadout.ShipID).Hull;
-			fuelAmountPercent = activeLoadout.FuelAmount / GameManager.Inst.ItemManager.GetShipStats(activeLoadout.ShipID).MaxFuel;
-			lsAmountPercent = activeLoadout.LifeSupportAmount / GameManager.Inst.ItemManager.GetShipStats(activeLoadout.ShipID).LifeSupport;
+			hullAmountPercent = CurrentLoadout.HullAmount / GameManager.Inst.ItemManager.GetShipStats(CurrentLoadout.ShipID).Hull;
+			fuelAmountPercent = CurrentLoadout.FuelAmount / GameManager.Inst.ItemManager.GetShipStats(CurrentLoadout.ShipID).MaxFuel;
+			lsAmountPercent = CurrentLoadout.LifeSupportAmount / GameManager.Inst.ItemManager.GetShipStats(CurrentLoadout.ShipID).LifeSupport;
 		}
 
 		HullIndicator.SetFillPercentage(hullAmountPercent);

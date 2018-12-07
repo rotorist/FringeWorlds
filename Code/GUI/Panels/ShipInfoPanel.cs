@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class ShipInfoPanel : PanelBase
 {
+	public Loadout CurrentLoadout;
 	public ShipInfoSheet ShipInfoSheet;
 	public ShipDataSheet ShipDataSheet;
 	public EquipmentSheet EquipmentSheet;
+	public WeaponSheet WeaponSheet;
 	public ShipInventorySheet EquipmentInventorySheet;
 
 	public List<GameObject> AllSheets;
@@ -29,12 +31,22 @@ public class ShipInfoPanel : PanelBase
 		ShipInfoSheet.Initialize();
 		ShipDataSheet.Initialize();
 		EquipmentSheet.Initialize();
+		WeaponSheet.Initialize();
 		EquipmentInventorySheet.Initialize();
+
+
 	}
 
 	public override void Show ()
 	{
 		base.Show();
+
+		ShipInfoSheet.CurrentLoadout = CurrentLoadout;
+		ShipDataSheet.CurrentLoadout = CurrentLoadout;
+		EquipmentSheet.CurrentLoadout = CurrentLoadout;
+		WeaponSheet.CurrentLoadout = CurrentLoadout;
+		EquipmentInventorySheet.CurrentLoadout = CurrentLoadout;
+
 		GameManager.Inst.CameraController.SetCameraBlur(20f, true);
 		Tabs.ForceSelectTab("Ship");
 
@@ -71,8 +83,18 @@ public class ShipInfoPanel : PanelBase
 			EquipmentInventorySheet.Show();
 			EquipmentSheet.Refresh();
 			EquipmentInventorySheet.Refresh();
+			EquipmentInventorySheet.RefreshLoadButtons(null);
 			SetLayout(3);
 
+		}
+		else if(tabName == "Weapon")
+		{
+			WeaponSheet.Show();
+			EquipmentInventorySheet.Show();
+			WeaponSheet.Refresh();
+			EquipmentInventorySheet.Refresh();
+			EquipmentInventorySheet.RefreshLoadButtons(null);
+			SetLayout(3);
 		}
 	}
 

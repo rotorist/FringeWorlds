@@ -100,22 +100,23 @@ public class WeaponJoint : MonoBehaviour
 		}
 	}
 
-	public void LoadWeapon(string weaponID)
+	public void LoadWeapon(InvItemData weaponItem)
 	{
 		if(MountedWeapon != null)
 		{
-			GameObject.Destroy(MountedWeapon);
+			GameObject.Destroy(MountedWeapon.gameObject);
 			MountedWeapon = null;
 		}
-
-		GameObject o = GameObject.Instantiate(Resources.Load(weaponID)) as GameObject;
+		Debug.Log("Loading weapon " + weaponItem.Item.ID);
+		GameObject o = GameObject.Instantiate(Resources.Load(weaponItem.Item.GetStringAttribute("Weapon Prefab ID"))) as GameObject;
 		Weapon weapon = o.GetComponent<Weapon>();
 		MountedWeapon = weapon;
 		MountedWeapon.transform.parent = transform;
 		MountedWeapon.transform.localPosition = Vector3.zero;
 		MountedWeapon.transform.LookAt(transform.forward);
 		MountedWeapon.ParentShip = ParentShip;
-		weapon.Rebuild();
+		MountedWeapon.Initialize(weaponItem, weaponItem.RelatedItemID);
+		MountedWeapon.Rebuild();
 	}
 
 
@@ -177,6 +178,7 @@ public class WeaponJoint : MonoBehaviour
 [System.Serializable]
 public class WeaponJointData
 {
+	public string JointID;
 	public int Class;
 	public WeaponRotationType RotationType;
 }

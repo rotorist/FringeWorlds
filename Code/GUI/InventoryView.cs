@@ -9,6 +9,8 @@ public class InventoryView : MonoBehaviour
 	public float LeftX;
 	public float EntryYSize;
 
+	public InvItemData RelatedItem;
+
 	public PanelBase SelectedItemHandler;
 
 	public List<InventoryItemEntry> ItemEntries;
@@ -63,7 +65,18 @@ public class InventoryView : MonoBehaviour
 		}
 	}
 
+	public void RefreshLoadButtons()
+	{
+		foreach(InventoryItemEntry entry in ItemEntries)
+		{
+			entry.RefreshLoadButton();
+		}
+	}
 
+	public void OnLoadButtonClick(InventoryItemEntry clickedEntry)
+	{
+
+	}
 
 	public void OnUserClickEntry(InventoryItemEntry clickedEntry)
 	{

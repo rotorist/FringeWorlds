@@ -108,6 +108,7 @@ public enum UserInputs
 	ThrottleUp,
 	ThrottleDown,
 	PowerManagement,
+	DeployShipMod,
 
 	None,
 }

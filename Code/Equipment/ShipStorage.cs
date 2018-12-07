@@ -54,7 +54,7 @@ public class ShipStorage : MonoBehaviour
 		return true;
 	}
 
-	public Item TakeAmmo(string itemID, int quantity)
+	public Item TakeAmmo(string itemID, int quantity, string ammoType)
 	{
 		if(AmmoBayItems.ContainsKey(itemID))
 		{
@@ -70,6 +70,28 @@ public class ShipStorage : MonoBehaviour
 				}
 
 				return item;
+			}
+		}
+		else if(ammoType != "")
+		{
+			//loop through each item and find one with same ammoType
+			foreach(KeyValuePair<string, InvItemData> ammo in AmmoBayItems)
+			{
+				if(ammo.Value.Item.GetStringAttribute("Ammo Type") == ammoType)
+				{
+					if(ammo.Value.Quantity >= quantity)
+					{
+						Item item = ammo.Value.Item;
+						ammo.Value.Quantity -= quantity;
+						AmmoBayUsage -= quantity * ammo.Value.Item.CargoUnits;
+						if(ammo.Value.Quantity <= 0)
+						{
+							AmmoBayItems.Remove(ammo.Key);
+						}
+
+						return ammo.Value.Item;
+					}
+				}
 			}
 		}
 

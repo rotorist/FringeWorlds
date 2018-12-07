@@ -13,7 +13,7 @@ public class Item
 	public ItemType Type;
 	public float CargoUnits;
 	public float Health;//0 to 1
-
+	public float BaseCost;
 	public List<ItemAttribute> Attributes;
 	public Dictionary<string, int> AttributeIndex;
 
@@ -36,7 +36,7 @@ public class Item
 		Attributes = new List<ItemAttribute>();
 		foreach(ItemAttribute attribute in stats.Attributes)
 		{
-			ItemAttribute newAttribute = new ItemAttribute(attribute.Name, attribute.SerValue, attribute.IsHidden);
+			ItemAttribute newAttribute = new ItemAttribute(attribute.Name, attribute.SerValue, attribute.IsHidden, attribute.Unit);
 			Attributes.Add(newAttribute);
 		}
 
@@ -57,7 +57,7 @@ public class Item
 		Attributes = new List<ItemAttribute>();
 		foreach(ItemAttribute attribute in item.Attributes)
 		{
-			ItemAttribute newAttribute = new ItemAttribute(attribute.Name, attribute.Value, attribute.IsHidden);
+			ItemAttribute newAttribute = new ItemAttribute(attribute.Name, attribute.Value, attribute.IsHidden, attribute.Unit);
 			Attributes.Add(newAttribute);
 		}
 
@@ -188,6 +188,7 @@ public enum ItemType
 	LifeSupport = 5,
 	ShipMod = 6,
 	Equipment = 7,
+	Defensives = 8,
 }
 
 
@@ -200,6 +201,6 @@ public class ItemStats
 	public string Description;
 	public ItemType Type;
 	public float CargoUnits;
-
+	public float BaseCost;
 	public List<ItemAttribute> Attributes;
 }

@@ -8,6 +8,8 @@ public class Projectile : Ammunition
 	public Vector3 Velocity;
 	public float Range;
 
+	public float AdditionalShieldDamage;
+	public float AdditionalHullDamage;
 
 	private float _distTraveled;
 	private float _destroyTimer;
@@ -76,8 +78,12 @@ public class Projectile : Ammunition
 		_rigidbody = GetComponent<Rigidbody>();
 		_rigidbody.velocity = velocity;
 
+		Damage.ShieldAmount += AdditionalShieldDamage;
+		Damage.HullAmount += AdditionalHullDamage;
+
 		Attacker = attacker;
 
 		//GetComponent<TrailRenderer>().enabled = false;
 	}
 }
+

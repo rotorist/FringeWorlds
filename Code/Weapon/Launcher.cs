@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Launcher : Weapon 
 {
@@ -23,7 +24,20 @@ public class Launcher : Weapon
 		}
 	}
 
+	public override void Initialize (InvItemData itemData, string ammoID)
+	{
+		this.WeaponItem = itemData.Item;
+		this.Class = itemData.Item.GetIntAttribute("Weapon Class");
+		this.FireRate = itemData.Item.GetFloatAttribute("Fire Rate");
+		this.PowerConsumption = itemData.Item.GetFloatAttribute("Power Consumption");
+		this.FiringSound = itemData.Item.GetStringAttribute("Firing Sound");
+		this.RotationType = (WeaponRotationType)Enum.Parse(typeof(WeaponRotationType), itemData.Item.GetStringAttribute("Rotation Type"));
+		this.AmmoID = ammoID;
+		this.AmmoType = itemData.Item.GetStringAttribute("Ammo Type");
 
+
+
+	}
 
 	public override void Rebuild ()
 	{
@@ -38,12 +52,38 @@ public class Launcher : Weapon
 		if(_isCooledDown)
 		{
 			//check if storage has it
-			Item missileItem = ParentShip.Storage.TakeAmmo(AmmoID, 1);
-			if(missileItem != null)
-			{
+			GameObject o = null;
+			Missile missile  = null;
+			Item ammoItem = null;
 
-				GameObject o = GameObject.Instantiate(Resources.Load(GameManager.Inst.ItemManager.GetItemStats(AmmoID).PrefabName)) as GameObject;
-				Missile missile = o.GetComponent<Missile>();
+			if(AmmoID == "")
+			{
+				return;
+			}
+			else
+			{
+				ammoItem = ParentShip.Storage.TakeAmmo(AmmoID, 1, this.AmmoType);
+				if(ammoItem != null)
+				{
+					//just in case the ammo type has changed during take ammo, we always assign the item's id to ammoid
+					AmmoID = ammoItem.ID;
+					o = GameObject.Instantiate(Resources.Load(ammoItem.GetStringAttribute("Weapon Prefab ID"))) as GameObject;
+					missile = o.GetComponent<Missile>();
+					Damage damage = new Damage();
+					damage.DamageType = (DamageType)Enum.Parse(typeof(DamageType), ammoItem.GetStringAttribute("Damage Type"));
+					damage.ShieldAmount = ammoItem.GetFloatAttribute("Shield Damage");
+					damage.HullAmount = ammoItem.GetFloatAttribute("Hull Damage");
+					missile.Damage = damage;
+				}
+				else
+				{
+					return;
+				}
+
+			}
+
+			if(missile != null)
+			{
 
 				Audio.PlayOneShot(GameManager.Inst.SoundManager.GetClip("MissileFire"));
 
@@ -65,7 +105,8 @@ public class Launcher : Weapon
 						currentTarget.IncomingMissiles.Add(missile.gameObject);
 					}
 				}
-				missile.Initialize(target, missileItem);
+
+				missile.Initialize(target, ammoItem);
 				missile.Attacker = this.ParentShip;
 				missile.transform.position = Barrel.transform.position + Barrel.transform.forward * 2f;
 				Vector3 lookTarget = Barrel.transform.position + Barrel.transform.forward * 100;

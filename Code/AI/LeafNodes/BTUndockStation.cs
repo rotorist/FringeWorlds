@@ -18,7 +18,7 @@ public class BTUndockStation : BTLeaf
 		{
 			if(_undockSession == null)
 			{
-				Debug.Log("BTUndock: Not docked!");
+				//Debug.Log("BTUndock: Not docked!");
 				return Exit(BTResult.Fail);
 			}
 			else

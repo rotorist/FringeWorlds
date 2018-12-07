@@ -177,6 +177,7 @@ public class NPCManager
 		ship.RB = ship.GetComponent<Rigidbody>();
 		ship.RB.inertiaTensor = new Vector3(1, 1, 1);
 		ship.Engine = shipModel.GetComponent<Engine>();
+		ship.Engine.Initialize(stats);
 		ship.Thruster = shipModel.GetComponent<Thruster>();
 		ship.Thruster.Initialize(loadout.Thruster);
 		ship.Scanner = shipModel.GetComponent<Scanner>();
@@ -187,10 +188,12 @@ public class NPCManager
 		ship.Storage.CargoBaySize = stats.CargoBaySize;
 		ship.WeaponCapacitor = shipModel.GetComponent<WeaponCapacitor>();
 		ship.WeaponCapacitor.Initialize(loadout.WeaponCapacitor);
+
 		ship.ShipModSlots = shipModel.GetComponent<ShipModSlots>();
 		ship.ShipModSlots.NumberOfSlots = stats.ModSlots;
 		ship.ShipModSlots.Initialize(loadout.ShipMods, ship);
 		ship.ShipModSlots.ApplyMods();
+
 
 		ship.MyLoadout = loadout;
 	}
@@ -207,7 +210,7 @@ public class NPCManager
 		foreach(WeaponJoint joint in ship.MyReference.WeaponJoints)
 		{
 			joint.ParentShip = ship;
-			foreach(KeyValuePair<string, string> jointSetup in loadout.WeaponJoints)
+			foreach(KeyValuePair<string, InvItemData> jointSetup in loadout.WeaponJoints)
 			{
 				if(jointSetup.Key == joint.JointID)
 				{
@@ -218,11 +221,11 @@ public class NPCManager
 
 		for(int i=0; i<loadout.Defensives.Count; i++)
 		{
-			if(loadout.Defensives[i] == DefensiveType.Countermeasure)
+			if(loadout.Defensives[i] != null && loadout.Defensives[i].Item.GetStringAttribute("Defensive Type") == "Countermeasure")
 			{
 				CMDispenser dispenser = new CMDispenser();
 				dispenser.ParentShip = ship;
-				dispenser.AmmoID = loadout.DefensiveAmmoIDs[i];
+				dispenser.AmmoID = loadout.Defensives[i].RelatedItemID;
 				dispenser.Type = DefensiveType.Countermeasure;
 				ship.MyReference.Defensives.Add(dispenser);
 
@@ -262,7 +265,7 @@ public class NPCManager
 		foreach(WeaponJoint joint in ship.MyReference.WeaponJoints)
 		{
 			joint.ParentShip = ship;
-			foreach(KeyValuePair<string, string> jointSetup in loadout.WeaponJoints)
+			foreach(KeyValuePair<string, InvItemData> jointSetup in loadout.WeaponJoints)
 			{
 				if(jointSetup.Key == joint.JointID)
 				{
@@ -273,11 +276,11 @@ public class NPCManager
 
 		for(int i=0; i<loadout.Defensives.Count; i++)
 		{
-			if(loadout.Defensives[i] == DefensiveType.Countermeasure)
+			if(loadout.Defensives[i] != null && loadout.Defensives[i].Item.GetStringAttribute("Defensive Type") == "Countermeasure")
 			{
 				CMDispenser dispenser = new CMDispenser();
 				dispenser.ParentShip = ship;
-				dispenser.AmmoID = loadout.DefensiveAmmoIDs[i];
+				dispenser.AmmoID = loadout.Defensives[i].RelatedItemID;
 				dispenser.Type = DefensiveType.Countermeasure;
 				ship.MyReference.Defensives.Add(dispenser);
 

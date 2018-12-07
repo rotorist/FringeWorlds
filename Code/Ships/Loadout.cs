@@ -7,10 +7,8 @@ public class Loadout
 	public string LoadoutID;
 	public string ShipID;
 	public ShipType ShipType;
-	public Dictionary<string, string> WeaponJoints;
-	public List<string> DefenseDeviceIDs;
-	public List<DefensiveType> Defensives;
-	public List<string> DefensiveAmmoIDs;
+	public Dictionary<string, InvItemData> WeaponJoints;
+	public List<InvItemData> Defensives;
 	public List<InvItemData> AmmoBayItems;
 	public List<InvItemData> CargoBayItems;
 	public InvItemData Shield;
@@ -31,7 +29,7 @@ public class Loadout
 	{
 		ShipID = shipID;
 		ShipType = shipType;
-		WeaponJoints = new Dictionary<string, string>();
+		WeaponJoints = new Dictionary<string, InvItemData>();
 		AmmoBayItems = new List<InvItemData>();
 		CargoBayItems = new List<InvItemData>();
 
@@ -54,6 +52,11 @@ public class Loadout
 			break;
 		}
 		return null;
+	}
+
+	public void SetWeaponInvItem(string jointID, InvItemData invItem)
+	{
+		WeaponJoints[jointID] = invItem;
 	}
 	
 	public void SetEquipmentInvItem(InvItemData invItem, string equipmentType)
@@ -195,10 +198,8 @@ public class LoadoutSaveData
 	public string ShipID;
 	public ShipType ShipType;
 	public List<string> WeaponJointNames;
-	public List<string> WeaponNames;
-	public List<string> DefenseDeviceIDs;
-	public List<DefensiveType> Defensives;
-	public List<string> DefensiveAmmoIDs;
+	public List<InvItemData> Weapons;
+	public List<InvItemData> Defensives;
 	public List<InvItemData> AmmoBayItems;
 	public List<InvItemData> CargoBayItems;
 	public InvItemData Shield;
