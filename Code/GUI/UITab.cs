@@ -11,6 +11,14 @@ public class UITab : MonoBehaviour
 
 	public UITabSelection ParentSelection;
 
+	void OnPress(bool isPress)
+	{
+		if(isPress)
+		{
+			OnSelectTab();
+		}
+	}
+
 	public void OnSelectTab()
 	{
 		Background.color = new Color(1, 1, 1);

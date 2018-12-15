@@ -59,6 +59,8 @@ public class InventoryView : MonoBehaviour
 			entry.OnDeselect();
 			entry.ItemData = itemData;
 			entry.SetItemText(itemData.Item.DisplayName);
+			entry.SetItemQuantity(itemData.Quantity);
+
 			ItemEntries.Add(entry);
 
 			i ++;
@@ -73,17 +75,22 @@ public class InventoryView : MonoBehaviour
 		}
 	}
 
-	public void OnLoadButtonClick(InventoryItemEntry clickedEntry)
+	public void OnSecButtonClick(InventoryItemEntry clickedEntry)
 	{
-
+		if(SelectedItemHandler != null)
+		{
+			SelectedItemHandler.OnItemSecButtonClick(clickedEntry, this);
+		}
 	}
 
 	public void OnUserClickEntry(InventoryItemEntry clickedEntry)
 	{
-		SelectedItemHandler.OnItemSelect(clickedEntry, this);
+		if(SelectedItemHandler != null)
+		{
+			SelectedItemHandler.OnItemSelect(clickedEntry, this);
 
-		clickedEntry.OnSelect();
-
+			clickedEntry.OnSelect();
+		}
 	}
 
 	public void DeselectAll()

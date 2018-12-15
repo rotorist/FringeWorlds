@@ -402,7 +402,7 @@ public class UIStateStationShipInfo : UIStateBase
 
 	public override void BeginState()
 	{
-		SM.UIManager.ShipInfoPanel.CurrentLoadout = GameManager.Inst.PlayerProgress.ActiveLoadout;
+		//SM.UIManager.ShipInfoPanel.CurrentLoadout = GameManager.Inst.PlayerProgress.ActiveLoadout;
 		
 		SM.UIManager.HideAllPanels();
 		SM.UIManager.StationHUDPanel.Show();

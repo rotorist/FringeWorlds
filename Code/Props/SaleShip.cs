@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class SaleShip
 {
+	public string ShipID;
 	public float Price;
-	public float Hull;
-	public float WeaponCapacitor;
-	public float TurnRate;
-	public float Weight;
-	public int ModSlots;
-	public List<WeaponJointData> WeaponJoints;
+
 }

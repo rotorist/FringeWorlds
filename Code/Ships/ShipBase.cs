@@ -162,7 +162,7 @@ public class ShipBase : MonoBehaviour
 		float range = 0;
 		foreach(WeaponJoint joint in MyReference.WeaponJoints)
 		{
-			if(joint.MountedWeapon.Range > range)
+			if(joint.MountedWeapon != null && joint.MountedWeapon.Range > range)
 			{
 				range = joint.MountedWeapon.Range;
 			}

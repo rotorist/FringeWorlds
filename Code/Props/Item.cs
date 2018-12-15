@@ -189,6 +189,7 @@ public enum ItemType
 	ShipMod = 6,
 	Equipment = 7,
 	Defensives = 8,
+	HangarItem = 9,
 }
 
 

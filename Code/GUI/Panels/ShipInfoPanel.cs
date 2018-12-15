@@ -5,11 +5,14 @@ using UnityEngine;
 public class ShipInfoPanel : PanelBase
 {
 	public Loadout CurrentLoadout;
+	public ShipHangarSheet ShipHangarSheet;
 	public ShipInfoSheet ShipInfoSheet;
 	public ShipDataSheet ShipDataSheet;
 	public EquipmentSheet EquipmentSheet;
 	public WeaponSheet WeaponSheet;
 	public ShipInventorySheet EquipmentInventorySheet;
+	public EquipmentActionSheet EquipmentActionSheet;
+	public VaultStorageSheet VaultStorageSheet;
 
 	public List<GameObject> AllSheets;
 
@@ -28,24 +31,21 @@ public class ShipInfoPanel : PanelBase
 	{
 		base.Initialize();
 		//GameManager.Inst.DBManager.JsonDataHandler.LoadAllItemStats();
+		ShipHangarSheet.Initialize();
 		ShipInfoSheet.Initialize();
 		ShipDataSheet.Initialize();
 		EquipmentSheet.Initialize();
 		WeaponSheet.Initialize();
 		EquipmentInventorySheet.Initialize();
-
-
+		EquipmentActionSheet.Initialize();
+		VaultStorageSheet.Initialize();
 	}
 
 	public override void Show ()
 	{
 		base.Show();
 
-		ShipInfoSheet.CurrentLoadout = CurrentLoadout;
-		ShipDataSheet.CurrentLoadout = CurrentLoadout;
-		EquipmentSheet.CurrentLoadout = CurrentLoadout;
-		WeaponSheet.CurrentLoadout = CurrentLoadout;
-		EquipmentInventorySheet.CurrentLoadout = CurrentLoadout;
+		ResetLoadout();
 
 		GameManager.Inst.CameraController.SetCameraBlur(20f, true);
 		Tabs.ForceSelectTab("Ship");
@@ -72,15 +72,18 @@ public class ShipInfoPanel : PanelBase
 		{
 			ShipInfoSheet.Show();
 			ShipDataSheet.Show();
+			ShipHangarSheet.Show();
 			ShipInfoSheet.Refresh();
 			ShipDataSheet.Refresh();
-			SetLayout(2);
+			ShipHangarSheet.Refresh();
+			SetLayout(3);
 		}
 		else if(tabName == "Equipment")
 		{
 			
 			EquipmentSheet.Show();
 			EquipmentInventorySheet.Show();
+			EquipmentActionSheet.Show();
 			EquipmentSheet.Refresh();
 			EquipmentInventorySheet.Refresh();
 			EquipmentInventorySheet.RefreshLoadButtons(null);
@@ -91,7 +94,18 @@ public class ShipInfoPanel : PanelBase
 		{
 			WeaponSheet.Show();
 			EquipmentInventorySheet.Show();
+			EquipmentActionSheet.Show();
 			WeaponSheet.Refresh();
+			EquipmentInventorySheet.Refresh();
+			EquipmentInventorySheet.RefreshLoadButtons(null);
+			SetLayout(3);
+		}
+		else if(tabName == "Storage")
+		{
+			VaultStorageSheet.Show();
+			EquipmentActionSheet.Show();
+			EquipmentInventorySheet.Show();
+			VaultStorageSheet.Refresh();
 			EquipmentInventorySheet.Refresh();
 			EquipmentInventorySheet.RefreshLoadButtons(null);
 			SetLayout(3);
@@ -118,7 +132,16 @@ public class ShipInfoPanel : PanelBase
 		}
 	}
 
-
+	public void ResetLoadout()
+	{
+		CurrentLoadout = GameManager.Inst.PlayerProgress.ActiveLoadout;
+		ShipInfoSheet.CurrentLoadout = CurrentLoadout;
+		ShipDataSheet.CurrentLoadout = CurrentLoadout;
+		EquipmentSheet.CurrentLoadout = CurrentLoadout;
+		WeaponSheet.CurrentLoadout = CurrentLoadout;
+		EquipmentInventorySheet.CurrentLoadout = CurrentLoadout;
+		VaultStorageSheet.CurrentLoadout = CurrentLoadout;
+	}
 
 
 

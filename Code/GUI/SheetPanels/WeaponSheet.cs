@@ -18,11 +18,12 @@ public class WeaponSheet : PanelBase
 	public UIButton RemoveButton;
 
 	private InvItemData _selectedWeaponItem;
+	private InventoryItemEntry _selectedItemEntry;
 	private InventoryView _selectedItemContainer;
 	private int _selectedWeaponItemIndex;
 
-	private InvItemData _selectedAmmoItem;
-	private int _selectedAmmoItemIndex;
+	//private InvItemData _selectedAmmoItem;
+	//private int _selectedAmmoItemIndex;
 
 	private List<InvItemData> _installedDefensiveItems;
 
@@ -42,6 +43,11 @@ public class WeaponSheet : PanelBase
 		NGUITools.SetActive(CargoAmmoTabs.gameObject, true);
 		CargoAmmoTabs.ForceSelectTab("Cargo");
 		CargoAmmoInventory.SelectedItemHandler = this;
+
+		InstallButton.isEnabled = false;
+		InstallButton.GetComponent<UISprite>().alpha = 1;
+		RemoveButton.isEnabled = false;
+		RemoveButton.GetComponent<UISprite>().alpha = 1;
 	}
 
 	public override void Hide ()
@@ -50,6 +56,25 @@ public class WeaponSheet : PanelBase
 		ClearSelections();
 		CargoAmmoTabs.ForceSelectTab("Cargo");
 		NGUITools.SetActive(CargoAmmoTabs.gameObject, false);
+
+		InstallButton.isEnabled = false;
+		InstallButton.GetComponent<UISprite>().alpha = 0;
+		RemoveButton.isEnabled = false;
+		RemoveButton.GetComponent<UISprite>().alpha = 0;
+	}
+
+	public override void OnItemSecButtonClick (InventoryItemEntry itemEntry, InventoryView container)
+	{
+		if(itemEntry.ItemData.Item.Type == ItemType.Ammo && _selectedWeaponItem != null)
+		{
+			string ammoType = _selectedWeaponItem.Item.GetStringAttribute("Ammo Type");
+			if(ammoType == itemEntry.ItemData.Item.GetStringAttribute("Ammo Type") && !string.IsNullOrEmpty(ammoType) && _selectedWeaponItem.Item.Type == ItemType.Weapon)
+			{
+				_selectedWeaponItem.RelatedItemID = itemEntry.ItemData.Item.ID;
+				Refresh();
+				OnItemSelect(_selectedItemEntry, _selectedItemContainer);
+			}
+		}
 	}
 
 	public override void OnItemSelect (InventoryItemEntry itemEntry, InventoryView container)
@@ -67,43 +92,45 @@ public class WeaponSheet : PanelBase
 			string ammoName = GameManager.Inst.ItemManager.GetItemStats(loadedAmmoID).DisplayName;
 			ActionSheet.SetItemSubnote("Current Load", ammoName);
 		}
+		else if(!string.IsNullOrEmpty(itemEntry.ItemData.Item.GetStringAttribute("Ammo Type")) && (itemEntry.ItemData.Item.Type == ItemType.Weapon || itemEntry.ItemData.Item.Type == ItemType.Defensives ))
+		{
+			ActionSheet.SetItemSubnote("Current Load", "NONE");
+		}
 		else
 		{
 			ActionSheet.SetItemSubnote("", "");
 		}
 
-		if(container == WeaponInventory || container == DefensivesInventory || itemEntry.ItemData.Item.Type == ItemType.Weapon)
+		if(container == WeaponInventory || container == DefensivesInventory || itemEntry.ItemData.Item.Type == ItemType.Weapon || itemEntry.ItemData.Item.Type == ItemType.Defensives)
 		{
 			_selectedWeaponItem = itemEntry.ItemData;
-			_selectedWeaponItemIndex = itemEntry.InventoryIndex;
+
 
 		}
 		else if(container == CargoAmmoInventory)
 		{
-			_selectedAmmoItem = itemEntry.ItemData;
-			_selectedAmmoItemIndex = itemEntry.InventoryIndex;
-
+			_selectedWeaponItem = itemEntry.ItemData;
+			
 		}
+
+		_selectedItemEntry = itemEntry;
+
+		WeaponInventory.DeselectAll();
+		DefensivesInventory.DeselectAll();
+		CargoAmmoInventory.DeselectAll();
 
 		if(container == WeaponInventory || container == DefensivesInventory)
 		{
-			WeaponInventory.DeselectAll();
-			DefensivesInventory.DeselectAll();
-			if(ShipInventorySheet.InventoryType == InventoryType.CargoBay)
-			{
-				CargoAmmoInventory.DeselectAll();
-			}
+
+
 			InstallButton.isEnabled = false;
 			RemoveButton.isEnabled = true;
 		}
 		else if(container == CargoAmmoInventory)
 		{
-			CargoAmmoInventory.DeselectAll();
-
-			if(itemEntry.ItemData.Item.Type == ItemType.Weapon)
+			if(itemEntry.ItemData.Item.Type == ItemType.Weapon || itemEntry.ItemData.Item.Type == ItemType.Defensives)
 			{
-				WeaponInventory.DeselectAll();
-				DefensivesInventory.DeselectAll();
+
 				InstallButton.isEnabled = true;
 				RemoveButton.isEnabled = false;
 			}
@@ -148,6 +175,7 @@ public class WeaponSheet : PanelBase
 				{
 					CurrentLoadout.SetWeaponInvItem(shipStats.WeaponJoints[i].JointID, _selectedWeaponItem);
 					slotFound = true;
+					break;
 				}
 			}
 
@@ -155,8 +183,91 @@ public class WeaponSheet : PanelBase
 			{
 				GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("NO WEAPON SLOTS AVAILABLE");
 			}
+			else
+			{
+				CurrentLoadout.CargoBayItems.Remove(_selectedWeaponItem);
+				ClearSelections();
+				Refresh();	
+			}
+
 
 		}
+		else if(_selectedWeaponItem != null && _selectedWeaponItem.Item.Type == ItemType.Defensives)
+		{
+			bool slotFound = false;
+			for(int i=0; i<CurrentLoadout.Defensives.Count; i++)
+			{
+				if(CurrentLoadout.Defensives[i] == null)
+				{
+					//load the weapon
+					CurrentLoadout.Defensives[i] = _selectedWeaponItem;
+					slotFound = true;
+				}
+			}
+
+			if(!slotFound)
+			{
+				GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("NO DEFENSIVE SLOTS AVAILABLE");
+			}
+			else
+			{
+				CurrentLoadout.CargoBayItems.Remove(_selectedWeaponItem);
+				ClearSelections();
+				Refresh();	
+			}
+		}
+
+
+
+
+	}
+
+	public void OnRemoveButtonClick()
+	{
+		if(_selectedWeaponItem != null && _selectedWeaponItem.Item.Type == ItemType.Weapon)
+		{
+			//find which joint this weapon is installed
+			Dictionary<string, InvItemData> weaponJointsCopy = new Dictionary<string, InvItemData>(CurrentLoadout.WeaponJoints);
+			foreach(KeyValuePair<string, InvItemData> weaponJoint in weaponJointsCopy)
+			{
+				if(weaponJoint.Value == _selectedWeaponItem)
+				{
+					//check if cargo has enough space
+					if(_selectedWeaponItem.Item.CargoUnits <= ShipInventorySheet.AvailableCargoSpaceValue)
+					{
+						CurrentLoadout.CargoBayItems.Add(_selectedWeaponItem);
+						CurrentLoadout.WeaponJoints[weaponJoint.Key] = null;
+					}
+					else
+					{
+						GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("NOT ENOUGH SPACE IN CARGO BAY");
+					}
+				}
+			}
+			ClearSelections();
+			Refresh();
+		}
+		else if(_selectedWeaponItem != null && _selectedWeaponItem.Item.Type == ItemType.Defensives)
+		{
+			for(int i=0; i<CurrentLoadout.Defensives.Count; i++)
+			{
+				if(CurrentLoadout.Defensives[i] == _selectedWeaponItem)
+				{
+					if(_selectedWeaponItem.Item.CargoUnits <= ShipInventorySheet.AvailableCargoSpaceValue)
+					{
+						CurrentLoadout.CargoBayItems.Add(_selectedWeaponItem);
+						CurrentLoadout.Defensives[i] = null;
+					}
+					else
+					{
+						GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("NOT ENOUGH SPACE IN CARGO BAY");
+					}
+				}
+			}
+			ClearSelections();
+			Refresh();
+		}
+
 
 	}
 
@@ -176,6 +287,12 @@ public class WeaponSheet : PanelBase
 				string jointClass = shipStats.WeaponJoints[i].Class.ToString();
 				hintText = "Class " + jointClass + " Gun/Missile";
 			}
+			else if(shipStats.WeaponJoints[i].RotationType == WeaponRotationType.Turret)
+			{
+				string jointClass = shipStats.WeaponJoints[i].Class.ToString();
+				hintText = "Class " + jointClass + " Turret";
+			}
+			NGUITools.SetActive(WeaponInventory.ItemEntries[i].gameObject, true);
 			WeaponInventory.ItemEntries[i].SetHintText(hintText);
 			_weaponSlots.Add(shipStats.WeaponJoints[i].JointID, WeaponInventory.ItemEntries[i]);
 
@@ -218,6 +335,7 @@ public class WeaponSheet : PanelBase
 		if(ShipInventorySheet.InventoryType == InventoryType.CargoBay)
 		{
 			ShipInventorySheet.InventoryItemTypes.Add(ItemType.Weapon);
+			ShipInventorySheet.InventoryItemTypes.Add(ItemType.Defensives);
 		}
 		else if(ShipInventorySheet.InventoryType == InventoryType.AmmoBay)
 		{
@@ -225,6 +343,7 @@ public class WeaponSheet : PanelBase
 		}
 		ShipInventorySheet.Refresh();
 		ShipInventorySheet.RefreshLoadButtons(_selectedWeaponItem);
+
 	}
 
 
@@ -235,7 +354,7 @@ public class WeaponSheet : PanelBase
 		DefensivesInventory.DeselectAll();
 		_selectedWeaponItem = null;
 		_selectedItemContainer = null;
-		_selectedAmmoItem = null;
+		//_selectedAmmoItem = null;
 		InstallButton.isEnabled = false;
 		RemoveButton.isEnabled = false;
 		ActionSheet.Clear();

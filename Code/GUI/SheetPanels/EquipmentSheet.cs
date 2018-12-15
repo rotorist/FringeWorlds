@@ -35,12 +35,22 @@ public class EquipmentSheet : PanelBase
 		base.Show();
 		ClearSelections();
 		CargoEquipmentInventory.SelectedItemHandler = this;
+
+		InstallButton.isEnabled = false;
+		InstallButton.GetComponent<UISprite>().alpha = 1;
+		RemoveButton.isEnabled = false;
+		RemoveButton.GetComponent<UISprite>().alpha = 1;
 	}
 
 	public override void Hide ()
 	{
 		base.Hide();
 		ClearSelections();
+
+		InstallButton.isEnabled = false;
+		InstallButton.GetComponent<UISprite>().alpha = 0;
+		RemoveButton.isEnabled = false;
+		RemoveButton.GetComponent<UISprite>().alpha = 0;
 	}
 
 	public override void OnItemSelect (InventoryItemEntry itemEntry, InventoryView container)
@@ -200,6 +210,7 @@ public class EquipmentSheet : PanelBase
 
 	public void Refresh()
 	{
+		Debug.Log("Current loadout id: " + CurrentLoadout.LoadoutID);
 		List<InvItemData> loadoutEquipment = new List<InvItemData>();
 		loadoutEquipment.Add(CurrentLoadout.Shield);
 		loadoutEquipment.Add(CurrentLoadout.WeaponCapacitor);

@@ -5,7 +5,6 @@ using UnityEngine;
 public class WorldManager 
 {
 	public StarSystem CurrentSystem;
-	public StationBase CurrentDockedStation;
 	public Sun [] Suns;
 	public Dictionary<string, StarSystemData> AllSystems { get { return _allSystems; } }
 	public Dictionary<string, NavNode> AllNavNodes { get { return _allNavNodes; } }
@@ -19,7 +18,8 @@ public class WorldManager
 
 	public void InitializeDocked()
 	{
-		DockableStationDatas = new Dictionary<string, DockableStationData>();
+		DockableStationDatas = GameManager.Inst.DBManager.JsonDataHandler.LoadAllDockableStations();
+
 	}
 
 	public void Initialize()
@@ -30,7 +30,7 @@ public class WorldManager
 
 		BuildNavMap();
 
-
+		DockableStationDatas = GameManager.Inst.DBManager.JsonDataHandler.LoadAllDockableStations();
 
 
 		StationBase [] stations = GameObject.FindObjectsOfType<StationBase>();

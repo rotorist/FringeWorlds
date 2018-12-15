@@ -5,8 +5,8 @@ using UnityEngine;
 [System.Serializable]
 public class SaleItem
 {
-	public Item Item;
+	public string ItemID;
 	public float Price;
-
+	public int Quantity;
 
 }

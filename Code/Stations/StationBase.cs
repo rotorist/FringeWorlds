@@ -43,14 +43,16 @@ public class StationData : NavNode
 	public string DisplayName;
 	public Vector3 EulerAngles;
 	public StationType StationType;
-	public List<MacroAIParty> DockedParties;
+	public DockableStationData DockableStationData;
+
 
 	public StationData()
 	{
-		DockedParties = new List<MacroAIParty>();
+
 	}
 
 }
+
 
 public enum DockRequestResult
 {

@@ -128,6 +128,34 @@ public class JsonDataHandler : DataHandlerBase
 	}
 
 
+	public DockableStationData LoadDockableStationJson(string fileName)
+	{
+		string dataAsJson = LoadJsonString("Stations/" + fileName);
+		DockableStationInitialData initialData = JsonUtility.FromJson<DockableStationInitialData>(dataAsJson);
+		DockableStationData stationData = new DockableStationData();
+		stationData.StationID = initialData.StationID;
+		stationData.FuelPrice = initialData.FuelPrice;
+		stationData.LifeSupportPrice = initialData.LifeSupportPrice;
+		stationData.ShipsForSale = initialData.ShipsForSale;
+		stationData.TraderSaleItems = initialData.TraderSaleItems;
+		return stationData;
+	}
+
+	public Dictionary<string, DockableStationData> LoadAllDockableStations()
+	{
+		Debug.Log("Loading station datas");
+		Dictionary<string, DockableStationData> stations = new Dictionary<string, DockableStationData>();
+		DirectoryInfo topDirInfo = new DirectoryInfo(this.Path + "Stations/");
+		FileInfo [] infos = topDirInfo.GetFiles("*.json");
+		foreach(FileInfo info in infos)
+		{
+			Debug.Log("Loading station " + info.Name);
+			DockableStationData stationData = LoadDockableStationJson(info.Name);
+			stations.Add(stationData.StationID, stationData);
+		}
+
+		return stations;
+	}
 }
 
 

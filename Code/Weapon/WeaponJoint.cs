@@ -115,6 +115,7 @@ public class WeaponJoint : MonoBehaviour
 		MountedWeapon.transform.localPosition = Vector3.zero;
 		MountedWeapon.transform.LookAt(transform.forward);
 		MountedWeapon.ParentShip = ParentShip;
+		MountedWeapon.DisplayName = weaponItem.Item.DisplayName;
 		MountedWeapon.Initialize(weaponItem, weaponItem.RelatedItemID);
 		MountedWeapon.Rebuild();
 	}

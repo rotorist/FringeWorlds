@@ -14,16 +14,16 @@ public class InventoryItemEntry : MonoBehaviour
 	public UISprite Icon;
 	public float IconSize;
 	public UIButton MyButton;
-	public UIButton LoadButton;
-	public UISprite LoadButtonRootSprite;
-	public UISprite LoadButtonIcon;
+	public UIButton SecButton;
+	public UISprite SecButtonRootSprite;
+	public UISprite SecButtonIcon;
 	public int InventoryIndex;
 
 
 
-	public void OnLoadButtonClick()
+	public void OnSecButtonClick()
 	{
-		ParentView.OnLoadButtonClick(this);
+		ParentView.OnSecButtonClick(this);
 	}
 
 	public void OnEntryClick()
@@ -66,8 +66,18 @@ public class InventoryItemEntry : MonoBehaviour
 		}
 
 		ItemText.text = text;
+	}
 
-
+	public void SetItemQuantity(int quantity)
+	{
+		if(quantity > 1)
+		{
+			QuantityText.text = quantity.ToString();
+		}
+		else
+		{
+			QuantityText.text = "";
+		}
 	}
 
 	public void RefreshLoadButton()
@@ -75,7 +85,7 @@ public class InventoryItemEntry : MonoBehaviour
 		//check if item is ammo and if it can be loaded into the selected item
 		//if same ammo type then show Load button
 		//if exactly same item then disable but show load button without icon
-		if(LoadButton != null)
+		if(SecButton != null)
 		{
 			if(ItemData.Item.Type == ItemType.Ammo && ParentView.RelatedItem != null)
 			{
@@ -83,26 +93,41 @@ public class InventoryItemEntry : MonoBehaviour
 				string otherAmmoType = ParentView.RelatedItem.Item.GetStringAttribute("Ammo Type");
 				if(ItemData.Item.ID == ParentView.RelatedItem.RelatedItemID)
 				{
-					LoadButton.isEnabled = false;
-					LoadButtonRootSprite.alpha = 1;
-					LoadButtonIcon.alpha = 0;
+					SecButton.isEnabled = false;
+					SecButtonRootSprite.alpha = 1;
+					SecButtonIcon.alpha = 0;
 				}
 				else if(myAmmoType == otherAmmoType)
 				{
-					LoadButton.isEnabled = true;
-					LoadButtonRootSprite.alpha = 1;
-					LoadButtonIcon.alpha = 1;
+					SecButton.isEnabled = true;
+					SecButtonRootSprite.alpha = 1;
+					SecButtonIcon.alpha = 1;
 				}
 				else
 				{
-					LoadButton.isEnabled = false;
-					LoadButtonRootSprite.alpha = 0;
+					SecButton.isEnabled = false;
+					SecButtonRootSprite.alpha = 0;
+				}
+			}
+			else if(ItemData.Item.Type == ItemType.HangarItem)
+			{
+				if(ItemData.Item.Description == GameManager.Inst.PlayerProgress.ActiveLoadout.LoadoutID)
+				{
+					SecButton.isEnabled = false;
+					SecButtonRootSprite.alpha = 1;
+					SecButtonIcon.alpha = 0;
+				}
+				else
+				{
+					SecButton.isEnabled = true;
+					SecButtonRootSprite.alpha = 1;
+					SecButtonIcon.alpha = 1;
 				}
 			}
 			else
 			{
-				LoadButton.isEnabled = false;
-				LoadButtonRootSprite.alpha = 0;
+				SecButton.isEnabled = false;
+				SecButtonRootSprite.alpha = 0;
 			}
 		}
 	}

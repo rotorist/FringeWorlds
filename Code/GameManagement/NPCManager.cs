@@ -267,7 +267,7 @@ public class NPCManager
 			joint.ParentShip = ship;
 			foreach(KeyValuePair<string, InvItemData> jointSetup in loadout.WeaponJoints)
 			{
-				if(jointSetup.Key == joint.JointID)
+				if(jointSetup.Key == joint.JointID && jointSetup.Value != null)
 				{
 					joint.LoadWeapon(jointSetup.Value);
 				}

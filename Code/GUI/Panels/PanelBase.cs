@@ -38,4 +38,9 @@ public class PanelBase : MonoBehaviour
 	{
 
 	}
+
+	public virtual void OnItemSecButtonClick(InventoryItemEntry itemEntry, InventoryView container)
+	{
+
+	}
 }
