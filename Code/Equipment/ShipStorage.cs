@@ -56,7 +56,7 @@ public class ShipStorage : MonoBehaviour
 
 	public Item TakeAmmo(string itemID, int quantity, string ammoType)
 	{
-		if(AmmoBayItems.ContainsKey(itemID))
+		if(!string.IsNullOrEmpty(itemID) && AmmoBayItems.ContainsKey(itemID))
 		{
 			if(AmmoBayItems[itemID].Quantity >= quantity)
 			{
@@ -79,6 +79,7 @@ public class ShipStorage : MonoBehaviour
 			{
 				if(ammo.Value.Item.GetStringAttribute("Ammo Type") == ammoType)
 				{
+					Debug.Log("Found ammo");
 					if(ammo.Value.Quantity >= quantity)
 					{
 						Item item = ammo.Value.Item;

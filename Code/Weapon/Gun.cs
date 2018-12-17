@@ -115,7 +115,7 @@ public class Gun : Weapon
 
 			if(Audio != null)
 			{
-				Audio.PlayOneShot(GameManager.Inst.SoundManager.GetClip("Shot1"));
+				Audio.PlayOneShot(GameManager.Inst.SoundManager.GetClip(this.FiringSound));
 			}
 		}
 	}

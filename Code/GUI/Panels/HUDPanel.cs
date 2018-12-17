@@ -766,6 +766,7 @@ public class HUDPanel : PanelBase
 			}
 			else
 			{
+				
 				ammoCount = -1;
 			}
 			entry.UpdateAmmoCount(ammoCount);

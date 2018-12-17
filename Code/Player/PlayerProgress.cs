@@ -145,12 +145,11 @@ public class PlayerProgress
 			itemData21.Quantity = 500;
 
 			ActiveLoadout.Shield = itemData4;
+			ActiveLoadout.WeaponCapacitor = itemData5;
 			ActiveLoadout.AmmoBayItems.Add(itemData);
 			ActiveLoadout.AmmoBayItems.Add(itemData2);
 			ActiveLoadout.AmmoBayItems.Add(itemData21);
-			ActiveLoadout.CargoBayItems.Add(itemData17);
 			ActiveLoadout.CargoBayItems.Add(itemData3);
-			ActiveLoadout.CargoBayItems.Add(itemData5);
 			ActiveLoadout.Thruster = itemData6;
 			ActiveLoadout.CargoBayItems.Add(itemData7);
 			ActiveLoadout.CargoBayItems.Add(itemData8);
@@ -161,9 +160,9 @@ public class PlayerProgress
 
 			ActiveLoadout.WeaponJoints = new Dictionary<string, InvItemData>()
 			{
-				{ "GimballLeft", itemData15 },
-				{ "GimballRight", itemData18 },
-				{ "GimballFront", null },
+				{ "GimballLeft", itemData17 },
+				{ "GimballRight", itemData15 },
+				{ "GimballFront", itemData18 },
 			};
 		}
 
@@ -301,7 +300,7 @@ public class PlayerProgress
 		//create a garage and vault in planet colombia
 		HomeStationData homeStation = new HomeStationData();
 		homeStation.HangarSize = 5;
-		homeStation.VaultSize = 350;
+		homeStation.VaultSize = 250;
 		homeStation.ShipsInHangar.Add(StoredLoadout);
 
 		GameManager.Inst.WorldManager.DockableStationDatas["planet_colombia_landing"].HomeStationData = homeStation;

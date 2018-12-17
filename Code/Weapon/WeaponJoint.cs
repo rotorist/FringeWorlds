@@ -116,7 +116,9 @@ public class WeaponJoint : MonoBehaviour
 		MountedWeapon.transform.LookAt(transform.forward);
 		MountedWeapon.ParentShip = ParentShip;
 		MountedWeapon.DisplayName = weaponItem.Item.DisplayName;
+		MountedWeapon.FiringSound = weaponItem.Item.GetStringAttribute("Firing Sound");
 		MountedWeapon.Initialize(weaponItem, weaponItem.RelatedItemID);
+
 		MountedWeapon.Rebuild();
 	}
 

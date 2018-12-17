@@ -16,11 +16,14 @@ public class VaultStorageSheet : PanelBase
 	public UITabSelection ItemTypeTabs;
 	public UIButton StoreButton;
 	public UIButton RetrieveButton;
+	public UISlider QuantitySlider;
+	public UILabel QuantityLabel;
 
 	private List<ItemType> _itemTypeFilter;
 	private InvItemData _selectedItem;
 	private InventoryView _selectedItemContainer;
 	private DockableStationData _currentStationData;
+	private int _selectedQuantity;
 
 	public override void Initialize ()
 	{
@@ -39,6 +42,9 @@ public class VaultStorageSheet : PanelBase
 		StoreButton.GetComponent<UISprite>().alpha = 1;
 		RetrieveButton.isEnabled = false;
 		RetrieveButton.GetComponent<UISprite>().alpha = 1;
+
+		QuantitySlider.alpha = 0;
+		NGUITools.SetActive(QuantitySlider.gameObject, false);
 	}
 
 	public override void Hide ()
@@ -64,20 +70,9 @@ public class VaultStorageSheet : PanelBase
 			ActionSheet.SetItemDesc(itemEntry.ItemData.Item.Description);
 			ActionSheet.ListItemAttributes(itemEntry.ItemData.Item);
 
-			string loadedAmmoID = itemEntry.ItemData.RelatedItemID;
-			if(!string.IsNullOrEmpty(loadedAmmoID))
-			{
-				string ammoName = GameManager.Inst.ItemManager.GetItemStats(loadedAmmoID).DisplayName;
-				ActionSheet.SetItemSubnote("Current Load", ammoName);
-			}
-			else if(!string.IsNullOrEmpty(itemEntry.ItemData.Item.GetStringAttribute("Ammo Type")) && (itemEntry.ItemData.Item.Type == ItemType.Weapon || itemEntry.ItemData.Item.Type == ItemType.Defensives ))
-			{
-				ActionSheet.SetItemSubnote("Current Load", "NONE");
-			}
-			else
-			{
-				ActionSheet.SetItemSubnote("", "");
-			}
+
+			ActionSheet.SetItemSubnote("", "");
+
 
 			VaultInventory.DeselectAll();
 			CargoAmmoInventory.DeselectAll();
@@ -91,6 +86,21 @@ public class VaultStorageSheet : PanelBase
 			{
 				StoreButton.isEnabled = true;
 				RetrieveButton.isEnabled = false;
+			}
+
+			if(_selectedItem.Quantity > 1)
+			{
+				QuantitySlider.alpha = 1;
+				NGUITools.SetActive(QuantitySlider.gameObject, true);
+				QuantitySlider.value = 1;
+				_selectedQuantity = _selectedItem.Quantity;
+				QuantityLabel.text = _selectedItem.Quantity.ToString();
+			}
+			else
+			{
+				QuantitySlider.alpha = 0;
+				_selectedQuantity = 1;
+				NGUITools.SetActive(QuantitySlider.gameObject, false);
 			}
 		}
 	}
@@ -124,7 +134,7 @@ public class VaultStorageSheet : PanelBase
 	{
 		//make a list of all ship items in the hangar
 		string stationID = GameManager.Inst.PlayerProgress.SpawnStationID;
-
+		ClearSelections();
 		if(GameManager.Inst.WorldManager.DockableStationDatas.ContainsKey(stationID))
 		{
 			_currentStationData = GameManager.Inst.WorldManager.DockableStationDatas[stationID];
@@ -140,6 +150,7 @@ public class VaultStorageSheet : PanelBase
 					}
 				}
 				VaultInventory.Initialize(displayedItems);
+				VaultInventory.RefreshLoadButtons();
 
 				ShipInventorySheet.InventoryItemTypes = _itemTypeFilter;
 				if(_itemTypeFilter.Contains(ItemType.Ammo))
@@ -152,6 +163,8 @@ public class VaultStorageSheet : PanelBase
 				}
 				ShipInventorySheet.Refresh();
 				ShipInventorySheet.RefreshLoadButtons(null);
+
+				RefreshVaultSpace(_currentStationData.HomeStationData, allVaultItems);
 			}
 
 		}
@@ -159,23 +172,114 @@ public class VaultStorageSheet : PanelBase
 
 	public void OnRetrieveButtonClick()
 	{
+		if(_selectedItem != null && _currentStationData != null && _currentStationData.HomeStationData != null)
+		{
+			if(_selectedItemContainer == VaultInventory)
+			{
+				//remove item from vault and move to cargo
+				List<InvItemData> dest = null;
+				if(_selectedItem.Item.Type == ItemType.Ammo)
+				{
+					dest = CurrentLoadout.AmmoBayItems;
+					if(ShipInventorySheet.AvailableAmmoSpaceValue < _selectedItem.Item.CargoUnits * _selectedQuantity)
+					{
+						GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("NOT ENOUGH SPACE IN AMMO BAY");
+						return;
+					}
+				}
+				else
+				{
+					dest = CurrentLoadout.CargoBayItems;
+					if(ShipInventorySheet.AvailableCargoSpaceValue < _selectedItem.Item.CargoUnits * _selectedQuantity)
+					{
+						GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("NOT ENOUGH SPACE IN CARGO BAY");
+						return;
+					}
+				}
 
+				int itemsTaken = GameManager.Inst.UIManager.TakeItemFromItemDataList(_currentStationData.HomeStationData.ItemsInVault, _selectedItem, _selectedQuantity);
+				GameManager.Inst.UIManager.AddItemtoInvItemDataList(dest, _selectedItem, itemsTaken);
+
+				Refresh();
+			}
+		}
 	}
 
 	public void OnStoreButtonClick()
 	{
 		if(_selectedItem != null && _currentStationData != null && _currentStationData.HomeStationData != null)
 		{
-			if(_selectedItemContainer == VaultInventory)
+			
+			if(_selectedItemContainer == CargoAmmoInventory)
 			{
-				//remove item from cargo and move to vault
+				List<InvItemData> source = null;
+				if(_selectedItem.Item.Type == ItemType.Ammo)
+				{
+					source = CurrentLoadout.AmmoBayItems;
+				}
+				else
+				{
+					source = CurrentLoadout.CargoBayItems;
+				}
 
-			}
-			else if(_selectedItemContainer == CargoAmmoInventory)
-			{
+				if(AvailableVaultSpaceValue < _selectedItem.Item.CargoUnits * _selectedQuantity)
+				{
+					GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("NOT ENOUGH SPACE IN VAULT");
+					return;
+				}
 
+				//remove item from source and add to vault
+				int itemsTaken = GameManager.Inst.UIManager.TakeItemFromItemDataList(source, _selectedItem, _selectedQuantity);
+				GameManager.Inst.UIManager.AddItemtoInvItemDataList(_currentStationData.HomeStationData.ItemsInVault, _selectedItem, itemsTaken);
+
+				Refresh();
 			}
 		}
+	}
+
+	public void OnSliderValueChange()
+	{
+		if(_selectedItem != null)
+		{
+			_selectedQuantity = Mathf.RoundToInt(Mathf.Lerp(1f, (float)_selectedItem.Quantity, QuantitySlider.value));
+			QuantityLabel.text = _selectedQuantity.ToString();
+		}
+	}
+
+	public void ClearSelections()
+	{
+		CargoAmmoInventory.DeselectAll();
+		VaultInventory.DeselectAll();
+		_selectedItem = null;
+		_selectedItemContainer = null;
+		StoreButton.isEnabled = false;
+		RetrieveButton.isEnabled = false;
+		QuantitySlider.alpha = 0;
+		NGUITools.SetActive(QuantitySlider.gameObject, false);
+		ActionSheet.Clear();
+	}
+
+	private void RefreshVaultSpace(HomeStationData homeStationData, List<InvItemData> vaultItems)
+	{
+		if(homeStationData == null)
+		{
+			AvailableVaultSpaceValue = 0;
+			VaultSpace.SetFillPercentage(1);
+			AvailableVaultSpace.text = "0";
+
+			return;
+		}
+
+		int totalVaultSpace = homeStationData.VaultSize;
+		float usedSpace = 0;
+		foreach(InvItemData itemData in vaultItems)
+		{
+			usedSpace += itemData.Item.CargoUnits * itemData.Quantity;
+		}
+
+		AvailableVaultSpaceValue = Mathf.Clamp(totalVaultSpace - usedSpace, 0, homeStationData.VaultSize);
+		VaultSpace.SetFillPercentage(Mathf.Clamp01(usedSpace / totalVaultSpace));
+		AvailableVaultSpace.text = Mathf.CeilToInt(AvailableVaultSpaceValue).ToString();
 	}
 
 }
