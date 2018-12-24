@@ -13,6 +13,8 @@ public class PlayerProgress
 
 	public List<string> HomeBaseIDs;
 
+	public int Credits;
+
 	public void Initialize()
 	{
 		/*
@@ -303,7 +305,7 @@ public class PlayerProgress
 		homeStation.VaultSize = 250;
 		homeStation.ShipsInHangar.Add(StoredLoadout);
 
-		GameManager.Inst.WorldManager.DockableStationDatas["planet_colombia_landing"].HomeStationData = homeStation;
+		//GameManager.Inst.WorldManager.DockableStationDatas["planet_colombia_landing"].HomeStationData = homeStation;
 
 
 		ProfileName = "Kurt";

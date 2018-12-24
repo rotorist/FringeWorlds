@@ -321,6 +321,8 @@ public class UIStateInStation : UIStateBase
 		UIEventHandler.OnOpenRepairWindow += OnOpenRepairWindow;
 		UIEventHandler.OnOpenStationShipInfo -= OnOpenStationShipInfo;
 		UIEventHandler.OnOpenStationShipInfo += OnOpenStationShipInfo;
+		UIEventHandler.OnOpenTraderPanel -= OnOpenTraderPanel;
+		UIEventHandler.OnOpenTraderPanel += OnOpenTraderPanel;
 
 		UIEventHandler.OnBeginUndocking -= OnBeginUndocking;
 		UIEventHandler.OnBeginUndocking += OnBeginUndocking;
@@ -333,6 +335,7 @@ public class UIStateInStation : UIStateBase
 		UIEventHandler.OnOpenRepairWindow -= OnOpenRepairWindow;
 		UIEventHandler.OnBeginUndocking -= OnBeginUndocking;
 		UIEventHandler.OnOpenStationShipInfo -= OnOpenStationShipInfo;
+		UIEventHandler.OnOpenTraderPanel -= OnOpenTraderPanel;
 	}
 
 	public void OnBeginUndocking()
@@ -353,6 +356,12 @@ public class UIStateInStation : UIStateBase
 	{
 		EndState();
 		SM.State = new UIStateStationShipInfo(SM);
+	}
+
+	public void OnOpenTraderPanel()
+	{
+		EndState();
+		SM.State = new UIStateTraderPanel(SM);
 	}
 }
 
@@ -407,6 +416,40 @@ public class UIStateStationShipInfo : UIStateBase
 		SM.UIManager.HideAllPanels();
 		SM.UIManager.StationHUDPanel.Show();
 		SM.UIManager.ShipInfoPanel.Show();
+		SM.UIManager.ErrorMessagePanel.Show();
+
+		InputEventHandler.Instance.InputState = InputState.DockedUI;
+
+		UIEventHandler.OnCloseStationWindows -= OnCloseWindow;
+		UIEventHandler.OnCloseStationWindows += OnCloseWindow;
+	}
+
+	public override void EndState()
+	{
+		UIEventHandler.OnCloseStationWindows -= OnCloseWindow;
+	}
+
+	public void OnCloseWindow()
+	{
+		EndState();
+		SM.State = new UIStateInStation(SM);
+	}
+}
+
+public class UIStateTraderPanel : UIStateBase
+{
+	public UIStateTraderPanel(UIStateMachine sm)
+	{
+		Name = "UIStateTraderPanel";
+		SM = sm;
+		BeginState();
+	}
+
+	public override void BeginState()
+	{
+		SM.UIManager.HideAllPanels();
+		SM.UIManager.TraderPanel.Show();
+		SM.UIManager.StationHUDPanel.Show();
 		SM.UIManager.ErrorMessagePanel.Show();
 
 		InputEventHandler.Instance.InputState = InputState.DockedUI;

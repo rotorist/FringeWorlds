@@ -82,7 +82,7 @@ public class VaultStorageSheet : PanelBase
 				StoreButton.isEnabled = false;
 				RetrieveButton.isEnabled = true;
 			}
-			else if(container == CargoAmmoInventory)
+			else if(container == CargoAmmoInventory && _currentStationData.HomeStationData != null && _currentStationData.HomeStationData.VaultSize > 0)
 			{
 				StoreButton.isEnabled = true;
 				RetrieveButton.isEnabled = false;
@@ -132,12 +132,25 @@ public class VaultStorageSheet : PanelBase
 
 	public void Refresh()
 	{
-		//make a list of all ship items in the hangar
+		//make a list of all items in the vault
 		string stationID = GameManager.Inst.PlayerProgress.SpawnStationID;
 		ClearSelections();
 		if(GameManager.Inst.WorldManager.DockableStationDatas.ContainsKey(stationID))
 		{
 			_currentStationData = GameManager.Inst.WorldManager.DockableStationDatas[stationID];
+
+			ShipInventorySheet.InventoryItemTypes = _itemTypeFilter;
+			if(_itemTypeFilter.Contains(ItemType.Ammo))
+			{
+				ShipInventorySheet.InventoryType = InventoryType.AmmoBay;
+			}
+			else
+			{
+				ShipInventorySheet.InventoryType = InventoryType.CargoBay;
+			}
+			ShipInventorySheet.Refresh();
+			ShipInventorySheet.RefreshLoadButtons(null);
+
 			if(_currentStationData.HomeStationData != null)
 			{
 				List<InvItemData> allVaultItems = _currentStationData.HomeStationData.ItemsInVault;
@@ -152,17 +165,7 @@ public class VaultStorageSheet : PanelBase
 				VaultInventory.Initialize(displayedItems);
 				VaultInventory.RefreshLoadButtons();
 
-				ShipInventorySheet.InventoryItemTypes = _itemTypeFilter;
-				if(_itemTypeFilter.Contains(ItemType.Ammo))
-				{
-					ShipInventorySheet.InventoryType = InventoryType.AmmoBay;
-				}
-				else
-				{
-					ShipInventorySheet.InventoryType = InventoryType.CargoBay;
-				}
-				ShipInventorySheet.Refresh();
-				ShipInventorySheet.RefreshLoadButtons(null);
+
 
 				RefreshVaultSpace(_currentStationData.HomeStationData, allVaultItems);
 			}

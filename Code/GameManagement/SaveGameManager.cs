@@ -377,6 +377,7 @@ public class SaveGameManager
 	{
 		Debug.Log("Creating new game in space");
 		CurrentSave = null;
+		GameManager.Inst.PlayerProgress.Credits = 36100;
 		GameManager.Inst.PlayerProgress.SpawnSystemID = "washington_system";
 		GameManager.Inst.PlayerProgress.SpawnStationID = "planet_colombia_landing";
 		GameManager.Inst.PlayerProgress.SpawnStationType = StationType.Station;
@@ -387,6 +388,7 @@ public class SaveGameManager
 	{
 		Debug.Log("Creating new game in station");
 		CurrentSave = null;
+		GameManager.Inst.PlayerProgress.Credits = 36100;
 		GameManager.Inst.PlayerProgress.SpawnSystemID = "washington_system";
 		GameManager.Inst.PlayerProgress.SpawnStationID = "planet_colombia_landing";
 		GameManager.Inst.PlayerProgress.SpawnStationType = StationType.Station;

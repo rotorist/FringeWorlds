@@ -6,6 +6,6 @@ using UnityEngine;
 public class SaleShip
 {
 	public string ShipID;
-	public float Price;
+	public float PriceFactor;
 
 }

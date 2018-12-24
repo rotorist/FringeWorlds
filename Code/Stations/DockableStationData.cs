@@ -8,6 +8,7 @@ public class DockableStationData
 	public string StationID;
 	public List<SaleItem> TraderSaleItems;
 	public List<SaleShip> ShipsForSale;
+	public List<DemandResource> DemandResources;
 	public float FuelPrice;
 	public float LifeSupportPrice;
 
@@ -22,6 +23,19 @@ public class DockableStationData
 		DockedParties = new List<MacroAIParty>();
 
 	}
+
+	public float GetSaleItemPriceFactor(string itemID)
+	{
+		foreach(SaleItem saleItem in TraderSaleItems)
+		{
+			if(saleItem.ItemID == itemID)
+			{
+				return saleItem.PriceFactor;
+			}
+		}
+
+		return 1;
+	}
 }
 
 [System.Serializable]
@@ -29,6 +43,7 @@ public class DockableStationSaveData
 {
 	public List<SaleItem> TraderSaleItems;
 	public List<SaleShip> ShipsForSale;
+	public List<DemandResource> DemandResources;
 	public float FuelPrice;
 	public float LifeSupportPrice;
 	public List<int> DockedPartiesNumbers;

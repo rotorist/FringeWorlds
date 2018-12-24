@@ -17,6 +17,7 @@ public class UIManager
 	public StationHUDPanel StationHUDPanel;
 	public RepairPanel RepairPanel;
 	public ShipInfoPanel ShipInfoPanel;
+	public TraderPanel TraderPanel;
 	public ErrorMessagePanel ErrorMessagePanel;
 
 	public float UIZoom;
@@ -69,6 +70,8 @@ public class UIManager
 			RepairPanel.Initialize();
 			ShipInfoPanel = UICamera.transform.Find("ShipInfoPanel").GetComponent<ShipInfoPanel>();
 			ShipInfoPanel.Initialize();
+			TraderPanel = UICamera.transform.Find("TraderPanel").GetComponent<TraderPanel>();
+			TraderPanel.Initialize();
 
 			ErrorMessagePanel = UICamera.transform.Find("ErrorMessagePanel").GetComponent<ErrorMessagePanel>();
 			ErrorMessagePanel.Initialize();
@@ -76,6 +79,7 @@ public class UIManager
 			_panels.Add(StationHUDPanel);
 			_panels.Add(RepairPanel);
 			_panels.Add(ShipInfoPanel);
+			_panels.Add(TraderPanel);
 			_panels.Add(ErrorMessagePanel);
 		}
 

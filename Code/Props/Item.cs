@@ -13,7 +13,7 @@ public class Item
 	public ItemType Type;
 	public float CargoUnits;
 	public float Health;//0 to 1
-	public float BaseCost;
+	public float BasePrice;
 	public List<ItemAttribute> Attributes;
 	public Dictionary<string, int> AttributeIndex;
 
@@ -33,6 +33,7 @@ public class Item
 		Type = stats.Type;
 		CargoUnits = stats.CargoUnits;
 		Health = 1;
+		BasePrice = stats.BasePrice;
 		Attributes = new List<ItemAttribute>();
 		foreach(ItemAttribute attribute in stats.Attributes)
 		{
@@ -54,6 +55,7 @@ public class Item
 		Type = item.Type;
 		CargoUnits = item.CargoUnits;
 		Health = item.Health;
+		BasePrice = item.BasePrice;
 		Attributes = new List<ItemAttribute>();
 		foreach(ItemAttribute attribute in item.Attributes)
 		{
@@ -202,6 +204,6 @@ public class ItemStats
 	public string Description;
 	public ItemType Type;
 	public float CargoUnits;
-	public float BaseCost;
+	public float BasePrice;
 	public List<ItemAttribute> Attributes;
 }

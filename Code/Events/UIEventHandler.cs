@@ -44,6 +44,7 @@ public class UIEventHandler
 	public static event GeneralUIEventDelegate OnCloseStationWindows;
 	public static event GeneralUIEventDelegate OnOpenRepairWindow;
 	public static event GeneralUIEventDelegate OnOpenStationShipInfo;
+	public static event GeneralUIEventDelegate OnOpenTraderPanel;
 
 	public static event GeneralUIEventDelegate OnOpenKeyBindingPanel;
 	public static event GeneralUIEventDelegate OnCloseKeyBindingPanel;
@@ -125,6 +126,14 @@ public class UIEventHandler
 		if(OnOpenStationShipInfo != null)
 		{
 			OnOpenStationShipInfo();
+		}
+	}
+
+	public void TriggerOpenTraderPanel()
+	{
+		if(OnOpenTraderPanel != null)
+		{
+			OnOpenTraderPanel();
 		}
 	}
 

@@ -7,6 +7,8 @@ public class InventoryItemEntry : MonoBehaviour
 	public InvItemData ItemData;
 	public UILabel HintText;
 	public UILabel QuantityText;
+	public UILabel PriceText;
+	public float Price;
 	public InventoryView ParentView;
 	public UILabel ItemText;
 	public Transform IconAnchor;
@@ -78,6 +80,13 @@ public class InventoryItemEntry : MonoBehaviour
 		{
 			QuantityText.text = "";
 		}
+	}
+
+	public void SetItemPrice(float price)
+	{
+		Price = price;
+		PriceText.text = "$" + Mathf.CeilToInt(price).ToString();
+		PriceText.alpha = 1;
 	}
 
 	public void RefreshLoadButton()

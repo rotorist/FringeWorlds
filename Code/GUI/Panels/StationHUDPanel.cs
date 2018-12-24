@@ -69,6 +69,10 @@ public class StationHUDPanel : PanelBase
 			UIEventHandler.Instance.TriggerBeginUndocking();
 		}
 
+		if(UIButton.current.name == "btnTrade")
+		{
+			UIEventHandler.Instance.TriggerOpenTraderPanel();
+		}
 
 	}
 

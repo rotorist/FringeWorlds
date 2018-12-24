@@ -6,7 +6,7 @@ using UnityEngine;
 public class SaleItem
 {
 	public string ItemID;
-	public float Price;
+	public float PriceFactor;
 	public int Quantity;
 
 }

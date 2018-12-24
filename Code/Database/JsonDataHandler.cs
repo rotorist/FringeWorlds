@@ -138,6 +138,13 @@ public class JsonDataHandler : DataHandlerBase
 		stationData.LifeSupportPrice = initialData.LifeSupportPrice;
 		stationData.ShipsForSale = initialData.ShipsForSale;
 		stationData.TraderSaleItems = initialData.TraderSaleItems;
+
+		foreach(SaleItem saleItem in stationData.TraderSaleItems)
+		{
+			saleItem.PriceFactor = 1;
+			saleItem.Quantity = 1;
+		}
+
 		return stationData;
 	}
 

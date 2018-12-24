@@ -27,7 +27,5 @@ public class ShipStats
 	public float CargoBaySize;
 
 
-	public float BasePrice;
-
 }
 
