@@ -116,7 +116,7 @@ public class XMLParserWorld
 		{
 			string path = Application.dataPath + "/GameData/StarSystem/" + fileInfo.Name;
 			string [] tokens = fileInfo.Name.Split('.');
-			if(tokens[0] == GameManager.Inst.WorldManager.CurrentSystem.ID)
+			if(GameManager.Inst.WorldManager.CurrentSystem != null && tokens[0] == GameManager.Inst.WorldManager.CurrentSystem.ID)
 			{
 				StarSystemData systemData = LoadStarSystemData(path, true);
 				allSystems.Add(systemData.ID, systemData);
@@ -152,10 +152,10 @@ public class XMLParserWorld
 		XmlAttributeCollection systemAttrs = systemNode.Attributes;
 		string systemID = systemAttrs["id"].Value.ToString();
 		string systemName = systemAttrs["displayname"].Value.ToString();
-		Transform origin = GameObject.Find("Origin").transform;
-		if(!isScene)
+		Transform origin = null;
+		if(isScene)
 		{
-			origin = null;
+			origin = GameObject.Find("Origin").transform;
 		}
 
 		StarSystemData systemData = new StarSystemData(systemID, systemName);

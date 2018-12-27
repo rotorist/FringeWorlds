@@ -6,6 +6,7 @@ using UnityEngine;
 public class DemandResource
 {
 	public ResourceType Type;
+	public string ItemID;
 	public float DemandLevel;
 
 }
@@ -14,6 +15,7 @@ public class DemandResource
 
 public enum ResourceType
 {
+	None,
 	Water,
 	Methane,
 	Oxygen,
@@ -28,6 +30,7 @@ public enum ResourceType
 	LuxuryFood,
 	Radioactive,
 	Slaves,
+	Refugees,
 	Robotics,
 	MachineComponent,
 	WeaponComponent,

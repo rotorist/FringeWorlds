@@ -10,6 +10,8 @@ public class TraderInventorySheet : PanelBase
 	public ShipInventorySheet ShipInventorySheet;
 	public EquipmentActionSheet ActionSheet;
 
+
+
 	public UITabSelection ItemTypeTabs;
 	public UIButton SellButton;
 	public UIButton BuyButton;
@@ -28,6 +30,7 @@ public class TraderInventorySheet : PanelBase
 	{
 		base.Initialize ();
 		_itemTypeFilter = new List<ItemType>();
+	
 	}
 
 	public override void Show ()
@@ -88,7 +91,7 @@ public class TraderInventorySheet : PanelBase
 				BuyButton.isEnabled = false;
 			}
 
-			if(_selectedItemEntry.ItemData.Item.Type == ItemType.Ammo)
+			if(_selectedItemEntry.ItemData.Item.Type == ItemType.Ammo || _selectedItemEntry.ItemData.Item.Type == ItemType.Commodity)
 			{
 				QuantitySlider.alpha = 1;
 				NGUITools.SetActive(QuantitySlider.gameObject, true);
@@ -121,23 +124,27 @@ public class TraderInventorySheet : PanelBase
 
 	public override void OnTabSelect (string tabName)
 	{
-		_itemTypeFilter.Clear();
+		
 		if(tabName == "Equipment")
 		{
+			_itemTypeFilter.Clear();
 			_itemTypeFilter.Add(ItemType.Equipment);
 			_itemTypeFilter.Add(ItemType.ShipMod);
 		}
 		else if(tabName == "Weapon")
 		{
+			_itemTypeFilter.Clear();
 			_itemTypeFilter.Add(ItemType.Weapon);
 			_itemTypeFilter.Add(ItemType.Defensives);
 		}
 		else if(tabName == "Ammo")
 		{
+			_itemTypeFilter.Clear();
 			_itemTypeFilter.Add(ItemType.Ammo);
 		}
 		else if(tabName == "Commodity")
 		{
+			_itemTypeFilter.Clear();
 			_itemTypeFilter.Add(ItemType.Commodity);
 		}
 
@@ -171,11 +178,13 @@ public class TraderInventorySheet : PanelBase
 				foreach(SaleItem saleItem in _currentStationData.TraderSaleItems)
 				{
 					ItemStats itemStats = GameManager.Inst.ItemManager.GetItemStats(saleItem.ItemID);
+					Item item = new Item(itemStats);
+					InvItemData invItem = new InvItemData();
+					invItem.Item = item;
+					invItem.Quantity = saleItem.Quantity;
 					if(_itemTypeFilter.Contains(itemStats.Type))
 					{
-						Item item = new Item(itemStats);
-						InvItemData invItem = new InvItemData();
-						invItem.Item = item;
+						
 						displayedItems.Add(invItem);
 					}
 				}
@@ -192,11 +201,17 @@ public class TraderInventorySheet : PanelBase
 
 	public void OnBuyButtonClick()
 	{
-		if(_selectedItemEntry != null && _currentStationData != null && _currentStationData.HomeStationData != null)
+		if(_selectedItemEntry != null && _currentStationData != null)
 		{
 			if(_selectedItemContainer == TraderInventory)
 			{
-				//remove item from vault and move to cargo
+				if(_selectedQuantity * _selectedItemEntry.Price > GameManager.Inst.PlayerProgress.Credits)
+				{
+					GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("NOT ENOUGH CREDITS");
+					return;
+				}
+
+				//remove item from trader and move to cargo
 				List<InvItemData> dest = null;
 				if(_selectedItemEntry.ItemData.Item.Type == ItemType.Ammo)
 				{
@@ -206,6 +221,33 @@ public class TraderInventorySheet : PanelBase
 						GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("NOT ENOUGH SPACE IN AMMO BAY");
 						return;
 					}
+
+
+					GameManager.Inst.UIManager.AddItemtoInvItemDataList(dest, _selectedItemEntry.ItemData, _selectedQuantity);
+				}
+				else if(_selectedItemEntry.ItemData.Item.Type == ItemType.Commodity)
+				{
+					dest = CurrentLoadout.CargoBayItems;
+					if(ShipInventorySheet.AvailableCargoSpaceValue < _selectedItemEntry.ItemData.Item.CargoUnits * _selectedQuantity)
+					{
+						GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("NOT ENOUGH SPACE IN CARGO BAY");
+						return;
+					}
+
+					//find the sale item in station with this item ID and remove the quantity
+					List<SaleItem> traderItemsCopy = new List<SaleItem>(_currentStationData.TraderSaleItems);
+					foreach(SaleItem saleItem in traderItemsCopy)
+					{
+						if(saleItem.ItemID == _selectedItemEntry.ItemData.Item.ID)
+						{
+							saleItem.Quantity -= _selectedQuantity;
+							if(saleItem.Quantity <= 0)
+							{
+								_currentStationData.TraderSaleItems.Remove(saleItem);
+							}
+						}
+					}
+					GameManager.Inst.UIManager.AddItemtoInvItemDataList(dest, _selectedItemEntry.ItemData, _selectedQuantity);
 				}
 				else
 				{
@@ -215,10 +257,10 @@ public class TraderInventorySheet : PanelBase
 						GameManager.Inst.UIManager.ErrorMessagePanel.DisplayMessage("NOT ENOUGH SPACE IN CARGO BAY");
 						return;
 					}
+					dest.Add(_selectedItemEntry.ItemData);
 				}
 
-				int itemsTaken = GameManager.Inst.UIManager.TakeItemFromItemDataList(_currentStationData.HomeStationData.ItemsInVault, _selectedItemEntry.ItemData, _selectedQuantity);
-				GameManager.Inst.UIManager.AddItemtoInvItemDataList(dest, _selectedItemEntry.ItemData, itemsTaken);
+				GameManager.Inst.PlayerProgress.Credits -= Mathf.FloorToInt(_selectedQuantity * _selectedItemEntry.Price);
 
 				Refresh();
 			}
@@ -227,7 +269,7 @@ public class TraderInventorySheet : PanelBase
 
 	public void OnSellButtonClick()
 	{
-		if(_selectedItemEntry != null && _currentStationData != null && _currentStationData.HomeStationData != null)
+		if(_selectedItemEntry != null && _currentStationData != null)
 		{
 
 			if(_selectedItemContainer == CargoAmmoInventory)
@@ -242,11 +284,19 @@ public class TraderInventorySheet : PanelBase
 					source = CurrentLoadout.CargoBayItems;
 				}
 
-
-
 				//remove item from source and add to vault
 				int itemsTaken = GameManager.Inst.UIManager.TakeItemFromItemDataList(source, _selectedItemEntry.ItemData, _selectedQuantity);
-				GameManager.Inst.UIManager.AddItemtoInvItemDataList(_currentStationData.HomeStationData.ItemsInVault, _selectedItemEntry.ItemData, itemsTaken);
+				GameManager.Inst.PlayerProgress.Credits += Mathf.FloorToInt(itemsTaken * _selectedItemEntry.Price);
+
+				//find the sale item in station with this item ID and remove the quantity
+				List<SaleItem> traderItemsCopy = new List<SaleItem>(_currentStationData.TraderSaleItems);
+				foreach(SaleItem saleItem in traderItemsCopy)
+				{
+					if(saleItem.ItemID == _selectedItemEntry.ItemData.Item.ID)
+					{
+						saleItem.Quantity += _selectedQuantity;
+					}
+				}
 
 				Refresh();
 			}
@@ -257,10 +307,13 @@ public class TraderInventorySheet : PanelBase
 	{
 		if(_selectedItemEntry != null && _currentStationData != null)
 		{
-			if(_selectedItemEntry.ItemData.Item.Type == ItemType.Ammo && _selectedItemContainer == TraderInventory)
+			if((_selectedItemEntry.ItemData.Item.Type == ItemType.Ammo || _selectedItemEntry.ItemData.Item.Type == ItemType.Commodity) && _selectedItemContainer == TraderInventory)
 			{
 				int maxQuantity = Mathf.FloorToInt(GameManager.Inst.PlayerProgress.Credits / (_selectedItemEntry.Price));
-
+				if(maxQuantity <= 1)
+				{
+					maxQuantity = 1;
+				}
 				_selectedQuantity = Mathf.RoundToInt(Mathf.Lerp(1f, maxQuantity, QuantitySlider.value));
 				QuantityLabel.text = _selectedQuantity.ToString();
 			}
@@ -268,6 +321,15 @@ public class TraderInventorySheet : PanelBase
 			{
 				_selectedQuantity = Mathf.RoundToInt(Mathf.Lerp(1f, (float)_selectedItemEntry.ItemData.Quantity, QuantitySlider.value));
 				QuantityLabel.text = _selectedQuantity.ToString();
+			}
+
+			if(_selectedItemContainer == TraderInventory)
+			{
+				ShipInventorySheet.RefreshProposedCargoUsage(_selectedQuantity * _selectedItemEntry.ItemData.Item.CargoUnits);
+			}
+			else
+			{
+				ShipInventorySheet.RefreshProposedCargoUsage(_selectedQuantity * _selectedItemEntry.ItemData.Item.CargoUnits * -1);
 			}
 
 			TotalPriceValue.alpha = 1;
@@ -295,7 +357,7 @@ public class TraderInventorySheet : PanelBase
 	{
 		foreach(InventoryItemEntry itemEntry in CargoAmmoInventory.ItemEntries)
 		{
-
+			itemEntry.SetItemPrice(GameManager.Inst.EconomyManager.GetItemSellPrice(itemEntry.ItemData.Item, _currentStationData));
 		}
 
 		foreach(InventoryItemEntry itemEntry in TraderInventory.ItemEntries)

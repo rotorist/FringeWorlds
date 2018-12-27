@@ -11,6 +11,8 @@ public class DockableStationData
 	public List<DemandResource> DemandResources;
 	public float FuelPrice;
 	public float LifeSupportPrice;
+	public float UndesiredItemPriceMultiplier;
+
 
 	public List<MacroAIParty> DockedParties;
 
@@ -41,6 +43,7 @@ public class DockableStationData
 [System.Serializable]
 public class DockableStationSaveData
 {
+	public string StationID;
 	public List<SaleItem> TraderSaleItems;
 	public List<SaleShip> ShipsForSale;
 	public List<DemandResource> DemandResources;
@@ -48,6 +51,7 @@ public class DockableStationSaveData
 	public float LifeSupportPrice;
 	public List<int> DockedPartiesNumbers;
 	public HomeStationSaveData HomeStationSaveData;
+	public float UndesiredItemPriceMultiplier;
 }
 
 [System.Serializable]
@@ -56,6 +60,7 @@ public class DockableStationInitialData
 	public string StationID;
 	public List<SaleItem> TraderSaleItems;
 	public List<SaleShip> ShipsForSale;
+	public List<DemandResource> DemandResources;
 	public float FuelPrice;
 	public float LifeSupportPrice;
 

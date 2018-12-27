@@ -53,9 +53,9 @@ public class SaveGameManager
 		CurrentSave.SpawnStationID = GameManager.Inst.PlayerProgress.SpawnStationID;
 		CurrentSave.SpawnStationType = GameManager.Inst.PlayerProgress.SpawnStationType;
 
-		CurrentSave.AllNonPlayerParties = GameManager.Inst.NPCManager.PartySaveDatas;
-		CurrentSave.LastUsedPartyNumber = GameManager.Inst.NPCManager.LastUsedPartyNumber;
-
+		//CurrentSave.AllNonPlayerParties = GameManager.Inst.NPCManager.PartySaveDatas;
+		//CurrentSave.LastUsedPartyNumber = GameManager.Inst.NPCManager.LastUsedPartyNumber;
+		SaveWorldData();
 
 		SavePlayerData(true);
 
@@ -80,6 +80,7 @@ public class SaveGameManager
 		CurrentSave.PlayerLoadouts.Add(loadout);
 		CurrentSave.PlayerActiveLoadoutID = loadout.LoadoutID;
 		CurrentSave.ProfileName = GameManager.Inst.PlayerProgress.ProfileName;
+		CurrentSave.PlayerCredits = GameManager.Inst.PlayerProgress.Credits;
 	}
 
 	public void SyncLoadoutWithShip(Loadout loadout, ShipBase ship)
@@ -176,8 +177,37 @@ public class SaveGameManager
 			CurrentSave.AllNonPlayerParties.Add(partyData);
 		}
 
-
-
+		//save station data
+		CurrentSave.DockableStationDatas = new List<DockableStationSaveData>();
+		foreach(KeyValuePair<string, DockableStationData> stationData in GameManager.Inst.WorldManager.DockableStationDatas)
+		{
+			DockableStationSaveData stationSaveData = new DockableStationSaveData();
+			stationSaveData.StationID = stationData.Value.StationID;
+			stationSaveData.DemandResources = stationData.Value.DemandResources;
+			stationSaveData.DockedPartiesNumbers = new List<int>();
+			foreach(MacroAIParty party in stationData.Value.DockedParties)
+			{
+				stationSaveData.DockedPartiesNumbers.Add(party.PartyNumber);
+			}
+			stationSaveData.FuelPrice = stationData.Value.FuelPrice;
+			stationSaveData.LifeSupportPrice = stationData.Value.LifeSupportPrice;
+			stationSaveData.ShipsForSale = stationData.Value.ShipsForSale;
+			stationSaveData.TraderSaleItems = stationData.Value.TraderSaleItems;
+			stationSaveData.UndesiredItemPriceMultiplier = stationData.Value.UndesiredItemPriceMultiplier;
+			if(stationData.Value.HomeStationData != null)
+			{
+				stationSaveData.HomeStationSaveData = new HomeStationSaveData();
+				stationSaveData.HomeStationSaveData.ItemsInVault = stationData.Value.HomeStationData.ItemsInVault;
+				stationSaveData.HomeStationSaveData.ShipsInHangar = new List<LoadoutSaveData>();
+				foreach(Loadout loadout in stationData.Value.HomeStationData.ShipsInHangar)
+				{
+					stationSaveData.HomeStationSaveData.ShipsInHangar.Add(CreateLoadoutSaveData(loadout));
+				}
+				stationSaveData.HomeStationSaveData.HangarSize = stationData.Value.HomeStationData.HangarSize;
+				stationSaveData.HomeStationSaveData.VaultSize = stationData.Value.HomeStationData.VaultSize;
+			}
+			CurrentSave.DockableStationDatas.Add(stationSaveData);
+		}
 
 	}
 
@@ -240,6 +270,30 @@ public class SaveGameManager
 			return;
 		}
 
+		LoadWorldData();
+
+		//load player data now
+		LoadPlayerData();
+
+	}
+
+	public void LoadPlayerData()
+	{
+		foreach(LoadoutSaveData loadoutData in CurrentSave.PlayerLoadouts)
+		{
+			if(loadoutData.LoadoutID == CurrentSave.PlayerActiveLoadoutID)
+			{
+				GameManager.Inst.PlayerProgress.ActiveLoadout = LoadLoadoutFromSave(loadoutData);
+
+				//Debug.Log(GameManager.Inst.PlayerProgress.ActiveLoadout.CurrentPowerMgmtButton);
+			}
+		}
+
+		GameManager.Inst.PlayerProgress.Credits = CurrentSave.PlayerCredits;
+	}
+
+	public void LoadWorldData()
+	{
 		GameManager.Inst.NPCManager.LastUsedPartyNumber = CurrentSave.LastUsedPartyNumber;
 
 		//loading all NPC and player parties
@@ -256,7 +310,7 @@ public class SaveGameManager
 			party.CurrentSystemID = currentSystem.ID;
 			party.DockedStationID = partyData.DockedStationID;
 
-			if(currentSystem.ID == GameManager.Inst.WorldManager.CurrentSystem.ID)
+			if(GameManager.Inst.WorldManager.CurrentSystem != null && currentSystem.ID == GameManager.Inst.WorldManager.CurrentSystem.ID)
 			{
 				party.Location = new RelLoc(currentSystem.OriginPosition, partyData.Location.ConvertToVector3(), GameObject.Find("Origin").transform, 1);
 			}
@@ -276,7 +330,7 @@ public class SaveGameManager
 				Loadout loadout = LoadLoadoutFromSave(loadoutData);
 				party.FollowerLoadouts.Add(loadout);
 			}
-				
+
 
 			if(partyData.CurrentTask != null)
 			{
@@ -341,21 +395,37 @@ public class SaveGameManager
 
 		}
 
-		//load player data now
-		LoadPlayerData();
-
-	}
-
-	public void LoadPlayerData()
-	{
-		foreach(LoadoutSaveData loadoutData in CurrentSave.PlayerLoadouts)
+		//load station data
+		GameManager.Inst.WorldManager.DockableStationDatas = new Dictionary<string, DockableStationData>();
+		foreach(DockableStationSaveData saveData in CurrentSave.DockableStationDatas)
 		{
-			if(loadoutData.LoadoutID == CurrentSave.PlayerActiveLoadoutID)
+			DockableStationData stationData = new DockableStationData();
+			stationData.DemandResources = saveData.DemandResources;
+			stationData.DockedParties = new List<MacroAIParty>();
+			foreach(int partyNumber in saveData.DockedPartiesNumbers)
 			{
-				GameManager.Inst.PlayerProgress.ActiveLoadout = LoadLoadoutFromSave(loadoutData);
-
-				//Debug.Log(GameManager.Inst.PlayerProgress.ActiveLoadout.CurrentPowerMgmtButton);
+				stationData.DockedParties.Add(GameManager.Inst.NPCManager.GetPartyByNumber(partyNumber));
 			}
+			stationData.FuelPrice = saveData.FuelPrice;
+			stationData.LifeSupportPrice = saveData.LifeSupportPrice;
+			stationData.ShipsForSale = saveData.ShipsForSale;
+			stationData.StationID = saveData.StationID;
+			stationData.TraderSaleItems = saveData.TraderSaleItems;
+			stationData.UndesiredItemPriceMultiplier = saveData.UndesiredItemPriceMultiplier;
+			if(saveData.HomeStationSaveData != null)
+			{
+				stationData.HomeStationData = new HomeStationData();
+				stationData.HomeStationData.HangarSize = saveData.HomeStationSaveData.HangarSize;
+				stationData.HomeStationData.VaultSize = saveData.HomeStationSaveData.VaultSize;
+				stationData.HomeStationData.ItemsInVault = saveData.HomeStationSaveData.ItemsInVault;
+				stationData.HomeStationData.ShipsInHangar = new List<Loadout>();
+				foreach(LoadoutSaveData loadoutSaveData in saveData.HomeStationSaveData.ShipsInHangar)
+				{
+					stationData.HomeStationData.ShipsInHangar.Add(LoadLoadoutFromSave(loadoutSaveData));
+				}
+			}
+
+			GameManager.Inst.WorldManager.DockableStationDatas.Add(stationData.StationID, stationData);
 		}
 	}
 
@@ -366,8 +436,9 @@ public class SaveGameManager
 			return;
 		}
 
-		GameManager.Inst.NPCManager.LastUsedPartyNumber = CurrentSave.LastUsedPartyNumber;
-		GameManager.Inst.NPCManager.PartySaveDatas = CurrentSave.AllNonPlayerParties;
+		//GameManager.Inst.NPCManager.LastUsedPartyNumber = CurrentSave.LastUsedPartyNumber;
+		//GameManager.Inst.NPCManager.PartySaveDatas = CurrentSave.AllNonPlayerParties;
+		LoadWorldData();
 
 		//load player data now
 		LoadPlayerData();
@@ -377,7 +448,7 @@ public class SaveGameManager
 	{
 		Debug.Log("Creating new game in space");
 		CurrentSave = null;
-		GameManager.Inst.PlayerProgress.Credits = 36100;
+		GameManager.Inst.PlayerProgress.Credits = 6100;
 		GameManager.Inst.PlayerProgress.SpawnSystemID = "washington_system";
 		GameManager.Inst.PlayerProgress.SpawnStationID = "planet_colombia_landing";
 		GameManager.Inst.PlayerProgress.SpawnStationType = StationType.Station;
@@ -388,7 +459,7 @@ public class SaveGameManager
 	{
 		Debug.Log("Creating new game in station");
 		CurrentSave = null;
-		GameManager.Inst.PlayerProgress.Credits = 36100;
+		GameManager.Inst.PlayerProgress.Credits = 6100;
 		GameManager.Inst.PlayerProgress.SpawnSystemID = "washington_system";
 		GameManager.Inst.PlayerProgress.SpawnStationID = "planet_colombia_landing";
 		GameManager.Inst.PlayerProgress.SpawnStationType = StationType.Station;

@@ -75,7 +75,7 @@ public class NPCManager
 		{	
 			{fac1.ID, 0.5f},
 			{fac2.ID, 0.5f},
-			{fac3.ID, 0.0f},
+			{fac3.ID, 0.5f},
 			{fac4.ID, 0.5f},
 			{fac5.ID, 0.5f}
 		};
@@ -100,7 +100,7 @@ public class NPCManager
 
 		fac3.Relationships = new Dictionary<string, float>() 
 		{	
-			{facp.ID, 0.0f},
+			{facp.ID, 0.5f},
 			{fac1.ID, 0},
 			{fac2.ID, 1},
 			{fac4.ID, 1},
@@ -339,6 +339,19 @@ public class NPCManager
 		{
 			_allShips.Remove(ship);
 		}
+	}
+
+	public MacroAIParty GetPartyByNumber(int partyNumber)
+	{
+		foreach(MacroAIParty party in _allParties)
+		{
+			if(partyNumber == party.PartyNumber)
+			{
+				return party;
+			}
+		}
+
+		return null;
 	}
 
 	public float GetFactionRelationship(Faction faction1, Faction faction2)

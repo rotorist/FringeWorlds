@@ -20,6 +20,8 @@ public class HomeStationData
 [System.Serializable]
 public class HomeStationSaveData
 {
-	public List<Loadout> ShipsInHangar;
+	public int HangarSize;
+	public int VaultSize;
+	public List<LoadoutSaveData> ShipsInHangar;
 	public List<InvItemData> ItemsInVault;
 }

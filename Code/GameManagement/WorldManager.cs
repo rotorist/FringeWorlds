@@ -18,6 +18,11 @@ public class WorldManager
 
 	public void InitializeDocked()
 	{
+		_allNavNodes = new Dictionary<string, NavNode>();
+		_allSystems = GameManager.Inst.DBManager.XMLParserWorld.LoadAllSystemsFromXML();
+
+		BuildNavMap();
+
 		DockableStationDatas = GameManager.Inst.DBManager.JsonDataHandler.LoadAllDockableStations();
 
 	}

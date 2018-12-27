@@ -138,7 +138,8 @@ public class JsonDataHandler : DataHandlerBase
 		stationData.LifeSupportPrice = initialData.LifeSupportPrice;
 		stationData.ShipsForSale = initialData.ShipsForSale;
 		stationData.TraderSaleItems = initialData.TraderSaleItems;
-
+		stationData.DemandResources = initialData.DemandResources;
+		stationData.UndesiredItemPriceMultiplier = UnityEngine.Random.Range(0.1f, 0.4f);
 		foreach(SaleItem saleItem in stationData.TraderSaleItems)
 		{
 			saleItem.PriceFactor = 1;

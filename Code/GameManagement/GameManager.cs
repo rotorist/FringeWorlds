@@ -31,6 +31,7 @@ public class GameManager : MonoBehaviour
 	public SaveGameManager SaveGameManager;
 	public SoundManager SoundManager;
 	public ItemManager ItemManager;
+	public EconomyManager EconomyManager;
 
 	public ShipBase ShipForTesting;
 
@@ -161,6 +162,8 @@ public class GameManager : MonoBehaviour
 		ItemManager = new ItemManager();
 		ItemManager.Initialize();
 
+		EconomyManager = new EconomyManager();
+
 		if(SceneType == SceneType.Space)
 		{
 			Debug.Log("Loading space scene");
@@ -213,6 +216,8 @@ public class GameManager : MonoBehaviour
 			WorldManager.CurrentSystem = system;
 			WorldManager.Initialize();
 
+			EconomyManager.Initialize();
+
 			if(LevelAnchor != null && !LevelAnchor.IsNewGame)
 			{
 				SaveGameManager.LoadSaveInSpace();
@@ -250,6 +255,7 @@ public class GameManager : MonoBehaviour
 			PlayerControl.Initialize();
 
 			WorldManager = new WorldManager();
+
 			//WorldManager.Initialize();
 
 			/*
@@ -277,6 +283,8 @@ public class GameManager : MonoBehaviour
 
 			WorldManager = new WorldManager();
 			WorldManager.InitializeDocked();
+
+			EconomyManager.Initialize();
 
 			NPCManager = new NPCManager();
 			NPCManager.InitializeDocked();
