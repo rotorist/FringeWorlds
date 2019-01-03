@@ -133,6 +133,27 @@ public class Item
 		return intArray;
 	}
 
+	public ResourceType GetResourceTypeAttribute()
+	{
+		string resourceTypeString = GetStringAttribute("ResourceType");
+		if(!string.IsNullOrEmpty(resourceTypeString))
+		{
+			object result = Enum.Parse(typeof(ResourceType), resourceTypeString);
+			if(result != null)
+			{
+				return (ResourceType)result;
+			}
+			else
+			{
+				return ResourceType.None;
+			}
+		}
+		else
+		{
+			return ResourceType.None;
+		}
+	}
+
 	public ItemAttribute GetAttributeByName(string name)
 	{
 		if(AttributeIndex.Count > 0)

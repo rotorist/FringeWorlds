@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MacroAIParty
 {
-
+	public MacroAIPartyType PartyType;
 	public Vector3 Destination;
 	public int PartyNumber;
 	public string FactionID;
@@ -71,6 +71,12 @@ public class MacroAIParty
 	}
 }
 
+public enum MacroAIPartyType
+{
+	Trader,
+	Raider,
+	Patrol
+}
 
 
 public class MacroAITask
@@ -99,6 +105,7 @@ public enum MacroAITaskType
 	None,
 	Travel,
 	Stay,
+	Trade,
 }
 
 [System.Serializable]

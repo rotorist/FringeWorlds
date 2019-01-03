@@ -200,8 +200,8 @@ public class VaultStorageSheet : PanelBase
 					}
 				}
 
-				int itemsTaken = GameManager.Inst.UIManager.TakeItemFromItemDataList(_currentStationData.HomeStationData.ItemsInVault, _selectedItem, _selectedQuantity);
-				GameManager.Inst.UIManager.AddItemtoInvItemDataList(dest, _selectedItem, itemsTaken);
+				int itemsTaken = GameManager.Inst.ItemManager.TakeItemFromItemDataList(_currentStationData.HomeStationData.ItemsInVault, _selectedItem, _selectedQuantity);
+				GameManager.Inst.ItemManager.AddItemtoInvItemDataList(dest, _selectedItem, itemsTaken);
 
 				Refresh();
 			}
@@ -232,8 +232,8 @@ public class VaultStorageSheet : PanelBase
 				}
 
 				//remove item from source and add to vault
-				int itemsTaken = GameManager.Inst.UIManager.TakeItemFromItemDataList(source, _selectedItem, _selectedQuantity);
-				GameManager.Inst.UIManager.AddItemtoInvItemDataList(_currentStationData.HomeStationData.ItemsInVault, _selectedItem, itemsTaken);
+				int itemsTaken = GameManager.Inst.ItemManager.TakeItemFromItemDataList(source, _selectedItem, _selectedQuantity);
+				GameManager.Inst.ItemManager.AddItemtoInvItemDataList(_currentStationData.HomeStationData.ItemsInVault, _selectedItem, itemsTaken);
 
 				Refresh();
 			}

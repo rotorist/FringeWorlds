@@ -6,13 +6,14 @@ using UnityEngine;
 public class DockableStationData
 {
 	public string StationID;
+	public string FactionID;
 	public List<SaleItem> TraderSaleItems;
 	public List<SaleShip> ShipsForSale;
 	public List<DemandResource> DemandResources;
 	public float FuelPrice;
 	public float LifeSupportPrice;
 	public float UndesiredItemPriceMultiplier;
-
+	public float DemandNormalizeSpeed;
 
 	public List<MacroAIParty> DockedParties;
 
@@ -26,24 +27,29 @@ public class DockableStationData
 
 	}
 
-	public float GetSaleItemPriceFactor(string itemID)
+	public float GetSaleItemPriceMultiplier(string itemID)
 	{
 		foreach(SaleItem saleItem in TraderSaleItems)
 		{
 			if(saleItem.ItemID == itemID)
 			{
-				return saleItem.PriceFactor;
+				//later need to involve player relationship with faction to calculate price factor
+				//right now just use supply level
+				return 1f / saleItem.SupplyLevel;
 			}
 		}
 
 		return 1;
 	}
+
+
 }
 
 [System.Serializable]
 public class DockableStationSaveData
 {
 	public string StationID;
+	public string FactionID;
 	public List<SaleItem> TraderSaleItems;
 	public List<SaleShip> ShipsForSale;
 	public List<DemandResource> DemandResources;
@@ -52,16 +58,18 @@ public class DockableStationSaveData
 	public List<int> DockedPartiesNumbers;
 	public HomeStationSaveData HomeStationSaveData;
 	public float UndesiredItemPriceMultiplier;
+	public float DemandNormalizeSpeed;
 }
 
 [System.Serializable]
 public class DockableStationInitialData
 {
 	public string StationID;
+	public string FactionID;
 	public List<SaleItem> TraderSaleItems;
 	public List<SaleShip> ShipsForSale;
 	public List<DemandResource> DemandResources;
 	public float FuelPrice;
 	public float LifeSupportPrice;
-
+	public float DemandNormalizeSpeed;
 }

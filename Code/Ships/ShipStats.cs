@@ -6,6 +6,7 @@ using UnityEngine;
 public class ShipStats 
 {
 	public string ID;
+	public ShipType ShipType;
 	public string DisplayName;
 	public string HUDName;
 	public string Description;

@@ -19,7 +19,7 @@ public class SoundManager
 			if(_nextMusicClip != null)
 			{
 				Music.clip = _nextMusicClip;
-				Music.Play();
+				//Music.Play();
 			}
 
 		}

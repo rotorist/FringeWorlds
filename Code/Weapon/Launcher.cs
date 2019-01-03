@@ -11,6 +11,7 @@ public class Launcher : Weapon
 
 	private float _coolDownTimer;
 	private bool _isCooledDown;
+	private bool _isNPC;
 
 	void Update()
 	{
@@ -35,7 +36,14 @@ public class Launcher : Weapon
 		this.AmmoID = ammoID;
 		this.AmmoType = itemData.Item.GetStringAttribute("Ammo Type");
 
-
+		if(ParentShip.MyAI.MyFaction != null && ParentShip.MyAI.MyFaction.ID == "player")
+		{
+			_isNPC = false;
+		}
+		else
+		{
+			_isNPC = true;
+		}
 
 	}
 
@@ -62,7 +70,7 @@ public class Launcher : Weapon
 			}
 			else
 			{
-				ammoItem = ParentShip.Storage.TakeAmmo(AmmoID, 1, this.AmmoType);
+				ammoItem = ParentShip.Storage.TakeAmmo(AmmoID, 1, this.AmmoType, _isNPC);
 				if(ammoItem != null)
 				{
 					//just in case the ammo type has changed during take ammo, we always assign the item's id to ammoid

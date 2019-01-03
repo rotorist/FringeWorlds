@@ -223,7 +223,7 @@ public class TraderInventorySheet : PanelBase
 					}
 
 
-					GameManager.Inst.UIManager.AddItemtoInvItemDataList(dest, _selectedItemEntry.ItemData, _selectedQuantity);
+					GameManager.Inst.ItemManager.AddItemtoInvItemDataList(dest, _selectedItemEntry.ItemData, _selectedQuantity);
 				}
 				else if(_selectedItemEntry.ItemData.Item.Type == ItemType.Commodity)
 				{
@@ -247,7 +247,7 @@ public class TraderInventorySheet : PanelBase
 							}
 						}
 					}
-					GameManager.Inst.UIManager.AddItemtoInvItemDataList(dest, _selectedItemEntry.ItemData, _selectedQuantity);
+					GameManager.Inst.ItemManager.AddItemtoInvItemDataList(dest, _selectedItemEntry.ItemData, _selectedQuantity);
 				}
 				else
 				{
@@ -285,7 +285,7 @@ public class TraderInventorySheet : PanelBase
 				}
 
 				//remove item from source and add to vault
-				int itemsTaken = GameManager.Inst.UIManager.TakeItemFromItemDataList(source, _selectedItemEntry.ItemData, _selectedQuantity);
+				int itemsTaken = GameManager.Inst.ItemManager.TakeItemFromItemDataList(source, _selectedItemEntry.ItemData, _selectedQuantity);
 				GameManager.Inst.PlayerProgress.Credits += Mathf.FloorToInt(itemsTaken * _selectedItemEntry.Price);
 
 				//find the sale item in station with this item ID and remove the quantity
@@ -362,7 +362,7 @@ public class TraderInventorySheet : PanelBase
 
 		foreach(InventoryItemEntry itemEntry in TraderInventory.ItemEntries)
 		{
-			itemEntry.SetItemPrice(itemEntry.ItemData.Item.BasePrice * _currentStationData.GetSaleItemPriceFactor(itemEntry.ItemData.Item.ID));
+			itemEntry.SetItemPrice(itemEntry.ItemData.Item.BasePrice * _currentStationData.GetSaleItemPriceMultiplier(itemEntry.ItemData.Item.ID));
 		}
 	}
 

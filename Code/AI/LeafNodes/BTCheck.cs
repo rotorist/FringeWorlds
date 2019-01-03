@@ -258,7 +258,7 @@ public class BTCheck : BTLeaf
 				}
 				else
 				{
-					if(MyParty.CurrentTask.TaskType == MacroAITaskType.Stay)
+					if(MyParty.CurrentTask.TaskType == MacroAITaskType.Stay || MyParty.CurrentTask.TaskType == MacroAITaskType.Trade)
 					{
 						if(MyParty.WaitTimer >= MyParty.CurrentTask.StayDuration)
 						{
@@ -292,7 +292,7 @@ public class BTCheck : BTLeaf
 				}
 				else
 				{
-					if(MyParty.CurrentTask.TaskType == MacroAITaskType.Stay)
+					if(MyParty.CurrentTask.TaskType == MacroAITaskType.Stay || MyParty.CurrentTask.TaskType == MacroAITaskType.Trade)
 					{
 						if(MyParty.WaitTimer >= MyParty.CurrentTask.StayDuration)
 						{

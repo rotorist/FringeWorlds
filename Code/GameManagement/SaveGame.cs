@@ -12,10 +12,13 @@ public class SaveGame
 
 	public int LastUsedPartyNumber;
 	public List<MacroAIPartySaveData> AllNonPlayerParties;
+	public FactionRelationshipSaveData FactionRelationships;
 
 	public List<DockableStationSaveData> DockableStationDatas;
 
 	public List<LoadoutSaveData> PlayerLoadouts;
 	public string PlayerActiveLoadoutID;
 	public int PlayerCredits; 
+
+	public int CurrentTime;
 }

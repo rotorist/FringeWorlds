@@ -10,33 +10,38 @@ public class WorldManager
 	public Dictionary<string, NavNode> AllNavNodes { get { return _allNavNodes; } }
 	public List<AsteroidField> AsteroidFields { get { return _asteroidFields; } }
 
+	public int CurrentTime;//in hours
+
 	public Dictionary<string, DockableStationData> DockableStationDatas;
 
 	private List<AsteroidField> _asteroidFields;
 	private Dictionary<string, StarSystemData> _allSystems;
 	private Dictionary<string, NavNode> _allNavNodes;
+	private int _secondsPerHour;
+	private float _hourCounter;
+
+	public void PreInitialize()
+	{
+		CurrentTime = 186698;
+		DockableStationDatas = GameManager.Inst.DBManager.JsonDataHandler.LoadAllDockableStations();
+		_allNavNodes = new Dictionary<string, NavNode>();
+		_allSystems = GameManager.Inst.DBManager.XMLParserWorld.LoadAllSystemsFromXML();
+	}
+
 
 	public void InitializeDocked()
 	{
-		_allNavNodes = new Dictionary<string, NavNode>();
-		_allSystems = GameManager.Inst.DBManager.XMLParserWorld.LoadAllSystemsFromXML();
 
 		BuildNavMap();
-
-		DockableStationDatas = GameManager.Inst.DBManager.JsonDataHandler.LoadAllDockableStations();
-
+		_secondsPerHour = 10;
 	}
 
-	public void Initialize()
+	public void InitializeSpace()
 	{
 		Suns = GameObject.FindObjectsOfType<Sun>();
-		_allNavNodes = new Dictionary<string, NavNode>();
-		_allSystems = GameManager.Inst.DBManager.XMLParserWorld.LoadAllSystemsFromXML();
 
 		BuildNavMap();
-
-		DockableStationDatas = GameManager.Inst.DBManager.JsonDataHandler.LoadAllDockableStations();
-
+		_secondsPerHour = 10;
 
 		StationBase [] stations = GameObject.FindObjectsOfType<StationBase>();
 		foreach(StationBase station in stations)
@@ -62,14 +67,22 @@ public class WorldManager
 				sun.transform.LookAt(GameManager.Inst.PlayerControl.PlayerShip.transform);
 			}
 		}
-
-
-
-
+			
 
 		if(_asteroidFields.Count > 0)
 		{
 			UpdateAsteroids();
+		}
+	}
+
+	public void PerSecondUpdate()
+	{
+		_hourCounter ++;
+		if(_hourCounter > _secondsPerHour)
+		{
+			CurrentTime ++;
+			_hourCounter = 0;
+			GameEventHandler.Instance.TriggerOnHour();
 		}
 	}
 
@@ -101,6 +114,51 @@ public class WorldManager
 		return nodeList;
 	}
 
+	public string GetFormattedTime(int timeInHours)
+	{
+		int sol = Mathf.FloorToInt(timeInHours / (128f * 16f));
+		int day = Mathf.FloorToInt((timeInHours % (128 * 16)) / 16f);
+		int hour = (timeInHours % (128 * 16)) % 16;
+
+		return "Sol " + sol.ToString() + " Day " + day.ToString() + " Hr " + hour;
+	}
+
+	public string GetFormattedCurrentTime()
+	{
+		return GetFormattedTime(CurrentTime);
+	}
+
+	public StationData GetRandomFriendlyDockableStation(string factionID, StationData excludeStation)
+	{
+		List<StationData> candidates = new List<StationData>();
+		foreach(KeyValuePair<string, NavNode> navNode in _allNavNodes)
+		{
+			if(navNode.Value.NavNodeType == NavNodeType.Station)
+			{
+				StationData stationData = (StationData)navNode.Value;
+				if(stationData != excludeStation && stationData.DockableStationData != null)
+				{
+					Faction requesterFaction = GameManager.Inst.NPCManager.AllFactions[factionID];
+					Faction stationFaction = GameManager.Inst.NPCManager.AllFactions[stationData.DockableStationData.FactionID];
+					float relationship = GameManager.Inst.NPCManager.GetFactionRelationship(requesterFaction, stationFaction);
+					if(relationship >= 0.4f)
+					{
+						candidates.Add(stationData);
+					}
+				}
+			}
+		}
+
+		if(candidates.Count > 0)
+		{
+			return candidates[UnityEngine.Random.Range(0, candidates.Count)];
+		}
+		else
+		{
+			return null;
+		}
+	}
+
 
 
 
@@ -114,6 +172,14 @@ public class WorldManager
 			foreach(StationData stationData in systemData.Value.Stations)
 			{
 				_allNavNodes.Add(stationData.ID, stationData);
+				//now assign dockablestationdata to the station, if there is a dockablestationdata created for it
+				foreach(KeyValuePair<string, DockableStationData> dockable in DockableStationDatas)
+				{
+					if(dockable.Value.StationID == stationData.ID)
+					{
+						stationData.DockableStationData = dockable.Value;
+					}
+				}
 			}
 
 			foreach(JumpGateData jumpGateData in systemData.Value.JumpGates)

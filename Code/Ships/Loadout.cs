@@ -189,6 +189,17 @@ public class Loadout
 
 		return dependencies;
 	}
+
+	public float GetCargoBayUsage()
+	{
+		float usage = 0;
+		foreach(InvItemData item in CargoBayItems)
+		{
+			usage += item.Quantity * item.Item.CargoUnits;
+		}
+
+		return usage;
+	}
 }
 
 [System.Serializable]

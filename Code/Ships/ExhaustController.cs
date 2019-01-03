@@ -9,6 +9,7 @@ public class ExhaustController : MonoBehaviour
 
 	private ExhaustState _state;
 	private List<GameObject> _exhausts;
+	private List<TrailRenderer> _exhaustTrails;
 	private float _normalExhaustScaleZ;
 	private GameObject _flare;
 
@@ -41,6 +42,7 @@ public class ExhaustController : MonoBehaviour
 		if(_exhausts == null)
 		{
 			_exhausts = new List<GameObject>();
+			_exhaustTrails = new List<TrailRenderer>();
 		}
 
 		foreach(GameObject go in _exhausts)
@@ -49,6 +51,7 @@ public class ExhaustController : MonoBehaviour
 		}
 
 		_exhausts.Clear();
+		_exhaustTrails.Clear();
 		_state = state;
 
 		foreach(Transform t in ExhaustHolders)
@@ -92,6 +95,25 @@ public class ExhaustController : MonoBehaviour
 			renderer.maxParticleSize *= FlameScale.x;
 			_exhausts.Add(exhaust);
 
+			TrailRenderer trail = exhaust.transform.GetComponentInChildren<TrailRenderer>();
+			if(trail != null)
+			{
+				_exhaustTrails.Add(trail);
+			}
+
+		}
+	}
+
+	public void UpdateExhaustTrail(float speed)
+	{
+		if(_exhaustTrails == null)
+		{
+			return;
+		}
+
+		foreach(TrailRenderer trail in _exhaustTrails)
+		{
+			trail.startWidth = Mathf.Lerp(0, 0.3f, Mathf.Clamp01(speed / 10));
 		}
 	}
 

@@ -2,15 +2,37 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class Faction 
 {
 
 	public string ID;
 	public string DisplayName;
-	public Dictionary<string, float> Relationships;
+	public string Description;
+
+	public List<string> ShipPool;
+	public List<string> EquipmentPool;
+	public List<string> WeaponPool;
+	public List<string> DefensivesPool;
+
+	public List<Loadout> LoadoutPool;
 
 	public Faction()
 	{
-		Relationships = new Dictionary<string, float>();
+		
 	}
+}
+
+[System.Serializable]
+public class FactionRelationship
+{
+	public string Faction1;
+	public string Faction2;
+	public float Relationship;
+}
+
+[System.Serializable]
+public class FactionRelationshipSaveData
+{
+	public List<FactionRelationship> Relationships;
 }

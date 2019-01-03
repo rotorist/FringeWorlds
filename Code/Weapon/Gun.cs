@@ -14,6 +14,7 @@ public class Gun : Weapon
 	private float _coolDownTimer;
 	private bool _isCooledDown;
 	private bool _isAmmoRequired;
+	private bool _isNPC;
 
 	void Update()
 	{
@@ -45,7 +46,14 @@ public class Gun : Weapon
 			_isAmmoRequired = true;
 		}
 
-
+		if(ParentShip.MyAI.MyFaction != null && ParentShip.MyAI.MyFaction.ID == "player")
+		{
+			_isNPC = false;
+		}
+		else
+		{
+			_isNPC = true;
+		}
 	}
 
 	public override void Rebuild ()
@@ -72,7 +80,7 @@ public class Gun : Weapon
 			}
 			else
 			{
-				ammoItem = ParentShip.Storage.TakeAmmo(AmmoID, 1, this.AmmoType);
+				ammoItem = ParentShip.Storage.TakeAmmo(AmmoID, 1, this.AmmoType, _isNPC);
 				if(ammoItem != null)
 				{
 					//just in case the ammo type has changed during take ammo, we always assign the item's id to ammoid

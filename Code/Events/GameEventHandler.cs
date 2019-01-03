@@ -38,6 +38,12 @@ public class GameEventHandler
 	public delegate void ShipEventDelegate(ShipBase ship);
 	public static event ShipEventDelegate OnShipDeath;
 
+
+	public delegate void TimeEventDelegate();
+	public static event TimeEventDelegate OnHour;
+
+
+
 	#endregion
 
 
@@ -49,6 +55,17 @@ public class GameEventHandler
 			OnShipDeath(ship);
 		}
 	}
+
+
+
+	public void TriggerOnHour()
+	{
+		if(OnHour != null)
+		{
+			OnHour();
+		}
+	}
+
 
 	#endregion
 

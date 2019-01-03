@@ -134,15 +134,25 @@ public class JsonDataHandler : DataHandlerBase
 		DockableStationInitialData initialData = JsonUtility.FromJson<DockableStationInitialData>(dataAsJson);
 		DockableStationData stationData = new DockableStationData();
 		stationData.StationID = initialData.StationID;
+		stationData.FactionID = initialData.FactionID;
 		stationData.FuelPrice = initialData.FuelPrice;
 		stationData.LifeSupportPrice = initialData.LifeSupportPrice;
 		stationData.ShipsForSale = initialData.ShipsForSale;
 		stationData.TraderSaleItems = initialData.TraderSaleItems;
 		stationData.DemandResources = initialData.DemandResources;
 		stationData.UndesiredItemPriceMultiplier = UnityEngine.Random.Range(0.1f, 0.4f);
+		stationData.DemandNormalizeSpeed = initialData.DemandNormalizeSpeed;
 		foreach(SaleItem saleItem in stationData.TraderSaleItems)
 		{
-			saleItem.PriceFactor = 1;
+			ItemStats stats = GameManager.Inst.ItemManager.GetItemStats(saleItem.ItemID);
+			if(stats.Type == ItemType.Commodity)
+			{
+				saleItem.SupplyLevel = UnityEngine.Random.Range(0.3f, 1.6f);
+			}
+			else
+			{
+				saleItem.SupplyLevel = 1;
+			}
 			saleItem.Quantity = 1;
 		}
 
@@ -163,6 +173,42 @@ public class JsonDataHandler : DataHandlerBase
 		}
 
 		return stations;
+	}
+
+	public Faction LoadFactionJson(string fileName)
+	{
+		string dataAsJson = LoadJsonString("Factions/" + fileName);
+		Faction faction = JsonUtility.FromJson<Faction>(dataAsJson);
+
+		return faction;
+	}
+
+	public Dictionary<string, Faction> LoadAllFactions()
+	{
+		Debug.Log("Loading faction data");
+		Dictionary<string, Faction> factions = new Dictionary<string, Faction>();
+		DirectoryInfo topDirInfo = new DirectoryInfo(this.Path + "Factions/");
+		FileInfo [] infos = topDirInfo.GetFiles("*.json");
+		foreach(FileInfo info in infos)
+		{
+			if(info.Name != "relationships.json")
+			{
+				Debug.Log("Loading faction " + info.Name);
+				Faction faction = LoadFactionJson(info.Name);
+				factions.Add(faction.ID, faction);
+			}
+		}
+
+		return factions;
+	}
+
+	public FactionRelationshipSaveData LoadFactionRelationships()
+	{
+		Debug.Log("Loading faction relationships");
+		string dataAsJson = LoadJsonString("Factions/relationships.json");
+		FactionRelationshipSaveData relationships = JsonUtility.FromJson<FactionRelationshipSaveData>(dataAsJson);
+
+		return relationships;
 	}
 }
 

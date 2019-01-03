@@ -39,6 +39,8 @@ public class GameManager : MonoBehaviour
 
 	public int MaxTimeScale = 1;
 
+	private float _secondsTimer;
+
 	// Use this for initialization
 	void Start () 
 	{
@@ -87,13 +89,15 @@ public class GameManager : MonoBehaviour
 			PlayerControl.FixedFrameUpdate();
 			CameraController.PerFrameFixedUpdate();
 
+			/*
 			if(Time.time % 5 == 0)
 			{
-				if(GameManager.Inst.NPCManager.AllParties.Count < 2)
+				if(GameManager.Inst.NPCManager.AllParties.Count < 6)
 				{
 					NPCManager.TestSpawn();
 				}
 			}
+			*/
 		}
 		else if(SceneType == SceneType.SpaceTest)
 		{
@@ -101,6 +105,12 @@ public class GameManager : MonoBehaviour
 			//CameraController.PerFrameFixedUpdate();
 		}
 
+		_secondsTimer += Time.fixedDeltaTime;
+		if(_secondsTimer >= 1)
+		{
+			PerSecondUpdate();
+			_secondsTimer = 0;
+		}
 
 	}
 
@@ -117,6 +127,7 @@ public class GameManager : MonoBehaviour
 	}
 
 
+
 	public void LoadStationScene()
 	{
 		UIEventHandler.Instance.OnUnloadScene();
@@ -131,7 +142,14 @@ public class GameManager : MonoBehaviour
 		SceneManager.LoadScene("Space");
 	}
 
-
+	private void PerSecondUpdate()
+	{
+		if(SceneType == SceneType.Space || SceneType == SceneType.Station)
+		{
+			WorldManager.PerSecondUpdate();
+			NPCManager.PerSecondUpdate();
+		}
+	}
 
 	private void Initialize()
 	{
@@ -185,7 +203,7 @@ public class GameManager : MonoBehaviour
 			PlayerControl.Initialize();
 
 			WorldManager = new WorldManager();
-
+			WorldManager.PreInitialize();
 
 
 
@@ -214,7 +232,7 @@ public class GameManager : MonoBehaviour
 
 
 			WorldManager.CurrentSystem = system;
-			WorldManager.Initialize();
+			WorldManager.InitializeSpace();
 
 			EconomyManager.Initialize();
 
@@ -282,6 +300,7 @@ public class GameManager : MonoBehaviour
 			PlayerProgress.Initialize();
 
 			WorldManager = new WorldManager();
+			WorldManager.PreInitialize();
 			WorldManager.InitializeDocked();
 
 			EconomyManager.Initialize();

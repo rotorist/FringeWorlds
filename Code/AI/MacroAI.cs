@@ -21,9 +21,13 @@ public class MacroAI
 		party.SpawnedShips = new List<ShipBase>();
 
 		List<string> keyList = new List<string>(GameManager.Inst.WorldManager.AllSystems.Keys);
-		StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems["washington_system"];
+
+		//StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems["washington_system"];
+		StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems[keyList[UnityEngine.Random.Range(0, keyList.Count)]];
 		party.CurrentSystemID = currentSystem.ID;
-		StationData currentStation = currentSystem.GetStationByID("planet_colombia_landing");
+
+		//StationData currentStation = currentSystem.GetStationByID("planet_colombia_landing");
+		StationData currentStation = currentSystem.Stations[UnityEngine.Random.Range(0, currentSystem.Stations.Count)];
 		party.DockedStationID = "planet_colombia_landing";
 		Transform origin = GameObject.Find("Origin").transform;
 		party.Location = new RelLoc(origin.position, currentStation.Location.RealPos, origin);
@@ -854,27 +858,43 @@ public class MacroAI
 		}
 		if(prevTaskType == MacroAITaskType.Travel)
 		{
+			
+			if(!string.IsNullOrEmpty(party.DockedStationID) && UnityEngine.Random.value < 0.75f)
+			{
+				task.TaskType = MacroAITaskType.Trade;
+				task.StayDuration = UnityEngine.Random.Range(10f, 30f);
+				party.WaitTimer = 0;
+				party.RunningNodeHist.UniquePush("Trading for " + task.StayDuration);
+				Debug.LogError("Party " + party.PartyNumber + " Task has been assigned to party: Trade, current station" + party.DockedStationID);
 
-			task.TaskType = MacroAITaskType.Stay;
-			task.StayDuration = UnityEngine.Random.Range(8f, 15f);
-			party.WaitTimer = 0;
-			party.RunningNodeHist.UniquePush("Stay for " + task.StayDuration);
-			Debug.LogError("Party " + party.PartyNumber + " Task has been assigned to party: " + task.TaskType + " for " + task.StayDuration);
+				TradeCommodity(party, GameManager.Inst.WorldManager.DockableStationDatas[party.DockedStationID]);
+			}
+			else
+			{
+				task.TaskType = MacroAITaskType.Stay;
+				task.StayDuration = UnityEngine.Random.Range(15f, 35f);
+				party.WaitTimer = 0;
+				party.RunningNodeHist.UniquePush("Stay for " + task.StayDuration);
+				Debug.LogError("Party " + party.PartyNumber + " Task has been assigned to party: " + task.TaskType + " for " + task.StayDuration);
+			}
+
 
 		}
-		else if(prevTaskType == MacroAITaskType.Stay)
+		else if(prevTaskType == MacroAITaskType.Stay || prevTaskType == MacroAITaskType.Trade)
 		{
+			
 			task.TaskType = MacroAITaskType.Travel;
 			List<string> keyList = new List<string>(GameManager.Inst.WorldManager.AllSystems.Keys);
-			if(Time.time < 5)
+			if(Time.time < 0)
 			{
 				Debug.LogError("new task for initial test");
-				//StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems[keyList[UnityEngine.Random.Range(0, keyList.Count)]];
-				StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems["washington_system"];
+				StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems[keyList[UnityEngine.Random.Range(0, keyList.Count)]];
+				//StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems["washington_system"];
 				//StarSystemData destSystem = GameManager.Inst.WorldManager.AllSystems["new_england_system"];
 				task.TravelDestSystemID = destSystem.ID;
-				//task.TravelDestNodeID = destSystem.Stations[UnityEngine.Random.Range(0, destSystem.Stations.Count)].ID;
-				task.TravelDestNodeID = "annandale_station";//"planet_colombia_landing";//"bethesda_station";
+
+				task.TravelDestNodeID = destSystem.Stations[UnityEngine.Random.Range(0, destSystem.Stations.Count)].ID;
+				//task.TravelDestNodeID = "annandale_station";//"planet_colombia_landing";//"bethesda_station";
 				task.IsDestAStation = true;
 				//task.TravelDestCoord = new RelLoc(destSystem.OriginPosition, new Vector3(-28.3f, 5f, 418.8f), null);
 			}
@@ -892,6 +912,8 @@ public class MacroAI
 
 			party.WaitTimer = 0;
 			Debug.LogError("Party " + party.PartyNumber + " Task has been assigned to party: " + task.TaskType + " to " + (task.IsDestAStation ? task.TravelDestNodeID : task.TravelDestCoord.ToString()));
+
+
 		}
 
 		party.CurrentTask = task;
@@ -1087,6 +1109,66 @@ public class MacroAI
 			i++;
 			party.Formation.Add(ship, disp);
 		}
+	}
+
+	private void TradeCommodity(MacroAIParty party, DockableStationData stationData)
+	{
+		//check if there are any commodity goods in leader's cargo bay. if so, check if station is in demand for it
+		//if so, sell it and trigger economy event. if demand level is less than 1, only a certain probability will sell it
+		List<InvItemData> cargoCopy = new List<InvItemData>(party.LeaderLoadout.CargoBayItems);
+		foreach(InvItemData invItem in cargoCopy)
+		{
+			if(invItem.Item.Type == ItemType.Commodity)
+			{
+				ResourceType resourceType = invItem.Item.GetResourceTypeAttribute();
+				foreach(DemandResource demand in stationData.DemandResources)
+				{
+					if(demand.Type == resourceType || demand.ItemID == invItem.Item.ID)
+					{
+						float sellProbability = 1;
+						if(demand.CurrentDemand <= 1)
+						{
+							sellProbability = 0.4f;
+						}
+
+						if(UnityEngine.Random.value < sellProbability)
+						{
+							party.LeaderLoadout.CargoBayItems.Remove(invItem);
+							GameManager.Inst.EconomyManager.OnConvoySellCommodity(stationData, resourceType, invItem.Quantity);
+						}
+					}
+				}
+			}
+		}
+
+		//check if leader cargobay has room. if so, check if station has any commodity for sale and supply level is above 1
+		//if so buy it and trigger economy event. if supply level is less than 1, only a certain probability will buy it
+		float cargoBayUsage = party.LeaderLoadout.GetCargoBayUsage();
+		float cargoBaySize = GameManager.Inst.ItemManager.GetShipStats(party.LeaderLoadout.ShipID).CargoBaySize;
+
+		foreach(SaleItem saleItem in stationData.TraderSaleItems)
+		{
+			ItemStats stats = GameManager.Inst.ItemManager.GetItemStats(saleItem.ItemID);
+			if(stats.Type == ItemType.Commodity)
+			{
+				float buyProbability = 1;
+				if(saleItem.SupplyLevel <= 1)
+				{
+					buyProbability = 0.4f;
+				}
+
+				if(UnityEngine.Random.value < buyProbability && cargoBayUsage < cargoBaySize)
+				{
+					InvItemData itemData = new InvItemData();
+					Item item = new Item(GameManager.Inst.ItemManager.GetItemStats(saleItem.ItemID));
+					itemData.Item = item;
+					itemData.Quantity = UnityEngine.Random.Range(1, Mathf.FloorToInt(cargoBaySize - cargoBayUsage));
+					GameManager.Inst.ItemManager.AddItemtoInvItemDataList(party.LeaderLoadout.CargoBayItems, itemData, itemData.Quantity);
+					GameManager.Inst.EconomyManager.OnConvoyBuyCommodity(stationData, itemData.Item.ID, itemData.Quantity);
+				}
+			}
+		}
+
 	}
 }
 

@@ -54,8 +54,13 @@ public class ShipStorage : MonoBehaviour
 		return true;
 	}
 
-	public Item TakeAmmo(string itemID, int quantity, string ammoType)
+	public Item TakeAmmo(string itemID, int quantity, string ammoType, bool isNPC)
 	{
+		if(isNPC)
+		{
+			return new Item(GameManager.Inst.ItemManager.GetItemStats(itemID));
+		}
+
 		if(!string.IsNullOrEmpty(itemID) && AmmoBayItems.ContainsKey(itemID))
 		{
 			if(AmmoBayItems[itemID].Quantity >= quantity)

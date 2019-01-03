@@ -5,6 +5,7 @@ using System.Linq;
 
 public class NPCManager
 {
+	public PartySpawner PartySpawner;
 	public MacroAI MacroAI;
 	public int LastUsedPartyNumber;
 	public List<ShipBase> AllShips { get { return _allShips; } }
@@ -14,7 +15,7 @@ public class NPCManager
 
 	public Dictionary<string, Faction> AllFactions { get { return _allFactions; } }
 
-
+	private Dictionary<string, FactionRelationship> _factionRelationships;
 	private List<ShipBase> _allShips;
 	private Dictionary<string, Faction> _allFactions;
 	private List<MacroAIParty> _allParties;
@@ -35,10 +36,17 @@ public class NPCManager
 		GameEventHandler.OnShipDeath += OnShipDeath;
 
 		_allShips = new List<ShipBase>();
-		_allFactions = new Dictionary<string, Faction>();
+		_allFactions = GameManager.Inst.DBManager.JsonDataHandler.LoadAllFactions();
 		_allParties = new List<MacroAIParty>();
 
+		_factionRelationships = new Dictionary<string, FactionRelationship>();
+		FactionRelationshipSaveData relationshipSaveData = GameManager.Inst.DBManager.JsonDataHandler.LoadFactionRelationships();
+		foreach(FactionRelationship relationship in relationshipSaveData.Relationships)
+		{
+			_factionRelationships.Add(relationship.Faction1 + relationship.Faction2, relationship);
+		}
 
+		/*
 		//for now manually create factions
 		Faction facp = new Faction();
 		facp.ID = "player";
@@ -124,10 +132,13 @@ public class NPCManager
 			{fac3.ID, 1},
 			{fac4.ID, 1}
 		};
+		*/
 
 		MacroAI = new MacroAI();
 		MacroAI.Initialize();
 
+		PartySpawner = new PartySpawner();
+		PartySpawner.Initialize();
 	}
 
 	public void TestSpawn()
@@ -138,7 +149,7 @@ public class NPCManager
 			//MacroAI.GenerateParties();
 		}
 		Debug.Log("Generating test party");
-		MacroAI.GenerateTestParty("otu_civil_defense");
+		MacroAI.GenerateTestParty("otu");
 		//MacroAI.GenerateTestParty("otu");
 	}
 
@@ -317,6 +328,11 @@ public class NPCManager
 		MacroAI.PerFrameUpdate();
 	}
 
+	public void PerSecondUpdate()
+	{
+
+	}
+
 	public void OnShipDeath(ShipBase ship)
 	{
 		if(_allShips.Contains(ship))
@@ -362,9 +378,16 @@ public class NPCManager
 			return 1;
 		}
 
-		else if(faction1.Relationships.ContainsKey(faction2.ID))
+		string key1 = faction1.ID + faction2.ID;
+		string key2 = faction2.ID + faction1.ID;
+
+		if(_factionRelationships.ContainsKey(key1))
 		{
-			return faction1.Relationships[faction2.ID];
+			return _factionRelationships[key1].Relationship;
+		}
+		else if(_factionRelationships.ContainsKey(key2))
+		{
+			return _factionRelationships[key2].Relationship;
 		}
 		else
 		{

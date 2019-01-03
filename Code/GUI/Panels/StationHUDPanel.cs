@@ -9,6 +9,8 @@ public class StationHUDPanel : PanelBase
 	public List<UIButton> AllToggleButtons;
 	public GameObject TopHUDHolder;
 
+	public UILabel DateTimeLabel;
+
 	public override void Initialize ()
 	{
 		base.Initialize();
@@ -28,7 +30,7 @@ public class StationHUDPanel : PanelBase
 
 	public override void PerFrameUpdate ()
 	{
-		
+		DateTimeLabel.text = GameManager.Inst.WorldManager.GetFormattedCurrentTime();
 	}
 
 	public void OnTopHUDClick()

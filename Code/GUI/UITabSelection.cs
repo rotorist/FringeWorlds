@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class UITabSelection : MonoBehaviour 
 {
+	public UIColorScheme ColorScheme;
 	public PanelBase ParentPanel;
 	public List<UITab> Tabs;
 
@@ -40,4 +41,11 @@ public class UITabSelection : MonoBehaviour
 			}
 		}
 	}
+}
+
+public enum UIColorScheme
+{
+	Teal,
+	Blue,
+	Orange,
 }

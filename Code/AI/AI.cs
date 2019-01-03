@@ -204,6 +204,9 @@ public class AI : MonoBehaviour
 				}
 			}
 
+			//update exhaust trail
+			MyShip.MyReference.ExhaustController.UpdateExhaustTrail(RB.velocity.magnitude);
+
 			if(_avoidanceForce != Vector3.zero)
 			{
 				//Debug.Log(_avoidanceForce);

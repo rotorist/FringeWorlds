@@ -21,21 +21,48 @@ public class UITab : MonoBehaviour
 
 	public void OnSelectTab()
 	{
-		Background.color = new Color(1, 1, 1);
-		Button.hover = new Color(1, 1, 1);
-		Button.pressed = new Color(1, 1, 1);
-		Button.defaultColor = new Color(1, 1, 1);
-		Label.color = new Color(0.517f, 0.75f, 0.75f);
+		Color bgColor = new Color(1, 1, 1);
+		Color textColor = new Color(1, 1, 1);
+		if(ParentSelection.ColorScheme == UIColorScheme.Teal)
+		{
+			bgColor = new Color(100f/255f, 242f/255f, 242/255f, 1f);
+			textColor = new Color(132f/255f, 191f/255f, 191f/255f, 1f);
+		}
+		else if(ParentSelection.ColorScheme == UIColorScheme.Blue)
+		{
+			bgColor = new Color(148f/255f, 189f/255f, 255/255f, 1f);
+			textColor = new Color(158f/255f, 202f/255f, 244f/255f, 1f);
+		}
+
+		Background.color = bgColor;
+		Button.hover = Background.color;
+		Button.pressed = Background.color;
+		Button.defaultColor = Background.color;
+		Label.color = textColor;
 		ParentSelection.OnTabSelect(this);
 	}
 
 	public void OnDeselectTab()
 	{
-		Background.color = new Color(0.6f, 0.6f, 0.6f);
-		Button.hover = new Color(0.6f, 0.6f, 0.6f);
-		Button.pressed = new Color(0.6f, 0.6f, 0.6f);
-		Button.defaultColor = new Color(0.6f, 0.6f, 0.6f);
-		Label.color = new Color(0.384f, 0.57f, 0.57f);
+		Color bgColor = new Color(1, 1, 1);
+		Color textColor = new Color(1, 1, 1);
+		if(ParentSelection.ColorScheme == UIColorScheme.Teal)
+		{
+			bgColor = new Color(75f/255f, 181f/255f, 181/255f, 1f);
+			textColor = new Color(132f/255f, 191f/255f, 191f/255f, 0.75f);
+		}
+		else if(ParentSelection.ColorScheme == UIColorScheme.Blue)
+		{
+			bgColor = new Color(85f/255f, 130f/255f, 170/255f, 1f);
+			textColor = new Color(158f/255f, 202f/255f, 244f/255f, 0.75f);
+		}
+
+		Background.color = bgColor;
+		Button.hover = Background.color;
+		Button.pressed = Background.color;
+		Button.defaultColor = Background.color;
+		Label.color = textColor;
 	}
 
 }
+

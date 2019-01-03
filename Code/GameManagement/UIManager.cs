@@ -13,6 +13,7 @@ public class UIManager
 	public FadePanel FadePanel;
 	public KeyBindingPanel KeyBindingPanel;
 	public PowerManagementPanel PowerManagementPanel;
+	public EconDebugPanel EconDebugPanel;
 
 	public StationHUDPanel StationHUDPanel;
 	public RepairPanel RepairPanel;
@@ -52,6 +53,10 @@ public class UIManager
 			PowerManagementPanel = UICamera.transform.Find("PowerManagement").GetComponent<PowerManagementPanel>();
 			PowerManagementPanel.Initialize();
 			_panels.Add(PowerManagementPanel);
+
+			EconDebugPanel = UICamera.transform.Find("EconDebugPanel").GetComponent<EconDebugPanel>();
+			EconDebugPanel.Initialize();
+			_panels.Add(EconDebugPanel);
 		}
 		else if(GameManager.Inst.SceneType == SceneType.SpaceTest)
 		{
@@ -225,52 +230,7 @@ public class UIManager
 		}
 	}
 
-	public void AddItemtoInvItemDataList(List<InvItemData> itemList, InvItemData target, int quantity)
-	{
-		bool itemExists = false;
-		foreach(InvItemData item in itemList)
-		{
-			if(item.Item.ID == target.Item.ID)
-			{
-				Debug.Log("Adding item " + quantity + " to existing " + item.Quantity);
-				item.Quantity += quantity;
-				itemExists = true;
-			}
-		}
 
-		if(!itemExists)
-		{
-			InvItemData newItem = new InvItemData();
-			newItem.Item = new Item(GameManager.Inst.ItemManager.GetItemStats(target.Item.ID));
-			newItem.Quantity = quantity;
-			itemList.Add(newItem);
-		}
-	}
-
-	public int TakeItemFromItemDataList(List<InvItemData> itemList, InvItemData target, int quantity)
-	{
-		List<InvItemData> listCopy = new List<InvItemData>(itemList);
-		foreach(InvItemData item in listCopy)
-		{
-			if(item == target)
-			{
-				int newQuantity = item.Quantity - quantity;
-				if(newQuantity <= 0)
-				{
-					int taken = item.Quantity;
-					itemList.Remove(item);
-					return taken;
-				}
-				else
-				{
-					target.Quantity = newQuantity;
-					return quantity;
-				}
-			}
-		}
-
-		return 0;
-	}
 
 
 

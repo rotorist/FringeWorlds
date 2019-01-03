@@ -15,6 +15,8 @@ public class Constants : MonoBehaviour
 
 	public Dictionary<ShieldTech, Dictionary<DamageType, float>> ShieldDamageMultiplier;
 
+	public int MaxTraderParties;
+
 	public void Initialize()
 	{
 		ShieldDamageMultiplier = new Dictionary<ShieldTech, Dictionary<DamageType, float>>()

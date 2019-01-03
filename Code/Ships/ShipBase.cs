@@ -202,10 +202,10 @@ public class ShipBase : MonoBehaviour
 
 public enum ShipType
 {
-	Fighter,
-	Transport,
-	Gunship,
-	CargoShip,
-	BattleCruiser,
-
+	Fighter = 0,
+	Transport = 1,
+	Gunship = 2,
+	CargoShip = 3,
+	BattleCruiser = 4,
+	Carrier = 5
 }

@@ -317,6 +317,13 @@ public class PlayerControl
 			}
 		}
 
+		if(Input.GetKeyDown(KeyCode.BackQuote))
+		{
+			if(GameManager.Inst.UIManager.EconDebugPanel.IsActive)
+			{
+				UIEventHandler.Instance.TriggerCloseEconDebugPanel();
+			}
+		}
 
 	}
 
@@ -375,6 +382,15 @@ public class PlayerControl
 				GameManager.Inst.UIManager.HUDPanel.OnPauseGame();
 			}
 		}
+
+		if(Input.GetKeyDown(KeyCode.BackQuote))
+		{
+			if(!GameManager.Inst.UIManager.EconDebugPanel.IsActive)
+			{
+				UIEventHandler.Instance.TriggerOpenEconDebugPanel();
+			}
+		}
+
 
 
 
@@ -774,6 +790,8 @@ public class PlayerControl
 					PlayerShip.MyReference.ExhaustController.setExhaustState(ExhaustState.Normal);
 				}
 			}
+
+			PlayerShip.MyReference.ExhaustController.UpdateExhaustTrail(0);
 
 			if(thruster != null && (_thruster != 0 || _isFAKilled))
 			{

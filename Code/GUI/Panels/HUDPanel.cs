@@ -30,6 +30,8 @@ public class HUDPanel : PanelBase
 	public UILabel TargetShieldValue;
 	public UILabel TargetHullValue;
 
+	public UILabel DateTimeDisplay;
+
 	public Transform HologramHolder3D;
 	public GameObject TargetHologram;
 	public UILabel TargetRepLabel;
@@ -679,6 +681,9 @@ public class HUDPanel : PanelBase
 				}
 			}
 		}
+
+		//update DateTimeDisplay
+		DateTimeDisplay.text = GameManager.Inst.WorldManager.GetFormattedCurrentTime();
 	}
 
 	private void UpdateWarnings()

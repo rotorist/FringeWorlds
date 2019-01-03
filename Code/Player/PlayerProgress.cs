@@ -145,6 +145,11 @@ public class PlayerProgress
 			itemData21.Item = item21;
 			itemData21.Quantity = 500;
 
+			Item item31 = new Item(GameManager.Inst.ItemManager.GetItemStats("com_IronOre"));
+			InvItemData itemData31 = new InvItemData();
+			itemData31.Item = item31;
+			itemData31.Quantity = 10;
+
 			ActiveLoadout.Shield = itemData4;
 			ActiveLoadout.WeaponCapacitor = itemData5;
 			ActiveLoadout.AmmoBayItems.Add(itemData);
@@ -157,6 +162,7 @@ public class PlayerProgress
 			ActiveLoadout.CargoBayItems.Add(itemData9);
 			ActiveLoadout.CargoBayItems.Add(itemData10);
 			ActiveLoadout.CargoBayItems.Add(itemData11);
+			ActiveLoadout.CargoBayItems.Add(itemData31);
 			ActiveLoadout.Defensives.Add(itemData12);
 
 			ActiveLoadout.WeaponJoints = new Dictionary<string, InvItemData>()
@@ -277,6 +283,8 @@ public class PlayerProgress
 			itemData21.Item = item21;
 			itemData21.Quantity = 500;
 
+
+
 			StoredLoadout.Shield = itemData10;
 			StoredLoadout.AmmoBayItems.Add(itemData2);
 			StoredLoadout.AmmoBayItems.Add(itemData21);
@@ -285,6 +293,7 @@ public class PlayerProgress
 			StoredLoadout.CargoBayItems.Add(itemData8);
 			StoredLoadout.CargoBayItems.Add(itemData9);
 			StoredLoadout.CargoBayItems.Add(itemData11);
+
 			StoredLoadout.Defensives.Add(itemData12);
 
 			StoredLoadout.WeaponJoints = new Dictionary<string, InvItemData>()

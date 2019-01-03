@@ -183,6 +183,7 @@ public class SaveGameManager
 		{
 			DockableStationSaveData stationSaveData = new DockableStationSaveData();
 			stationSaveData.StationID = stationData.Value.StationID;
+			stationSaveData.FactionID = stationData.Value.FactionID;
 			stationSaveData.DemandResources = stationData.Value.DemandResources;
 			stationSaveData.DockedPartiesNumbers = new List<int>();
 			foreach(MacroAIParty party in stationData.Value.DockedParties)
@@ -194,6 +195,7 @@ public class SaveGameManager
 			stationSaveData.ShipsForSale = stationData.Value.ShipsForSale;
 			stationSaveData.TraderSaleItems = stationData.Value.TraderSaleItems;
 			stationSaveData.UndesiredItemPriceMultiplier = stationData.Value.UndesiredItemPriceMultiplier;
+			stationSaveData.DemandNormalizeSpeed = stationData.Value.DemandNormalizeSpeed;
 			if(stationData.Value.HomeStationData != null)
 			{
 				stationSaveData.HomeStationSaveData = new HomeStationSaveData();
@@ -209,6 +211,8 @@ public class SaveGameManager
 			CurrentSave.DockableStationDatas.Add(stationSaveData);
 		}
 
+		//time
+		CurrentSave.CurrentTime = GameManager.Inst.WorldManager.CurrentTime;
 	}
 
 	public void SerializeSave()
@@ -410,8 +414,10 @@ public class SaveGameManager
 			stationData.LifeSupportPrice = saveData.LifeSupportPrice;
 			stationData.ShipsForSale = saveData.ShipsForSale;
 			stationData.StationID = saveData.StationID;
+			stationData.FactionID = saveData.FactionID;
 			stationData.TraderSaleItems = saveData.TraderSaleItems;
 			stationData.UndesiredItemPriceMultiplier = saveData.UndesiredItemPriceMultiplier;
+			stationData.DemandNormalizeSpeed = saveData.DemandNormalizeSpeed;
 			if(saveData.HomeStationSaveData != null)
 			{
 				stationData.HomeStationData = new HomeStationData();
@@ -427,6 +433,9 @@ public class SaveGameManager
 
 			GameManager.Inst.WorldManager.DockableStationDatas.Add(stationData.StationID, stationData);
 		}
+
+		//load time
+		GameManager.Inst.WorldManager.CurrentTime = CurrentSave.CurrentTime;
 	}
 
 	public void LoadSaveInStation()

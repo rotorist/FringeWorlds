@@ -52,6 +52,8 @@ public class UIEventHandler
 	public static event GeneralUIEventDelegate OnOpenPowerManagement;
 	public static event GeneralUIEventDelegate OnClosePowerManagement;
 
+	public static event GeneralUIEventDelegate OnOpenEconDebugPanel;
+	public static event GeneralUIEventDelegate OnCloseEconDebugPanel;
 
 
 
@@ -166,6 +168,22 @@ public class UIEventHandler
 		if(OnClosePowerManagement != null)
 		{
 			OnClosePowerManagement();
+		}
+	}
+
+	public void TriggerOpenEconDebugPanel()
+	{
+		if(OnOpenEconDebugPanel != null)
+		{
+			OnOpenEconDebugPanel();
+		}
+	}
+
+	public void TriggerCloseEconDebugPanel()
+	{
+		if(OnCloseEconDebugPanel != null)
+		{
+			OnCloseEconDebugPanel();
 		}
 	}
 

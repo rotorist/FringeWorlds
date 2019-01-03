@@ -13,7 +13,7 @@ public class CMDispenser : Defensive
 			return;
 		}
 
-		Item ammo = ParentShip.Storage.TakeAmmo(AmmoID, 1, "Countermeasure");
+		Item ammo = ParentShip.Storage.TakeAmmo(AmmoID, 1, "Countermeasure", false);
 		if(ammo != null)
 		{
 			string prefabID = ammo.GetStringAttribute("Weapon Prefab ID");

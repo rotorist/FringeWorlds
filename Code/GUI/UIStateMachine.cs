@@ -77,7 +77,8 @@ public class UIStateInFlight : UIStateBase
 		UIEventHandler.OnOpenKeyBindingPanel += OnOpenKeyBindingPanel;
 		UIEventHandler.OnOpenPowerManagement -= OnOpenPowerManagement;
 		UIEventHandler.OnOpenPowerManagement += OnOpenPowerManagement;
-
+		UIEventHandler.OnOpenEconDebugPanel -= OnOpenEconDebugPanel;
+		UIEventHandler.OnOpenEconDebugPanel += OnOpenEconDebugPanel;
 	}
 
 	public override void EndState()
@@ -85,6 +86,7 @@ public class UIStateInFlight : UIStateBase
 		UIEventHandler.OnBeginDocking -= OnBeginDocking;
 		UIEventHandler.OnOpenKeyBindingPanel -= OnOpenKeyBindingPanel;
 		UIEventHandler.OnOpenPowerManagement -= OnOpenPowerManagement;
+		UIEventHandler.OnOpenEconDebugPanel -= OnOpenEconDebugPanel;
 	}
 
 	public void OnBeginDocking()
@@ -103,6 +105,12 @@ public class UIStateInFlight : UIStateBase
 	{
 		EndState();
 		SM.State = new UIStatePowerManagement(SM);
+	}
+
+	public void OnOpenEconDebugPanel()
+	{
+		EndState();
+		SM.State = new UIStateEconDebug(SM);
 	}
 }
 
@@ -298,6 +306,43 @@ public class UIStateKeyBinding : UIStateBase
 		SM.State = new UIStateInFlight(SM);
 	}
 }
+
+public class UIStateEconDebug : UIStateBase
+{
+	public UIStateEconDebug(UIStateMachine sm)
+	{
+		Name = "UIStateEconDebug";
+		SM = sm;
+		BeginState();
+	}
+
+	public override void BeginState ()
+	{
+		SM.UIManager.HideAllPanels();
+		SM.UIManager.EconDebugPanel.Show();
+		SM.UIManager.FadePanel.Show();
+
+		SM.UIManager.FadePanel.BlackBG.alpha = 0.7f;
+
+		InputEventHandler.Instance.InputState = InputState.UI;
+
+		UIEventHandler.OnCloseEconDebugPanel -= OnCloseEconDebugPanel;
+		UIEventHandler.OnCloseEconDebugPanel += OnCloseEconDebugPanel;
+	}
+
+	public override void EndState ()
+	{
+		SM.UIManager.FadePanel.BlackBG.alpha = 0;
+		UIEventHandler.OnCloseEconDebugPanel -= OnCloseEconDebugPanel;
+	}
+
+	public void OnCloseEconDebugPanel()
+	{
+		EndState();
+		SM.State = new UIStateInFlight(SM);
+	}
+}
+
 
 public class UIStateInStation : UIStateBase
 {
