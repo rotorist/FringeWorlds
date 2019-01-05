@@ -113,7 +113,8 @@ public class WeaponJoint : MonoBehaviour
 		MountedWeapon = weapon;
 		MountedWeapon.transform.parent = transform;
 		MountedWeapon.transform.localPosition = Vector3.zero;
-		MountedWeapon.transform.LookAt(transform.forward);
+		MountedWeapon.transform.localEulerAngles = Vector3.zero;
+		//MountedWeapon.transform.LookAt(transform.forward, transform.up);
 		MountedWeapon.ParentShip = ParentShip;
 		MountedWeapon.DisplayName = weaponItem.Item.DisplayName;
 		MountedWeapon.FiringSound = weaponItem.Item.GetStringAttribute("Firing Sound");

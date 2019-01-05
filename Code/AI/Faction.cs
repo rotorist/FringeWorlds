@@ -12,10 +12,10 @@ public class Faction
 
 	public List<string> ShipPool;
 	public List<string> EquipmentPool;
-	public List<string> WeaponPool;
-	public List<string> DefensivesPool;
 
-	public List<Loadout> LoadoutPool;
+	public List<Loadout> FightersPool;
+	public List<Loadout> FreightersPool;
+	public List<Loadout> CapitalPool;
 
 	public Faction()
 	{

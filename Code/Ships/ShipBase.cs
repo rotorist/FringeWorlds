@@ -148,9 +148,9 @@ public class ShipBase : MonoBehaviour
 		{
 			return;
 		}
-		Debug.Log("Current Hull " + HullAmount);
+		//Debug.Log("Current Hull " + HullAmount);
 		HullAmount = Mathf.Clamp(HullAmount - damage.HullAmount, 0, HullCapacity);
-		Debug.Log("current hull " + HullAmount + " damage " + damage.HullAmount);
+		//Debug.Log("current hull " + HullAmount + " damage " + damage.HullAmount);
 		if(HullAmount <= 0 && GameManager.Inst.PlayerControl.PlayerShip != this)
 		{
 			OnDeath(attacker);

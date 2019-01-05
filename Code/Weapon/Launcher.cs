@@ -64,31 +64,25 @@ public class Launcher : Weapon
 			Missile missile  = null;
 			Item ammoItem = null;
 
-			if(AmmoID == "")
+			ammoItem = ParentShip.Storage.TakeAmmo(AmmoID, 1, this.AmmoType, _isNPC);
+			if(ammoItem != null)
 			{
-				return;
+				//just in case the ammo type has changed during take ammo, we always assign the item's id to ammoid
+				AmmoID = ammoItem.ID;
+				o = GameObject.Instantiate(Resources.Load(ammoItem.GetStringAttribute("Weapon Prefab ID"))) as GameObject;
+				missile = o.GetComponent<Missile>();
+				Damage damage = new Damage();
+				damage.DamageType = (DamageType)Enum.Parse(typeof(DamageType), ammoItem.GetStringAttribute("Damage Type"));
+				damage.ShieldAmount = ammoItem.GetFloatAttribute("Shield Damage");
+				damage.HullAmount = ammoItem.GetFloatAttribute("Hull Damage");
+				missile.Damage = damage;
 			}
 			else
 			{
-				ammoItem = ParentShip.Storage.TakeAmmo(AmmoID, 1, this.AmmoType, _isNPC);
-				if(ammoItem != null)
-				{
-					//just in case the ammo type has changed during take ammo, we always assign the item's id to ammoid
-					AmmoID = ammoItem.ID;
-					o = GameObject.Instantiate(Resources.Load(ammoItem.GetStringAttribute("Weapon Prefab ID"))) as GameObject;
-					missile = o.GetComponent<Missile>();
-					Damage damage = new Damage();
-					damage.DamageType = (DamageType)Enum.Parse(typeof(DamageType), ammoItem.GetStringAttribute("Damage Type"));
-					damage.ShieldAmount = ammoItem.GetFloatAttribute("Shield Damage");
-					damage.HullAmount = ammoItem.GetFloatAttribute("Hull Damage");
-					missile.Damage = damage;
-				}
-				else
-				{
-					return;
-				}
-
+				return;
 			}
+
+
 
 			if(missile != null)
 			{

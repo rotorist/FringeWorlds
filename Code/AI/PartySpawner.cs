@@ -43,6 +43,8 @@ public class PartySpawner
 		party.FactionID = factionID;
 		party.SpawnedShips = new List<ShipBase>();
 
+		Faction faction = GameManager.Inst.NPCManager.AllFactions[party.FactionID];
+
 		List<string> keyList = new List<string>(GameManager.Inst.WorldManager.AllSystems.Keys);
 
 		//StarSystemData currentSystem = GameManager.Inst.WorldManager.AllSystems["washington_system"];
@@ -58,11 +60,90 @@ public class PartySpawner
 		party.Location = new RelLoc(origin.position, currentStation.Location.RealPos, origin);
 		party.PartyNumber = GameManager.Inst.NPCManager.LastUsedPartyNumber + 1;
 		GameManager.Inst.NPCManager.LastUsedPartyNumber = party.PartyNumber;
+
+		//pick 1 freighter loadout for the leader
+		if(faction.FreightersPool.Count > 0)
+		{
+			party.LeaderLoadout = new Loadout(faction.FreightersPool[UnityEngine.Random.Range(0, faction.FreightersPool.Count)]);
+		}
+		else
+		{
+			party.LeaderLoadout = new Loadout(faction.FightersPool[UnityEngine.Random.Range(0, faction.FightersPool.Count)]);
+		}
+
+		//pick 1-4 fighter loadouts for followers
+		party.FollowerLoadouts = new List<Loadout>();
+		int numberOfFollowers = UnityEngine.Random.Range(1, 5);
+		for(int i=0; i<numberOfFollowers; i++)
+		{
+			party.FollowerLoadouts.Add(new Loadout(faction.FightersPool[UnityEngine.Random.Range(0, faction.FightersPool.Count)]));
+
+		}
+
+		MacroAITask task = GameManager.Inst.NPCManager.MacroAI.AssignMacroAITask(MacroAITaskType.None, party);
+
+		party.IsInTradelane = false;
+		//party.DestinationCoord = GameManager.Inst.WorldManager.AllNavNodes["cambridge_station"].Location;
+		party.MoveSpeed = 10f;
+		party.NextTwoNodes = new List<NavNode>();
+		party.PrevNode = null;//CreateTempNode(party.Location, "tempstart", GameManager.Inst.WorldManager.AllSystems[party.CurrentSystemID]);
+
+		GameManager.Inst.NPCManager.MacroAI.LoadPartyTreeset(party);
+
+		GameManager.Inst.NPCManager.AllParties.Add(party);
 	}
 
 	public void GenerateFactionLoadouts(Faction faction)
 	{
-		string shipID = faction.ShipPool[UnityEngine.Random.Range(0, faction.ShipPool.Count)];
+		faction.FightersPool = new List<Loadout>();
+		faction.FreightersPool = new List<Loadout>();
+		faction.CapitalPool = new List<Loadout>();
+
+		//create 3 random loadouts for each ship in the ship pool and add them to corresponding loadout pool
+		int index = 0;
+		foreach(string shipID in faction.ShipPool)
+		{
+			ShipStats shipStats = GameManager.Inst.ItemManager.GetShipStats(shipID);
+			Loadout loadout1 = GenerateFactionLoadout(faction, shipID, index);
+			index ++;
+			Loadout loadout2 = GenerateFactionLoadout(faction, shipID, index);
+			index ++;
+			Loadout Loadout3 = GenerateFactionLoadout(faction, shipID, index);
+			index ++;
+
+			List<Loadout> targetList = null;
+			if(shipStats.ShipType == ShipType.Fighter)
+			{
+				targetList = faction.FightersPool;
+			}
+			else if(shipStats.ShipType == ShipType.Transport || shipStats.ShipType == ShipType.CargoShip)
+			{
+				targetList = faction.FreightersPool;
+			}
+			else
+			{
+				targetList = faction.CapitalPool;
+			}
+
+			targetList.Add(loadout1);
+			targetList.Add(loadout2);
+			targetList.Add(Loadout3);
+		}
+	}
+
+	public void RefillLoadoutAmmo(Loadout loadout)
+	{
+		foreach(KeyValuePair<string, InvItemData> weapon in loadout.WeaponJoints)
+		{
+
+		}
+	}
+
+
+
+
+	private Loadout GenerateFactionLoadout(Faction faction, string shipID, int loadoutIndex)
+	{
 		ShipStats shipStats = GameManager.Inst.ItemManager.GetShipStats(shipID);
 		Loadout loadout = new Loadout(shipID, shipStats.ShipType);
 
@@ -122,6 +203,14 @@ public class PartySpawner
 				itemData.Item = item;
 				weaponCandidates.Add(itemData);
 			}
+			else if(item.Type == ItemType.Ammo)
+			{
+				InvItemData itemData = new InvItemData();
+				itemData.Quantity = 1;
+				itemData.Item = item;
+				loadout.AmmoBayItems.Add(itemData);
+				Debug.Log("Party Spawner Added ammo " + itemData.Item.ID);
+			}
 		}
 
 		loadout.Shield = shieldCandidates[UnityEngine.Random.Range(0, shieldCandidates.Count)];
@@ -136,7 +225,34 @@ public class PartySpawner
 		}
 
 		//go through each weapon slot and find all the weapon candidates that can fit it, and then pick a random one
+		loadout.WeaponJoints = new Dictionary<string, InvItemData>();
+		foreach(WeaponJointData jointData in shipStats.WeaponJoints)
+		{
+			List<InvItemData> slotWeaponCandidates = new List<InvItemData>();
+			foreach(InvItemData weaponItem in weaponCandidates)
+			{
+				if(weaponItem.Item.GetIntAttribute("Weapon Class") <= jointData.Class && weaponItem.Item.GetStringAttribute("Rotation Type") == jointData.RotationType.ToString())
+				{
+					slotWeaponCandidates.Add(weaponItem);
+				}
+			}
+
+			if(slotWeaponCandidates.Count > 0)
+			{
+				loadout.WeaponJoints.Add(jointData.JointID, slotWeaponCandidates[UnityEngine.Random.Range(0, slotWeaponCandidates.Count)]);
+			}
+		}
+
+		loadout.ShipMods = new InvItemData[shipStats.ModSlots];
 
 
+		loadout.CurrentPowerMgmtButton = new Vector3(0, -20f, 0);
+		loadout.FuelAmount = shipStats.MaxFuel;
+		loadout.HullAmount = shipStats.Hull;
+		loadout.LifeSupportAmount = shipStats.LifeSupport;
+		loadout.LoadoutID = faction.ID + "_" + loadoutIndex.ToString();
+
+
+		return loadout;
 	}
 }

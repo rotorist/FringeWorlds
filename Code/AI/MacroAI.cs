@@ -1003,6 +1003,15 @@ public class MacroAI
 		}
 	}
 
+	public void LoadPartyTreeset(MacroAIParty party)
+	{
+		party.TreeSet = new Dictionary<string, BehaviorTree>();
+		party.TreeSet.Add("MAIBaseBehavior", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("MAIBaseBehavior", null, party));
+		party.TreeSet.Add("MAITravel", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("MAITravel", null, party));
+		party.TreeSet.Add("MAICombat", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("MAICombat", null, party));
+	}
+
+
 
 
 
@@ -1067,13 +1076,6 @@ public class MacroAI
 		party.ShouldEnableAI = false;
 	}
 
-	private void LoadPartyTreeset(MacroAIParty party)
-	{
-		party.TreeSet = new Dictionary<string, BehaviorTree>();
-		party.TreeSet.Add("MAIBaseBehavior", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("MAIBaseBehavior", null, party));
-		party.TreeSet.Add("MAITravel", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("MAITravel", null, party));
-		party.TreeSet.Add("MAICombat", GameManager.Inst.DBManager.XMLParserBT.LoadBehaviorTree("MAICombat", null, party));
-	}
 
 	private void GenerateFormationForParty(MacroAIParty party)
 	{

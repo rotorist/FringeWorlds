@@ -116,7 +116,7 @@ public class Tradelane : StationBase
 
 		if(angleA < 90 && IsTerminalAorB >= 0)
 		{
-			Debug.Log("Docking requested to go to A");
+			//Debug.Log("Docking requested to go to A");
 			//direction is going towards A
 			//check if anyone is already docking A
 			if(_dockingStageA > 0 || _sessionA != null)

@@ -4,16 +4,21 @@ using UnityEngine;
 
 public class CMDispenser : Defensive
 {
-	
+	private bool _isNPC;
 
 	public void DropCountermeasure()
 	{
-		if(AmmoID == "")
+		
+		if(ParentShip.MyAI.MyFaction != null && ParentShip.MyAI.MyFaction.ID == "player")
 		{
-			return;
+			_isNPC = false;
+		}
+		else
+		{
+			_isNPC = true;
 		}
 
-		Item ammo = ParentShip.Storage.TakeAmmo(AmmoID, 1, "Countermeasure", false);
+		Item ammo = ParentShip.Storage.TakeAmmo(AmmoID, 1, "Countermeasure", _isNPC);
 		if(ammo != null)
 		{
 			string prefabID = ammo.GetStringAttribute("Weapon Prefab ID");

@@ -23,7 +23,77 @@ public class Loadout
 	public float FuelAmount;
 	public float LifeSupportAmount;
 
+	public Loadout(Loadout template)
+	{
+		LoadoutID = template.LoadoutID;
+		ShipID = template.ShipID;
+		ShipType = template.ShipType;
+		WeaponJoints = new Dictionary<string, InvItemData>();
+		foreach(KeyValuePair<string, InvItemData> weaponJoint in template.WeaponJoints)
+		{
+			WeaponJoints.Add(weaponJoint.Key, new InvItemData(weaponJoint.Value));
+		}
 
+		Defensives = new List<InvItemData>();
+		foreach(InvItemData itemData in template.Defensives)
+		{
+			Defensives.Add(new InvItemData(itemData));
+		}
+
+		AmmoBayItems = new List<InvItemData>();
+		foreach(InvItemData itemData in template.AmmoBayItems)
+		{
+			AmmoBayItems.Add(new InvItemData(itemData));
+		}
+
+		CargoBayItems = new List<InvItemData>();
+		foreach(InvItemData itemData in template.CargoBayItems)
+		{
+			CargoBayItems.Add(new InvItemData(itemData));
+		}
+
+		if(template.Shield != null)
+		{
+			Shield = new InvItemData(template.Shield);
+		}
+		if(template.WeaponCapacitor != null)
+		{
+			WeaponCapacitor = new InvItemData(template.WeaponCapacitor);
+		}
+		if(template.Thruster != null)
+		{
+			Thruster = new InvItemData(template.Thruster);
+		}
+		if(template.Scanner != null)
+		{
+			Scanner = new InvItemData(template.Scanner);
+		}
+		if(template.Teleporter != null)
+		{
+			Teleporter = new InvItemData(template.Teleporter);
+		}
+
+		if(template.ShipMods != null)
+		{
+			ShipMods = new InvItemData[template.ShipMods.Length];
+			for(int i=0; i<template.ShipMods.Length; i++)
+			{
+				if(template.ShipMods[i] != null)
+				{
+					ShipMods[i] = new InvItemData(template.ShipMods[i]);
+				}
+			}
+		}
+		else
+		{
+			ShipMods = new InvItemData[0];
+		}
+
+		CurrentPowerMgmtButton = template.CurrentPowerMgmtButton;
+		HullAmount = template.HullAmount;
+		FuelAmount = template.FuelAmount;
+		LifeSupportAmount = template.LifeSupportAmount;
+	}
 
 	public Loadout(string shipID, ShipType shipType)
 	{

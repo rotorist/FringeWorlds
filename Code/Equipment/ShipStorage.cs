@@ -56,43 +56,46 @@ public class ShipStorage : MonoBehaviour
 
 	public Item TakeAmmo(string itemID, int quantity, string ammoType, bool isNPC)
 	{
-		if(isNPC)
-		{
-			return new Item(GameManager.Inst.ItemManager.GetItemStats(itemID));
-		}
-
+		//Debug.Log("taking ammo of type " + ammoType + " is itemID null " + (itemID == null));
 		if(!string.IsNullOrEmpty(itemID) && AmmoBayItems.ContainsKey(itemID))
 		{
 			if(AmmoBayItems[itemID].Quantity >= quantity)
 			{
 				Item item = AmmoBayItems[itemID].Item;
-				AmmoBayItems[itemID].Quantity -=  quantity;
-				AmmoBayUsage -= quantity * AmmoBayItems[itemID].Item.CargoUnits;
-				if(AmmoBayItems[itemID].Quantity <= 0)
+				if(!isNPC)
 				{
-					AmmoBayItems.Remove(itemID);
+					AmmoBayItems[itemID].Quantity -=  quantity;
+					AmmoBayUsage -= quantity * AmmoBayItems[itemID].Item.CargoUnits;
+					if(AmmoBayItems[itemID].Quantity <= 0)
+					{
+						AmmoBayItems.Remove(itemID);
 
+					}
 				}
 
 				return item;
 			}
 		}
-		else if(ammoType != "")
+		else if(!string.IsNullOrEmpty(ammoType))
 		{
 			//loop through each item and find one with same ammoType
 			foreach(KeyValuePair<string, InvItemData> ammo in AmmoBayItems)
 			{
+				Debug.Log("checking ammo " + ammo.Value.Item.ID);
 				if(ammo.Value.Item.GetStringAttribute("Ammo Type") == ammoType)
 				{
 					Debug.Log("Found ammo");
 					if(ammo.Value.Quantity >= quantity)
 					{
 						Item item = ammo.Value.Item;
-						ammo.Value.Quantity -= quantity;
-						AmmoBayUsage -= quantity * ammo.Value.Item.CargoUnits;
-						if(ammo.Value.Quantity <= 0)
+						if(!isNPC)
 						{
-							AmmoBayItems.Remove(ammo.Key);
+							ammo.Value.Quantity -= quantity;
+							AmmoBayUsage -= quantity * ammo.Value.Item.CargoUnits;
+							if(ammo.Value.Quantity <= 0)
+							{
+								AmmoBayItems.Remove(ammo.Key);
+							}
 						}
 
 						return ammo.Value.Item;

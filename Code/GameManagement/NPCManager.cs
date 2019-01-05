@@ -139,6 +139,11 @@ public class NPCManager
 
 		PartySpawner = new PartySpawner();
 		PartySpawner.Initialize();
+
+		foreach(KeyValuePair<string, Faction> faction in _allFactions)
+		{
+			PartySpawner.GenerateFactionLoadouts(faction.Value);
+		}
 	}
 
 	public void TestSpawn()
@@ -325,12 +330,16 @@ public class NPCManager
 			return;
 		}
 
+		
 		MacroAI.PerFrameUpdate();
 	}
 
 	public void PerSecondUpdate()
 	{
-
+		if(PartySpawner != null)
+		{
+			PartySpawner.PerSecondUpdate();
+		}
 	}
 
 	public void OnShipDeath(ShipBase ship)
